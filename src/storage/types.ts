@@ -90,10 +90,10 @@ const rawQuasarConfig = z.object({
       partnerDeviceId: z.string(),
       role: z.union([z.literal('follower'), z.literal('leader')])
     }),
-    tvBeta: z.boolean()
+    tvBeta: z.boolean().default(false)
   }),
   systemConfig: z.object({
-    addAllEmbeddedEndpoints: z.boolean(),
+    addAllEmbeddedEndpoints: z.boolean().default(false),
     audioInput: z.object({
       modelStorage: z.object({
         models: z.record(z.string(), z.record(z.string(), z.object({
