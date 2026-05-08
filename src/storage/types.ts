@@ -362,7 +362,7 @@ function deepDefault<T extends z.ZodType>(schema: T): T {
   return schema;
 }
 
-export const quasarConfig = (rawQuasarConfig)
+export const quasarConfig = deepDefault(rawQuasarConfig)
 
 export type QuasarConfig = z.infer<typeof quasarConfig>
 
