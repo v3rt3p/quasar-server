@@ -1,5 +1,5 @@
 import { Column, DataSource, Entity, PrimaryColumn, Repository } from "typeorm";
-import { glagolSecurity, quasarConfig, StationInfo, StationInfoProvider } from "./types";
+import { glagolSecurity, QuasarConfig, quasarConfig, StationInfo, StationInfoProvider } from "./types";
 import { generateGlagolSecurity, getDefaultQuasarConfig } from "./defaults";
 
 @Entity("stations")
@@ -107,6 +107,33 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
     const stations = await this.dataSource.getRepository<Station>(Station).find()
 
     return stations.map(toInfo)
+  }
+
+  async updateNameAndQuasarConfig(duid: string, name: string | undefined, config: QuasarConfig | undefined): Promise<StationInfo> {
+    return toInfo(await this.dataSource.transaction(async manager => {
+      const repository = manager.getRepository<Station>(Station)
+
+      const existing = await repository.findOne({
+        where: {
+          id: duid
+        }
+      })
+
+      if (!existing) {
+        throw new Error('Station does not exist')
+      }
+
+      if (name !== undefined) {
+        existing.name = name
+      }
+      if (config !== undefined) {
+        existing.quasarConfig = config
+      }
+
+      await repository.save(existing)
+
+      return existing
+    }))
   }
 
   async updateNetworkInfo(duid: string, platform: string, networkInfo: unknown): Promise<StationInfo> {

@@ -1,19 +1,21 @@
 import express from "express";
 import dotenv from "dotenv";
-import {getLogger} from "./logger";
-import {registerQuasarYandexNetRouter} from "./routers/quasar.yandex.net";
-import {registerUniproxyAliceYandexNetRouter, UniProxyConnection} from "./routers/uniproxy.alice.yandex.net";
-import {OpenAI} from "openai";
-import {GigaAMSTTBackend} from "./backend/stt/gigaam";
-import {OpenAITTSBackend} from "./backend/tts/openai";
-import {BasicProcessorBackend} from "./backend/processors/basic";
-import {BufferedAudioMetadataBackend} from "./backend/audio-metadata/buffered";
+import { getLogger } from "./logger";
+import { registerQuasarYandexNetRouter } from "./routers/quasar.yandex.net";
+import { registerUniproxyAliceYandexNetRouter, UniProxyConnection } from "./routers/uniproxy.alice.yandex.net";
+import { OpenAI } from "openai";
+import { GigaAMSTTBackend } from "./backend/stt/gigaam";
+import { OpenAITTSBackend } from "./backend/tts/openai";
+import { BasicProcessorBackend } from "./backend/processors/basic";
+import { BufferedAudioMetadataBackend } from "./backend/audio-metadata/buffered";
 import z from "zod";
 import bodyParser from "body-parser";
 import { PostgresDatabaseStationInfoStorage } from "./storage/database";
 import Elysia, { t } from "elysia";
 import node from "@elysiajs/node";
 import openapi from "@elysia/openapi";
+import { quasarConfig } from "./storage/types";
+import { pushUpdateConfigDirective } from "./routers/alice/directives";
 
 dotenv.config({
     path: ".env.local"
@@ -82,6 +84,9 @@ const apiServer = new Elysia({
             title: 'Quasar API',
             version: '1.4.6'
         }
+    },
+    mapJsonSchema: {
+        zod: z.toJSONSchema
     }
 }))
 
@@ -103,11 +108,11 @@ function runForConnections(duidOrAll: string, action: (connection: UniProxyConne
     }
 }
 
-apiServer.post('/device/:duid/push', async ({ body, params: { duid } }) => {
+apiServer.post('/devices/:duid/push', async ({ body, params: { duid } }) => {
     runForConnections(duid, connection => {
         connection.push(body.eventText).catch(error => logger.warn(`Failed to push event to UniProxy connection: ${error}`))
     })
-    
+
     return {}
 }, {
     params: t.Object({
@@ -121,13 +126,13 @@ apiServer.post('/device/:duid/push', async ({ body, params: { duid } }) => {
         })
     }),
     detail: {
-        summary: 'Pushes event to LLM to be processed',
+        summary: 'Push event to LLM to be processed',
         tags: ['device']
     },
     response: t.Object({})
 })
 
-apiServer.post('/device/:duid/push/raw', async ({ body, params: { duid } }) => {
+apiServer.post('/devices/:duid/push-raw', async ({ body, params: { duid } }) => {
     runForConnections(duid, connection => {
         connection.pushRaw(body.eventText).catch(error => logger.warn(`Failed to push raw event to UniProxy connection: ${error}`))
     })
@@ -145,17 +150,17 @@ apiServer.post('/device/:duid/push/raw', async ({ body, params: { duid } }) => {
         })
     }),
     detail: {
-        summary: 'Pushes event text to be TTSed',
+        summary: 'Push event text to be TTSed',
         tags: ['device']
     },
     response: t.Object({})
 })
 
-apiServer.post('/device/:duid/directive/raw', async ({ body, params: { duid } }) => {
+apiServer.post('/devices/:duid/push-directive', async ({ body, params: { duid } }) => {
     runForConnections(duid, connection => {
         connection.pushRawDirective(body).catch(error => logger.warn(`Failed to push raw directive to UniProxy connection: ${error}`));
     })
-    
+
     return {}
 }, {
     params: t.Object({
@@ -167,10 +172,63 @@ apiServer.post('/device/:duid/directive/raw', async ({ body, params: { duid } })
         description: 'Raw Quasar directive'
     }),
     detail: {
-        summary: 'Pushes directive to the device',
+        summary: 'Push directive to the device',
         tags: ['device']
     },
     response: t.Object({})
+})
+
+apiServer.get('/devices', async () => {
+    const infos = await storage.getStationInfos()
+    return infos.map(info => ({
+        duid: info.duid,
+        name: info.name,
+        quasarConfig: info.quasarConfig
+    }))
+}, {
+    detail: {
+        summary: 'Get list of devices',
+        tags: ['device']
+    },
+    response: z.array(z.object({
+        duid: z.string().describe('DUID'),
+        name: z.string().describe('Name'),
+        quasarConfig: quasarConfig.describe('Quasar\'s maind config')
+    }))
+})
+
+apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
+    const info = await storage.updateNameAndQuasarConfig(duid, body.name, body.quasarConfig)
+
+    runForConnections(duid, connection => {
+        connection.pushRawDirective(pushUpdateConfigDirective).catch(error =>
+            logger.warn(`Failed to push config update directive to UniProxy connection: ${error}`))
+    })
+
+    return {
+        duid: info.duid,
+        name: info.name,
+        quasarConfig: info.quasarConfig
+    }
+}, {
+    detail: {
+        summary: 'Update device config',
+        tags: ['device']
+    },
+    params: t.Object({
+        duid: t.String({
+            description: 'DUID'
+        })
+    }),
+    body: z.object({
+        name: z.string().optional().describe('Name'),
+        quasarConfig: quasarConfig.optional().describe('Quasar\'s maind config')
+    }),
+    response: z.object({
+        duid: z.string().describe('DUID'),
+        name: z.string().describe('Name'),
+        quasarConfig: quasarConfig.describe('Quasar\'s maind config')
+    })
 })
 
 app.use((req, res) => {
