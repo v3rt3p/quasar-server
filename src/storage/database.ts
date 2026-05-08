@@ -48,6 +48,10 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
     })
   }
 
+  async initialize(): Promise<void> {
+    await this.dataSource.initialize()
+  }
+
   private async getOrCreate(duid: string, platform: string, 
     action?: (repo: Repository<Station>, station: Station) => Promise<void>): Promise<Station> {
     return await this.dataSource.transaction(async manager => {

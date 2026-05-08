@@ -43,6 +43,8 @@ const POSTGRES_URL = process.env.POSTGRES_URL ?? "postgres://quasar:quasar@local
 
 const storage = new PostgresDatabaseStationInfoStorage(POSTGRES_URL)
 
+storage.initialize().catch(error => logger.fatal(error))
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -71,10 +73,6 @@ const uniProxyRouter = registerUniproxyAliceYandexNetRouter({
     }),
     audioMetadata: new BufferedAudioMetadataBackend(AUDIO_METADATA_URLS)
 }, app, server);
-
-const pushRequestType = z.object({
-    eventText: z.string()
-})
 
 const apiServer = new Elysia({
     adapter: node()
