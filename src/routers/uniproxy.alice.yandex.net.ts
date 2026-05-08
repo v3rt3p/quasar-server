@@ -276,7 +276,7 @@ interface ClientEventData {
     sequenceNumber: any;
 }
 
-class UniProxyConnection {
+export class UniProxyConnection {
     private readonly logger = getLogger<UniProxyConnection>();
 
     private currentProcessingSession: ClientProcessingSession | null = null;
@@ -880,7 +880,7 @@ class UniProxyConnection {
 }
 
 interface UniProxyRouter {
-    connections: Set<UniProxyConnection>
+    connections: Map<string, Set<UniProxyConnection>>
 }
 
 export function registerUniproxyAliceYandexNetRouter(backends: Backends, app: Application, server: Server): UniProxyRouter {
@@ -895,22 +895,27 @@ export function registerUniproxyAliceYandexNetRouter(backends: Backends, app: Ap
     });
 
     const router: UniProxyRouter = {
-        connections: new Set()
+        connections: new Map()
     };
 
     wsServer.on("connection", (websocket, request) => {
         logger.debug("Got WebSocket connection");
 
+        const deviceId = String(request.headers['x-uprx-device-id']) ?? 'unknown'
+
         const connection = new UniProxyConnection(websocket, backends);
         websocket.on('close', () => {
-            router.connections.delete(connection);
+            router.connections.get(deviceId)!.delete(connection);
             logger.warn('UniProxy WebSocket closed')
         });
         websocket.on('error', e => {
-            router.connections.delete(connection);
+            router.connections.get(deviceId)!.delete(connection);
             logger.warn(`UniProxy WebSocket error: ${e}`)
         });
-        router.connections.add(connection);
+        if (!router.connections.has(deviceId)) {
+            router.connections.set(deviceId, new Set())
+        }
+        router.connections.get(deviceId)!.add(connection);
     });
 
     return router;

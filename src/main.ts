@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import {getLogger} from "./logger";
 import {registerQuasarYandexNetRouter} from "./routers/quasar.yandex.net";
-import {registerUniproxyAliceYandexNetRouter} from "./routers/uniproxy.alice.yandex.net";
+import {registerUniproxyAliceYandexNetRouter, UniProxyConnection} from "./routers/uniproxy.alice.yandex.net";
 import {OpenAI} from "openai";
 import {GigaAMSTTBackend} from "./backend/stt/gigaam";
 import {OpenAITTSBackend} from "./backend/tts/openai";
@@ -10,6 +10,10 @@ import {BasicProcessorBackend} from "./backend/processors/basic";
 import {BufferedAudioMetadataBackend} from "./backend/audio-metadata/buffered";
 import z from "zod";
 import bodyParser from "body-parser";
+import { PostgresDatabaseStationInfoStorage } from "./storage/database";
+import Elysia, { t } from "elysia";
+import node from "@elysiajs/node";
+import openapi from "@elysia/openapi";
 
 dotenv.config({
     path: ".env.local"
@@ -35,7 +39,13 @@ const TTS_OPENAI_SPEED = parseFloat(process.env.TTS_OPENAI_SPEED ?? "1");
 const AUDIO_METADATA_URLS = (process.env.AUDIO_METADATA_URLS ?? "").split(",")
     .filter(url => url);
 
+const POSTGRES_URL = process.env.POSTGRES_URL ?? "postgres://quasar:quasar@localhost/quasar"
+
+const storage = new PostgresDatabaseStationInfoStorage(POSTGRES_URL)
+
 const app = express();
+
+app.use(bodyParser.json());
 
 const server = app.listen(PORT, e => {
     if (e) {
@@ -45,20 +55,9 @@ const server = app.listen(PORT, e => {
     logger.info(`Started quasar on :${PORT}`);
 });
 
-
-const apiApp = express();
-
-apiApp.use(bodyParser.json());
-
-const apiServer = apiApp.listen(API_PORT, e => {
-    if (e) {
-        logger.error(`API failed to start on :${API_PORT}: ${e}`);
-        return;
-    }
-    logger.info(`Started API on :${API_PORT}`);
+registerQuasarYandexNetRouter(app, {
+    infoProvider: storage
 });
-
-registerQuasarYandexNetRouter(app);
 const uniProxyRouter = registerUniproxyAliceYandexNetRouter({
     stt: new GigaAMSTTBackend(STT_GIGAAM_URL),
     processor: new BasicProcessorBackend(PROCESSOR_BASIC_URL),
@@ -77,28 +76,104 @@ const pushRequestType = z.object({
     eventText: z.string()
 })
 
-apiApp.post('/push', (request, response) => {
-    const requestData = pushRequestType.parse(request.body);
-    for (const connection of uniProxyRouter.connections) {
-        connection.push(requestData.eventText).catch(error => logger.warn(`Failed to push event to UniProxy connection: ${error}`));
+const apiServer = new Elysia({
+    adapter: node()
+}).use(openapi({
+    documentation: {
+        info: {
+            title: 'Quasar API',
+            version: '1.4.6'
+        }
     }
-    response.status(200).end();
-});
+}))
 
-apiApp.post('/push/raw', (request, response) => {
-    const requestData = pushRequestType.parse(request.body);
-    for (const connection of uniProxyRouter.connections) {
-        connection.pushRaw(requestData.eventText).catch(error => logger.warn(`Failed to push raw event to UniProxy connection: ${error}`));
-    }
-    response.status(200).end();
-});
+try {
+    apiServer.listen(API_PORT, () => {
+        logger.info(`Started API on :${API_PORT}`);
+    })
+} catch (error) {
+    logger.error(`API failed to start on :${API_PORT}: ${error}`);
+}
 
-apiApp.post('/debug/directive/raw', (request, response) => {
-    for (const connection of uniProxyRouter.connections) {
-        connection.pushRawDirective(request.body).catch(error => logger.warn(`Failed to push raw directive to UniProxy connection: ${error}`));
+function runForConnections(duidOrAll: string, action: (connection: UniProxyConnection) => void) {
+    for (const [duid, connections] of uniProxyRouter.connections) {
+        if (duidOrAll === 'all' || duidOrAll === duid) {
+            for (const connection of connections) {
+                action(connection)
+            }
+        }
     }
-    response.status(200).end();
-});
+}
+
+apiServer.post('/device/:duid/push', async ({ body, params: { duid } }) => {
+    runForConnections(duid, connection => {
+        connection.push(body.eventText).catch(error => logger.warn(`Failed to push event to UniProxy connection: ${error}`))
+    })
+    
+    return {}
+}, {
+    params: t.Object({
+        duid: t.String({
+            description: "DUID or 'all' for all devices"
+        })
+    }),
+    body: t.Object({
+        eventText: t.String({
+            description: 'Event text to be pushed to LLM'
+        })
+    }),
+    detail: {
+        summary: 'Pushes event to LLM to be processed',
+        tags: ['device']
+    },
+    response: t.Object({})
+})
+
+apiServer.post('/device/:duid/push/raw', async ({ body, params: { duid } }) => {
+    runForConnections(duid, connection => {
+        connection.pushRaw(body.eventText).catch(error => logger.warn(`Failed to push raw event to UniProxy connection: ${error}`))
+    })
+
+    return {}
+}, {
+    params: t.Object({
+        duid: t.String({
+            description: "DUID or 'all' for all devices"
+        })
+    }),
+    body: t.Object({
+        eventText: t.String({
+            description: 'Event text to be pushed to TTS'
+        })
+    }),
+    detail: {
+        summary: 'Pushes event text to be TTSed',
+        tags: ['device']
+    },
+    response: t.Object({})
+})
+
+apiServer.post('/device/:duid/directive/raw', async ({ body, params: { duid } }) => {
+    runForConnections(duid, connection => {
+        connection.pushRawDirective(body).catch(error => logger.warn(`Failed to push raw directive to UniProxy connection: ${error}`));
+    })
+    
+    return {}
+}, {
+    params: t.Object({
+        duid: t.String({
+            description: "DUID or 'all' for all devices"
+        })
+    }),
+    body: t.Unknown({
+        description: 'Raw Quasar directive'
+    }),
+    detail: {
+        summary: 'Pushes directive to the device',
+        tags: ['device']
+    },
+    response: t.Object({})
+})
 
 app.use((req, res) => {
     logger.debug(`Got unknown request: ${req.method} ${req.url}`);
