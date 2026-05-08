@@ -52,10 +52,10 @@ const rawQuasarConfig = z.object({
         navigation: z.boolean().default(false)
       })
     }),
-    jingle: z.boolean().default(false),
+    jingle: z.boolean().default(false).describe('Enabled "blimp" sound on activation and cancellation'),
     saveHistoryUsage: z.boolean().default(true),
     smartActivation: z.boolean().default(true),
-    spotter: z.string().default("alisa"),
+    spotter: z.string().default("alisa").describe("Specifies spotter word, currently working are: alisa, yandex and yasmina"),
     useBiometryChildScoring: z.boolean().default(true),
     useRichModelForPro: z.boolean().default(true),
     userWifiConfig: z.object({
@@ -79,10 +79,10 @@ const rawQuasarConfig = z.object({
         auto: z.boolean().default(true),
         value: z.number().default(0.5)
       }),
-      idleAnimation: z.boolean().default(false),
+      idleAnimation: z.boolean().default(false).describe('Enabled idle animation after 20 seconds if idling'),
       musicEqualizerVisualization: z.object({
-        auto: z.boolean().default(false),
-        style: z.string().default("lava_beat")
+        auto: z.boolean().default(false).describe('Enables automatic LED pattern switching while playing music'),
+        style: z.string().default("lava_beat").describe('Set LED pattern while playing music: lava_beat, blink, polar_shining and none')
       })
     }),
     locale: z.string().default('ru-RU'),
@@ -95,10 +95,10 @@ const rawQuasarConfig = z.object({
       deepStandbyTimeoutMinutes: z.number().default(240)
     }),
     stereoPair: z.object({
-      channel: z.union([z.literal('left'), z.literal('right')]),
-      partnerDeviceId: z.string(),
-      role: z.union([z.literal('follower'), z.literal('leader')])
-    }).optional(),
+      channel: z.union([z.literal('left'), z.literal('right')]).describe('Specifies what speaker will this station be'),
+      partnerDeviceId: z.string().describe('Partner speaker DUID'),
+      role: z.union([z.literal('follower'), z.literal('leader')]).describe('Role for this speaker: follower only plays music, leader listens to user requests')
+    }).optional().describe('Config for stereopair'),
     tvBeta: z.boolean().default(false)
   }),
   systemConfig: z.object({
