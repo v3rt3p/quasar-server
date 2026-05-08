@@ -21,7 +21,16 @@ function mapStationInfoToGlagolDeviceConfig(info: StationInfo): unknown {
         led: {
             time_visualization: {
                 format: config.led.timeVisualization.format
-            }
+            },
+            brightness: {
+                auto: config.led.brightness.auto,
+                value: config.led.brightness.value
+            },
+            idle_animation: config.led.idleAnimation,
+            music_equalizer_visualization: {
+                auto: config.led.musicEqualizerVisualization.auto,
+                style: config.led.musicEqualizerVisualization.style
+            },
         },
         locale: config.locale,
         location: config.location ? {
@@ -111,7 +120,16 @@ function mapStationInfoToStationSyncInfoResponseConfig(info: StationInfo): unkno
             led: {
                 time_visualization: {
                     format: device.led.timeVisualization.format
-                }
+                },
+                brightness: {
+                    auto: device.led.brightness.auto,
+                    value: device.led.brightness.value
+                },
+                idle_animation: device.led.idleAnimation,
+                music_equalizer_visualization: {
+                    auto: device.led.musicEqualizerVisualization.auto,
+                    style: device.led.musicEqualizerVisualization.style
+                },
             },
             locale: device.locale,
             location: device.location ? {

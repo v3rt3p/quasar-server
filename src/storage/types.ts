@@ -74,6 +74,15 @@ const rawQuasarConfig = z.object({
       timeVisualization: z.object({
         format: z.union([z.literal('24h'), z.literal('12h')])
           .default('24h')
+      }),
+      brightness: z.object({
+        auto: z.boolean().default(true),
+        value: z.number().default(0.5)
+      }),
+      idleAnimation: z.boolean().default(false),
+      musicEqualizerVisualization: z.object({
+        auto: z.boolean().default(false),
+        style: z.string().default("lava_beat")
       })
     }),
     locale: z.string().default('ru-RU'),

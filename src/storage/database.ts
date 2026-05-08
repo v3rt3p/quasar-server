@@ -50,6 +50,16 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
 
   async initialize(): Promise<void> {
     await this.dataSource.initialize()
+
+    await this.dataSource.transaction(async manager => {
+      const repository = manager.getRepository<Station>(Station)
+
+      const infos = await repository.find()
+      for (const info of infos) {
+        info.quasarConfig = quasarConfig.parse(info.quasarConfig)
+      }
+      await repository.save(infos)
+    })
   }
 
   private async getOrCreate(duid: string, platform: string, 
