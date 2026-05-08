@@ -349,49 +349,71 @@ const rawQuasarConfig = z.object({
   })
 })
 
-export function deepDefault<T extends z.ZodType>(schema: T): T {
-  const [transformed] = transform(schema);
-  return transformed as unknown as T;
+const NO_DEFAULT = Symbol("NO_DEFAULT");
+type NoDefault = typeof NO_DEFAULT;
+
+function deepDefault<T extends z.ZodType>(schema: T): T {
+  return transform(schema).schema as unknown as T;
 }
 
-function transform(schema: z.ZodType): [z.ZodType, boolean] {
+function transform(schema: z.ZodType): {
+  schema: z.ZodType;
+  default: unknown | NoDefault;
+} {
+  const result = rebuild(schema);
+  const meta = schema.meta?.();
+  if (meta) result.schema = result.schema.meta(meta);
+  return result;
+}
+
+function rebuild(schema: z.ZodType): {
+  schema: z.ZodType;
+  default: unknown | NoDefault;
+} {
   if (schema instanceof z.ZodDefault) {
-    const [inner] = transform(schema.unwrap() as z.ZodType);
-    return [inner.default(schema.def.defaultValue), true];
+    const inner = transform(schema.unwrap() as z.ZodType);
+    const raw = schema.def.defaultValue;
+    const value = typeof raw === "function" ? (raw as () => unknown)() : raw;
+    return { schema: inner.schema.default(value), default: value };
   }
 
   if (schema instanceof z.ZodOptional) {
-    const [inner] = transform(schema.unwrap() as z.ZodType);
-    return [inner.optional(), true];
+    const inner = transform(schema.unwrap() as z.ZodType);
+    return { schema: inner.schema.optional(), default: undefined };
   }
 
   if (schema instanceof z.ZodNullable) {
-    const [inner, defaultable] = transform(schema.unwrap() as z.ZodType);
-    return [inner.nullable(), defaultable];
+    const inner = transform(schema.unwrap() as z.ZodType);
+    return { schema: inner.schema.nullable(), default: inner.default };
   }
 
   if (schema instanceof z.ZodObject) {
     const newShape: Record<string, z.ZodType> = {};
-    let allChildrenDefaultable = true;
+    const computed: Record<string, unknown> = {};
+    let allDefaultable = true;
 
     for (const [k, v] of Object.entries(schema.shape)) {
-      const [child, childDefaultable] = transform(v as z.ZodType);
-      newShape[k] = child;
-      if (!childDefaultable) allChildrenDefaultable = false;
+      const child = transform(v as z.ZodType);
+      newShape[k] = child.schema;
+      if (child.default === NO_DEFAULT) {
+        allDefaultable = false;
+      } else if (child.default !== undefined) {
+        computed[k] = child.default;
+      }
     }
 
-    const rebuilt = z.object(newShape);
-    return allChildrenDefaultable
-      ? [rebuilt.prefault({}), true]   // <-- prefault, not default
-      : [rebuilt, false];
+    const obj = z.object(newShape);
+    return allDefaultable
+      ? { schema: obj.default(computed), default: computed }
+      : { schema: obj, default: NO_DEFAULT };
   }
 
   if (schema instanceof z.ZodArray) {
-    const [element] = transform(schema.element as z.ZodType);
-    return [z.array(element), false];
+    const element = transform(schema.element as z.ZodType);
+    return { schema: z.array(element.schema), default: NO_DEFAULT };
   }
 
-  return [schema, false];
+  return { schema, default: NO_DEFAULT };
 }
 
 export const quasarConfig = deepDefault(rawQuasarConfig)
