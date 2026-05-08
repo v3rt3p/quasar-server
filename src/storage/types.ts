@@ -89,7 +89,7 @@ const rawQuasarConfig = z.object({
       channel: z.union([z.literal('left'), z.literal('right')]),
       partnerDeviceId: z.string(),
       role: z.union([z.literal('follower'), z.literal('leader')])
-    }),
+    }).optional(),
     tvBeta: z.boolean().default(false)
   }),
   systemConfig: z.object({
@@ -169,8 +169,8 @@ const rawQuasarConfig = z.object({
     analyticsEnvironment: z.object({
       quasmodromGroup: z.string().default('production'),
       quasmodromSubgroup: z.string().default('production'),
-      testBuckets: z.string(),
-      testids: z.string()
+      testBuckets: z.string().default('1556982,0,4;1561379,0,36;1547992,0,87;721150,0,79;1525886,0,41;1217762,0,78;945524,0,81;950035,0,41;1283447,0,48;1423171,0,62;956122,0,95;1549517,0,96;1550823,0,49;1288685,0,77;1560108,0,48;1287409,0,67;1479393,0,60;1559533,0,28'),
+      testids: z.string().default('1058670_1058695_1058696_1058739_1058743_1058746_1074585_1098487_1118599_1155918_1294733_1367806_1395542_1420044_1431608_1432181_1450785_1454721_1457247_1457514_1458555_1460807_1479393_1511604_1525886_1559533_721150')
     }),
     experiments: z.array(z.string()).default([]),
     fluentBit: z.object({
@@ -340,26 +340,49 @@ const rawQuasarConfig = z.object({
   })
 })
 
-function deepDefault<T extends z.ZodType>(schema: T): T {
+export function deepDefault<T extends z.ZodType>(schema: T): T {
+  const [transformed] = transform(schema);
+  return transformed as unknown as T;
+}
+
+function transform(schema: z.ZodType): [z.ZodType, boolean] {
   if (schema instanceof z.ZodDefault) {
-    const inner = deepDefault(schema.unwrap() as z.ZodType);
-    return inner.default(schema.def.defaultValue) as unknown as T;
+    const [inner] = transform(schema.unwrap() as z.ZodType);
+    return [inner.default(schema.def.defaultValue), true];
+  }
+
+  if (schema instanceof z.ZodOptional) {
+    const [inner] = transform(schema.unwrap() as z.ZodType);
+    return [inner.optional(), true];
+  }
+
+  if (schema instanceof z.ZodNullable) {
+    const [inner, defaultable] = transform(schema.unwrap() as z.ZodType);
+    return [inner.nullable(), defaultable];
   }
 
   if (schema instanceof z.ZodObject) {
-    const newShape = Object.fromEntries(
-      Object.entries(schema.shape).map(
-        ([k, v]) => [k, deepDefault(v as z.ZodType)]
-      )
-    );
-    return z.object(newShape).default({}) as unknown as T;
+    const newShape: Record<string, z.ZodType> = {};
+    let allChildrenDefaultable = true;
+
+    for (const [k, v] of Object.entries(schema.shape)) {
+      const [child, childDefaultable] = transform(v as z.ZodType);
+      newShape[k] = child;
+      if (!childDefaultable) allChildrenDefaultable = false;
+    }
+
+    const rebuilt = z.object(newShape);
+    return allChildrenDefaultable
+      ? [rebuilt.prefault({}), true]   // <-- prefault, not default
+      : [rebuilt, false];
   }
 
   if (schema instanceof z.ZodArray) {
-    return z.array(deepDefault(schema.element as z.ZodType)).default([]) as unknown as T;
+    const [element] = transform(schema.element as z.ZodType);
+    return [z.array(element), false];
   }
 
-  return schema;
+  return [schema, false];
 }
 
 export const quasarConfig = deepDefault(rawQuasarConfig)
