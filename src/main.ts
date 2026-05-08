@@ -90,14 +90,6 @@ const apiServer = new Elysia({
     }
 }))
 
-try {
-    apiServer.listen(API_PORT, () => {
-        logger.info(`Started API on :${API_PORT}`);
-    })
-} catch (error) {
-    logger.error(`API failed to start on :${API_PORT}: ${error}`);
-}
-
 function runForConnections(duidOrAll: string, action: (connection: UniProxyConnection) => void) {
     for (const [duid, connections] of uniProxyRouter.connections) {
         if (duidOrAll === 'all' || duidOrAll === duid) {
@@ -107,6 +99,25 @@ function runForConnections(duidOrAll: string, action: (connection: UniProxyConne
         }
     }
 }
+
+apiServer.get('/devices', async () => {
+    const infos = await storage.getStationInfos()
+    return infos.map(info => ({
+        duid: info.duid,
+        name: info.name,
+        quasarConfig: info.quasarConfig
+    }))
+}, {
+    detail: {
+        summary: 'Get list of devices',
+        tags: ['device']
+    },
+    response: z.array(z.object({
+        duid: z.string().describe('DUID'),
+        name: z.string().describe('Name'),
+        quasarConfig: quasarConfig.describe('Quasar\'s maind config')
+    }))
+})
 
 apiServer.post('/devices/:duid/push', async ({ body, params: { duid } }) => {
     runForConnections(duid, connection => {
@@ -178,25 +189,6 @@ apiServer.post('/devices/:duid/push-directive', async ({ body, params: { duid } 
     response: t.Object({})
 })
 
-apiServer.get('/devices', async () => {
-    const infos = await storage.getStationInfos()
-    return infos.map(info => ({
-        duid: info.duid,
-        name: info.name,
-        quasarConfig: info.quasarConfig
-    }))
-}, {
-    detail: {
-        summary: 'Get list of devices',
-        tags: ['device']
-    },
-    response: z.array(z.object({
-        duid: z.string().describe('DUID'),
-        name: z.string().describe('Name'),
-        quasarConfig: quasarConfig.describe('Quasar\'s maind config')
-    }))
-})
-
 apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
     const info = await storage.updateNameAndQuasarConfig(duid, body.name, body.quasarConfig)
 
@@ -230,6 +222,14 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
         quasarConfig: quasarConfig.describe('Quasar\'s maind config')
     })
 })
+
+try {
+    apiServer.listen(API_PORT, () => {
+        logger.info(`Started API on :${API_PORT}`);
+    })
+} catch (error) {
+    logger.error(`API failed to start on :${API_PORT}: ${error}`);
+}
 
 app.use((req, res) => {
     logger.debug(`Got unknown request: ${req.method} ${req.url}`);
