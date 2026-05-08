@@ -28,6 +28,7 @@
     "openai": "^5.23.2",
     "pg": "^8.20.0",
     "protobufjs": "^7.5.6",
+    "quasar-server": "link:",
     "tslog": "^4.10.2",
     "tsx": "^4.21.0",
     "typeorm": "^0.3.29",
