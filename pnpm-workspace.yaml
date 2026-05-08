@@ -1,4 +1,2 @@
 onlyBuiltDependencies:
   - '@discordjs/opus'
-  - esbuild
-  - protobufjs
