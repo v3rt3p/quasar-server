@@ -52,7 +52,7 @@ const rawQuasarConfig = z.object({
         navigation: z.boolean().default(false)
       })
     }),
-    jingle: z.boolean().default(false).describe('Enabled "blimp" sound on activation and cancellation'),
+    jingle: z.boolean().default(false).describe('Enables "blimp" sound on activation and cancellation'),
     saveHistoryUsage: z.boolean().default(true),
     smartActivation: z.boolean().default(true),
     spotter: z.string().default("alisa").describe("Specifies spotter word, currently working are: alisa, yandex and yasmina"),
@@ -79,10 +79,10 @@ const rawQuasarConfig = z.object({
         auto: z.boolean().default(true),
         value: z.number().default(0.5)
       }),
-      idleAnimation: z.boolean().default(false).describe('Enabled idle animation after 20 seconds if idling'),
+      idleAnimation: z.boolean().default(false).describe('Enables idle animation after 20 seconds of idling'),
       musicEqualizerVisualization: z.object({
         auto: z.boolean().default(false).describe('Enables automatic LED pattern switching while playing music'),
-        style: z.string().default("lava_beat").describe('Set LED pattern while playing music: lava_beat, blink, polar_shining and none')
+        style: z.string().default("lava_beat").describe('Specify LED pattern (auto: false) while playing music: lava_beat, blink, polar_shining and none')
       })
     }),
     locale: z.string().default('ru-RU'),
