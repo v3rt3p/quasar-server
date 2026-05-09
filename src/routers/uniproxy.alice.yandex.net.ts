@@ -558,6 +558,29 @@ export class UniProxyConnection {
                                             }
                                         },
                                         IsLedSilent: true
+                                    },
+                                    {
+                                        Type: "server_action",
+                                        Name: "@@mm_semantic_frame",
+                                        Payload: {
+                                            fields: {
+                                                typed_semantic_frame: {
+                                                    structValue: {
+                                                        fields: {
+                                                            raw_external_event_semantic_frame: {
+                                                                structValue: {
+                                                                    fields: {
+                                                                        event: {
+                                                                            stringValue: "жопа"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 ],
                                 Suggest: {
