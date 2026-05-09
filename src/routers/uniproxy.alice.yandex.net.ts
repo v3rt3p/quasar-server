@@ -240,6 +240,7 @@ class ClientProcessingSession {
 
         postProcess().catch(error => {
             this.logger.error(`Failed to process: ${error}`);
+            console.error(error)
         })
     }
 
