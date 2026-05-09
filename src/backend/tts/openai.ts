@@ -1,27 +1,27 @@
-import {TTSBackend, TTSRequest, TTSResponse} from "../backend";
-import {OpenAI} from "openai";
+import { OpenAI } from 'openai'
 
-interface OpenAITTSBackendParams {
-    model: string;
-    voice: string;
-    speed: number;
+import { TTSBackend, TTSRequest, TTSResponse } from '../backend'
+
+interface OpenAITSBackendParameters {
+  model: string;
+  speed: number;
+  voice: string;
 }
 
 export class OpenAITTSBackend implements TTSBackend {
-    constructor(private readonly openAI: OpenAI, private readonly params: OpenAITTSBackendParams) {
-    }
+  constructor (private readonly openAI: OpenAI, private readonly parameters: OpenAITSBackendParameters) {}
 
-    async synthesize(request: TTSRequest): Promise<TTSResponse> {
-        const result = await this.openAI.audio.speech.create({
-            input: request.text,
-            voice: this.params.voice,
-            response_format: "opus",
-            model: this.params.model,
-            speed: this.params.speed,
-        });
-        return {
-            voiceOutput: Buffer.from(await result.arrayBuffer()),
-            format: "audio/opus",
-        }
+  async synthesize (request: TTSRequest): Promise<TTSResponse> {
+    const result = await this.openAI.audio.speech.create({
+      input: request.text,
+      model: this.parameters.model,
+      response_format: 'opus',
+      speed: this.parameters.speed,
+      voice: this.parameters.voice,
+    })
+    return {
+      format: 'audio/opus',
+      voiceOutput: Buffer.from(await result.arrayBuffer()),
     }
+  }
 }

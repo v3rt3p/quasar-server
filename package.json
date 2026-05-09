@@ -9,6 +9,7 @@
     "start": "tsx src/main.ts"
   },
   "dependencies": {
+    "@bksp/style-guide": "^1.5.0",
     "@discordjs/opus": "^0.10.0",
     "@elysia/openapi": "^1.4.15",
     "@elysiajs/node": "^1.4.5",
@@ -23,6 +24,7 @@
     "body-parser": "^2.2.2",
     "dotenv": "^17.4.2",
     "elysia": "^1.4.28",
+    "eslint": "^9.39.4",
     "express": "^5.2.1",
     "js-yaml": "^4.1.1",
     "node-forge": "^1.4.0",

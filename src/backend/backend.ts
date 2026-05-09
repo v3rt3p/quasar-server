@@ -1,119 +1,105 @@
-import {AliceDirective} from "../routers/alice/directives";
-
-export type AudioFormat = "audio/opus" | "audio/mp3";
-
-export interface STTChunkTranscribeResult {
-    text: string;
-    endOfUtt: boolean;
-}
-
-export type STTChunkTranscribeCallback = (result: STTChunkTranscribeResult) => void;
-
-export interface STTTranscribingParams {
-    format: AudioFormat;
-}
-
-export abstract class STTBackendSession {
-    private callback: STTChunkTranscribeCallback | null = null;
-
-    setCallback(callback: STTChunkTranscribeCallback): void {
-        this.callback = callback;
-    }
-
-    protected chunkTranscribed(result: STTChunkTranscribeResult): void {
-        if (this.callback) {
-            this.callback(result);
-        }
-    }
-
-    abstract transcribeChunk(chunk: Buffer): void;
-
-    abstract close(): void;
-}
-
-export interface STTBackend {
-    startTranscribing(params: STTTranscribingParams): Promise<STTBackendSession>;
-}
-
-export interface AudioMetadataCapturingParams {
-    format: AudioFormat;
-}
-
-export abstract class AudioMetadataBackendSession {
-    abstract processChunk(chunk: Buffer): void;
-
-    abstract finish(): Promise<object>;
-}
+import { AliceDirective } from '../routers/alice/directives'
 
 export interface AudioMetadataBackend {
-    startCapturing(params: AudioMetadataCapturingParams): Promise<AudioMetadataBackendSession>;
-}
-
-export type ProcessorRequestSource = "textOrVoice" | "rawCommand";
-
-export interface ProcessorRequest {
-    text: string;
-    metadata: object;
-    sessionId?: string;
-    isExternalEvent?: boolean;
-}
-
-export interface ProcessorResponse {
-    text: string;
-    requireMoreInput: boolean;
-    sessionId: string;
-    directives: AliceDirective[];
-}
-
-export type ProcessorPartialResponse = {
-    text: string;
-    finished: false;
-    sessionId: string;
-    directives: AliceDirective[];
-} | {
-    text: string;
-    finished: true;
-    requireMoreInput: boolean;
-    sessionId: string;
-    directives: AliceDirective[];
-}
-
-export interface ProcessorPrepareRequest {
-    sessionId?: string;
-}
-
-export interface ProcessorPrepareResponse {
-    sessionId?: string;
-}
-
-export type CancellablePromise<T> = Promise<T> & {
-    cancel(): void
+  startCapturing(): Promise<AudioMetadataBackendSession>;
 }
 
 export type CancelCallback = () => void
 
-export interface ProcessorSession {
-    prepare(request: ProcessorPrepareRequest): Promise<void>;
-    process(request: Omit<ProcessorRequest, 'sessionId'>): Promise<void>;
-    waitForPartialResponse(): [Promise<ProcessorPartialResponse>, CancelCallback];
-    close(): void;
-}
-
 export interface ProcessorBackend {
-    prepare(request: ProcessorPrepareRequest): Promise<ProcessorPrepareResponse>;
-    process(request: ProcessorRequest): Promise<ProcessorResponse>;
-    openSession(): Promise<ProcessorSession>;
+  openSession(): Promise<ProcessorSession>;
+  prepare(request: ProcessorPrepareRequest): Promise<ProcessorPrepareResponse>;
+  process(request: ProcessorRequest): Promise<ProcessorResponse>;
 }
 
-export interface TTSRequest {
-    text: string;
+export type ProcessorPartialResponse = {
+  directives: AliceDirective[];
+  finished: false;
+  sessionId: string;
+  text: string;
+} | {
+  directives: AliceDirective[];
+  finished: true;
+  requireMoreInput: boolean;
+  sessionId: string;
+  text: string;
 }
 
-export interface TTSResponse {
-    voiceOutput: Buffer;
-    format: AudioFormat;
+export interface ProcessorPrepareRequest {
+  sessionId?: string;
+}
+
+export interface ProcessorPrepareResponse {
+  sessionId?: string;
+}
+
+export interface ProcessorRequest {
+  isExternalEvent?: boolean;
+  metadata: object;
+  sessionId?: string;
+  text: string;
+}
+
+export type ProcessorRequestSource = 'rawCommand' | 'textOrVoice'
+
+export interface ProcessorResponse {
+  directives: AliceDirective[];
+  requireMoreInput: boolean;
+  sessionId: string;
+  text: string;
+}
+
+export interface ProcessorSession {
+  close(): void;
+  prepare(request: ProcessorPrepareRequest): Promise<void>;
+  process(request: Omit<ProcessorRequest, 'sessionId'>): Promise<void>;
+  waitForPartialResponse(): [Promise<ProcessorPartialResponse>, CancelCallback];
+}
+
+export interface STTBackend {
+  startTranscribing(): Promise<STTBackendSession>;
+}
+
+export type STTChunkTranscribeCallback = (result: STTChunkTranscribeResult) => void
+
+export interface STTChunkTranscribeResult {
+  endOfUtt: boolean;
+  text: string;
 }
 
 export interface TTSBackend {
-    synthesize(request: TTSRequest): Promise<TTSResponse>;
+  synthesize(request: TTSRequest): Promise<TTSResponse>;
+}
+
+export interface TTSRequest {
+  text: string;
+}
+
+export interface TTSResponse {
+  format: string; 
+  voiceOutput: Buffer;
+}
+
+export abstract class AudioMetadataBackendSession {
+  abstract finish(): Promise<object>
+
+  abstract processChunk(chunk: Buffer): Promise<void>
+}
+
+export abstract class STTBackendSession {
+  private callback: null | STTChunkTranscribeCallback = null
+
+  abstract close(): void
+
+  setCallback(callback: STTChunkTranscribeCallback): void {
+    this.callback = callback
+  }
+
+  abstract transcribeChunk(chunk: Buffer): void
+
+  protected chunkTranscribed(result: STTChunkTranscribeResult): void {
+    if (this.callback) {
+      this.callback(result)
+    }
+  }
 }

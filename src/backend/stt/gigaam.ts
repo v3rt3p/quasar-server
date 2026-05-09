@@ -1,63 +1,76 @@
-import {STTBackend, STTBackendSession, STTTranscribingParams} from "../backend";
-import {WebSocket} from "ws";
-import {OpusProcessor} from "../../codecs/opus-processor";
+import { WebSocket } from 'ws'
+
+import { OpusProcessor } from '../../codecs/opus-processor'
+import { STTBackend, STTBackendSession } from '../backend'
 
 interface GigaAMMessage {
-    end_of_utt: boolean;
-    text: string;
+  end_of_utt: boolean;
+  text: string;
 }
 
 class GigaAMSTTSession extends STTBackendSession {
-    private opusProcessor: OpusProcessor;
+  private opusProcessor: OpusProcessor
 
-    constructor(private readonly webSocket: WebSocket) {
-        super();
-        this.opusProcessor = new OpusProcessor(data => {
-            this.webSocket.send(data, {
-                binary: true
-            });
-        }, sampleRate => {
-            this.webSocket.send(JSON.stringify({
-                sample_rate: sampleRate
-            }), {
-                binary: false
-            });
-        })
-        webSocket.on("message", (message, isBinary) => {
-            const simplifiedMessage = Array.isArray(message) ? Buffer.concat(message) : Buffer.from(message as ArrayBuffer);
-            const response = JSON.parse(simplifiedMessage.toString("utf8")) as GigaAMMessage;
-            this.chunkTranscribed({
-                endOfUtt: response.end_of_utt,
-                text: response.text
-            });
-        });
-    }
+  constructor (private readonly webSocket: WebSocket) {
+    super()
+    this.opusProcessor = new OpusProcessor(data => new Promise((resolve, reject) => 
+      this.webSocket.send(data, {
+        binary: true
+      }, error => {
+        if (error) {
+            reject(error)
+        } else {
+            resolve()
+        }
+      })
+    ), sampleRate => new Promise((resolve, reject) => {
+      this.webSocket.send(JSON.stringify({
+        sample_rate: sampleRate
+      }), {
+        binary: false
+      }, error => {
+        if (error) {
+            reject(error)
+        } else {
+            resolve()
+        }
+      })
+    }))
 
-    transcribeChunk(chunk: Buffer): void {
-        this.opusProcessor.handleAudioData(chunk);
-    }
+    webSocket.on('message', (message) => {
+      const simplifiedMessage = Array.isArray(message) ? Buffer.concat(message) : Buffer.from(message as ArrayBuffer)
+      const response = JSON.parse(simplifiedMessage.toString('utf8')) as GigaAMMessage
+      this.chunkTranscribed({
+        endOfUtt: response.end_of_utt,
+        text: response.text
+      })
+    })
+  }
 
-    close(): void {
-        this.webSocket.close();
-    }
+  close (): void {
+    this.webSocket.close()
+  }
+
+  async transcribeChunk (chunk: Buffer): Promise<void> {
+    await this.opusProcessor.handleAudioData(chunk)
+  }
 }
 
 export class GigaAMSTTBackend implements STTBackend {
-    constructor(private readonly endpoint: string) {
-    }
+  constructor (private readonly endpoint: string) {}
 
-    startTranscribing(params: STTTranscribingParams): Promise<STTBackendSession> {
-        const webSocket = new WebSocket(this.endpoint);
-        return new Promise((resolve, reject) => {
-            webSocket.on("error", e => {
-                reject(e);
-            });
-            webSocket.on("close", () => {
-                reject(new Error("Unexpected close"));
-            });
-            webSocket.on("open", () => {
-                resolve(new GigaAMSTTSession(webSocket));
-            })
-        });
-    }
+  startTranscribing (): Promise<STTBackendSession> {
+    const webSocket = new WebSocket(this.endpoint)
+    return new Promise((resolve, reject) => {
+      webSocket.on('error', e => {
+        reject(e)
+      })
+      webSocket.on('close', () => {
+        reject(new Error('Unexpected close'))
+      })
+      webSocket.on('open', () => {
+        resolve(new GigaAMSTTSession(webSocket))
+      })
+    })
+  }
 }

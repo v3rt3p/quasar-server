@@ -1,15 +1,6 @@
-import z from "zod"
+import z from 'zod'
 
 const rawQuasarConfig = z.object({
-  aliceProSubscription: z.union([z.object({
-    enabled: z.literal(true),
-    ttl: z.number()
-  }), z.object({
-    enabled: z.literal(false)
-  })]).default({
-    enabled: true,
-    ttl: 365 * 24 * 60 * 60
-  }),
   accountConfig: z.object({
     aliceAdaptiveVolume: z.object({
       enabled: z.boolean().default(true),
@@ -55,12 +46,21 @@ const rawQuasarConfig = z.object({
     jingle: z.boolean().default(false).describe('Enables "blimp" sound on activation and cancellation'),
     saveHistoryUsage: z.boolean().default(true),
     smartActivation: z.boolean().default(true),
-    spotter: z.string().default("alisa").describe("Specifies spotter word, currently working are: alisa, yandex and yasmina"),
+    spotter: z.string().default('alisa').describe('Specifies spotter word, currently working are: alisa, yandex and yasmina'),
     useBiometryChildScoring: z.boolean().default(true),
     useRichModelForPro: z.boolean().default(true),
     userWifiConfig: z.object({
-      wifiHash: z.string().default("39671801dd40273b54f83b5c3f7d9a0f0055e5a1b1687a6427241d9be9bf402e")
+      wifiHash: z.string().default('39671801dd40273b54f83b5c3f7d9a0f0055e5a1b1687a6427241d9be9bf402e')
     })
+  }),
+  aliceProSubscription: z.union([z.object({
+    enabled: z.literal(true),
+    ttl: z.number()
+  }), z.object({
+    enabled: z.literal(false)
+  })]).default({
+    enabled: true,
+    ttl: 365 * 24 * 60 * 60
   }),
   deviceConfig: z.object({
     beta: z.boolean().default(false),
@@ -71,10 +71,6 @@ const rawQuasarConfig = z.object({
       })
     }),
     led: z.object({
-      timeVisualization: z.object({
-        format: z.union([z.literal('24h'), z.literal('12h')])
-          .default('24h')
-      }),
       brightness: z.object({
         auto: z.boolean().default(true),
         value: z.number().default(0.5)
@@ -82,7 +78,11 @@ const rawQuasarConfig = z.object({
       idleAnimation: z.boolean().default(false).describe('Enables idle animation after 20 seconds of idling'),
       musicEqualizerVisualization: z.object({
         auto: z.boolean().default(false).describe('Enables automatic LED pattern switching while playing music'),
-        style: z.string().default("lava_beat").describe('Specify LED pattern (auto: false) while playing music: lava_beat, blink, polar_shining and none')
+        style: z.string().default('lava_beat').describe('Specify LED pattern (auto: false) while playing music: lava_beat, blink, polar_shining and none')
+      }),
+      timeVisualization: z.object({
+        format: z.union([z.literal('24h'), z.literal('12h')])
+          .default('24h')
       })
     }),
     locale: z.string().default('ru-RU'),
@@ -103,26 +103,32 @@ const rawQuasarConfig = z.object({
   }),
   systemConfig: z.object({
     addAllEmbeddedEndpoints: z.boolean().default(false),
+    analyticsEnvironment: z.object({
+      quasmodromGroup: z.string().default('production'),
+      quasmodromSubgroup: z.string().default('production'),
+      testBuckets: z.string().default('1556982,0,4;1561379,0,36;1547992,0,87;721150,0,79;1525886,0,41;1217762,0,78;945524,0,81;950035,0,41;1283447,0,48;1423171,0,62;956122,0,95;1549517,0,96;1550823,0,49;1288685,0,77;1560108,0,48;1287409,0,67;1479393,0,60;1559533,0,28'),
+      testids: z.string().default('1058670_1058695_1058696_1058739_1058743_1058746_1074585_1098487_1118599_1155918_1294733_1367806_1395542_1420044_1431608_1432181_1450785_1454721_1457247_1457514_1458555_1460807_1479393_1511604_1525886_1559533_721150')
+    }),
+    audioclient: z.object({
+      gogol: z.object({
+        keepAlive: z.boolean().default(true)
+      })
+    }),
     audioInput: z.object({
       modelStorage: z.object({
         models: z.record(z.string(), z.record(z.string(), z.object({
           crc: z.number(),
           fallbackUrls: z.array(z.string()),
           format: z.union([z.literal('zip')]),
+          type: z.string().optional(),
           url: z.string(),
-          word: z.string().optional(),
-          type: z.string().optional()
+          word: z.string().optional()
         }))).default({})
       })
     }),
     audioPlayerCapability: z.object({
       enableMusicSets: z.boolean().default(true),
       enableSmartCrossfade: z.boolean().default(true)
-    }),
-    audioclient: z.object({
-      gogol: z.object({
-        keepAlive: z.boolean().default(true)
-      })
     }),
     bioCapability: z.object({
       engineConfig: z.object({
@@ -175,12 +181,6 @@ const rawQuasarConfig = z.object({
     deviceControlPanel: z.object({
       checkAliceProSubscription: z.boolean().default(true)
     }),
-    analyticsEnvironment: z.object({
-      quasmodromGroup: z.string().default('production'),
-      quasmodromSubgroup: z.string().default('production'),
-      testBuckets: z.string().default('1556982,0,4;1561379,0,36;1547992,0,87;721150,0,79;1525886,0,41;1217762,0,78;945524,0,81;950035,0,41;1283447,0,48;1423171,0,62;956122,0,95;1549517,0,96;1550823,0,49;1288685,0,77;1560108,0,48;1287409,0,67;1479393,0,60;1559533,0,28'),
-      testids: z.string().default('1058670_1058695_1058696_1058739_1058743_1058746_1074585_1098487_1118599_1155918_1294733_1367806_1395542_1420044_1431608_1432181_1450785_1454721_1457247_1457514_1458555_1460807_1479393_1511604_1525886_1559533_721150')
-    }),
     experiments: z.array(z.string()).default([]),
     fluentBit: z.object({
       samplingRatio: z.number().default(0.5)
@@ -191,14 +191,14 @@ const rawQuasarConfig = z.object({
         scenarios: z.object({
           fastCommandScenario: z.object({
             supportedFrames: z.array(z.string()).default([
-              "personal_assistant.scenarios.bluetooth_off",
-              "personal_assistant.scenarios.bluetooth_on",
-              "personal_assistant.scenarios.player.continue",
-              "personal_assistant.scenarios.player.next_track",
-              "personal_assistant.scenarios.player.pause",
-              "personal_assistant.scenarios.player.previous_track",
-              "personal_assistant.scenarios.sound.louder",
-              "personal_assistant.scenarios.sound.quiter"
+              'personal_assistant.scenarios.bluetooth_off',
+              'personal_assistant.scenarios.bluetooth_on',
+              'personal_assistant.scenarios.player.continue',
+              'personal_assistant.scenarios.player.next_track',
+              'personal_assistant.scenarios.player.pause',
+              'personal_assistant.scenarios.player.previous_track',
+              'personal_assistant.scenarios.sound.louder',
+              'personal_assistant.scenarios.sound.quiter'
             ])
           })
         })
@@ -260,9 +260,9 @@ const rawQuasarConfig = z.object({
     teleme3d: z.object({
       appmetrica: z.object({
         plusEvents: z.array(z.string()).default([
-          "directiveHandled",
-          "directiveStarted",
-          "directiveCompleted"
+          'directiveHandled',
+          'directiveStarted',
+          'directiveCompleted'
         ])
       })
     }),
@@ -277,25 +277,28 @@ const rawQuasarConfig = z.object({
     }),
     unbound: z.object({
       checkHosts: z.array(z.string()).default([
-        "quasar.yandex.net",
-        "uniproxy.alice.yandex.net",
-        "scbh.yandex.net"
+        'quasar.yandex.net',
+        'uniproxy.alice.yandex.net',
+        'scbh.yandex.net'
       ]),
       enable: z.boolean().default(true),
       forwarders: z.array(z.string()).default([
-        "77.88.8.1",
-        "77.88.8.8",
-        "77.88.8.88",
-        "77.88.8.2",
-        "1.1.1.1"
+        '77.88.8.1',
+        '77.88.8.8',
+        '77.88.8.88',
+        '77.88.8.2',
+        '1.1.1.1'
       ]),
       serverParams: z.array(z.string()).default([
-        "msg-cache-size: 2m",
-        "rrset-cache-size: 2m",
-        "username: \"nobody\""
+        'msg-cache-size: 2m',
+        'rrset-cache-size: 2m',
+        'username: "nobody"'
       ])
     }),
     useVinsRequestProto: z.boolean().default(true),
+    voiceActivityDetector: z.object({
+      eventsEnabled: z.boolean().default(true)
+    }),
     voiceDialogSettings: z.object({
       backoffUseNew: z.boolean().default(true),
       blockUpdateSettingsWhileActiveRequest: z.boolean().default(true),
@@ -314,10 +317,10 @@ const rawQuasarConfig = z.object({
       }),
       protoAliceApi: z.object({
         clientEventsWhitelist: z.array(z.string()).default([
-          "RequestStat"
+          'RequestStat'
         ]),
         serverEventsWhitelist: z.array(z.string()).default([
-          "RequestStatAck"
+          'RequestStatAck'
         ])
       }),
       recognizer: z.object({
@@ -325,20 +328,17 @@ const rawQuasarConfig = z.object({
       }),
       spotterLoggingRareEventPercent: z.number().default(1)
     }),
-    voiceActivityDetector: z.object({
-      eventsEnabled: z.boolean().default(true)
+    wifiCapability: z.object({
+      enabledV2: z.boolean().default(true)
     }),
     wifiSettings: z.object({
       generate204: z.object({
-        failPeriodMs: z.number().default(10000),
+        failPeriodMs: z.number().default(10_000),
         maxFailAttempts: z.number().default(3),
-        periodOnLastFailAttemptMs: z.number().default(30000),
+        periodOnLastFailAttemptMs: z.number().default(30_000),
         periodSec: z.number().default(30),
         timeoutMs: z.number().default(8000)
       })
-    }),
-    wifiCapability: z.object({
-      enabledV2: z.boolean().default(true)
     }),
     zigbee: z.object({
       externalTemperatureMeasurement: z.object({
@@ -349,71 +349,71 @@ const rawQuasarConfig = z.object({
   })
 })
 
-const NO_DEFAULT = Symbol("NO_DEFAULT");
-type NoDefault = typeof NO_DEFAULT;
+const NO_DEFAULT = Symbol('NO_DEFAULT')
+type NoDefault = typeof NO_DEFAULT
 
-function deepDefault<T extends z.ZodType>(schema: T): T {
-  return transform(schema).schema as unknown as T;
+function deepDefault<T extends z.ZodType> (schema: T): T {
+  return transform(schema).schema as unknown as T
 }
 
-function transform(schema: z.ZodType): {
+function rebuild (schema: z.ZodType): {
+  default: NoDefault | unknown;
   schema: z.ZodType;
-  default: unknown | NoDefault;
-} {
-  const result = rebuild(schema);
-  const meta = schema.meta?.();
-  if (meta) result.schema = result.schema.meta(meta);
-  return result;
-}
-
-function rebuild(schema: z.ZodType): {
-  schema: z.ZodType;
-  default: unknown | NoDefault;
 } {
   if (schema instanceof z.ZodDefault) {
-    const inner = transform(schema.unwrap() as z.ZodType);
-    const raw = schema.def.defaultValue;
-    const value = typeof raw === "function" ? (raw as () => unknown)() : raw;
-    return { schema: inner.schema.default(value), default: value };
+    const inner = transform(schema.unwrap() as z.ZodType)
+    const raw = schema.def.defaultValue
+    const value = typeof raw === 'function' ? (raw as () => unknown)() : raw
+    return { default: value, schema: inner.schema.default(value) }
   }
 
   if (schema instanceof z.ZodOptional) {
-    const inner = transform(schema.unwrap() as z.ZodType);
-    return { schema: inner.schema.optional(), default: undefined };
+    const inner = transform(schema.unwrap() as z.ZodType)
+    return { default: undefined, schema: inner.schema.optional() }
   }
 
   if (schema instanceof z.ZodNullable) {
-    const inner = transform(schema.unwrap() as z.ZodType);
-    return { schema: inner.schema.nullable(), default: inner.default };
+    const inner = transform(schema.unwrap() as z.ZodType)
+    return { default: inner.default, schema: inner.schema.nullable() }
   }
 
   if (schema instanceof z.ZodObject) {
-    const newShape: Record<string, z.ZodType> = {};
-    const computed: Record<string, unknown> = {};
-    let allDefaultable = true;
+    const newShape: Record<string, z.ZodType> = {}
+    const computed: Record<string, unknown> = {}
+    let allDefaultable = true
 
     for (const [k, v] of Object.entries(schema.shape)) {
-      const child = transform(v as z.ZodType);
-      newShape[k] = child.schema;
+      const child = transform(v as z.ZodType)
+      newShape[k] = child.schema
       if (child.default === NO_DEFAULT) {
-        allDefaultable = false;
+        allDefaultable = false
       } else if (child.default !== undefined) {
-        computed[k] = child.default;
+        computed[k] = child.default
       }
     }
 
-    const obj = z.object(newShape);
+    const object = z.object(newShape)
     return allDefaultable
-      ? { schema: obj.default(computed), default: computed }
-      : { schema: obj, default: NO_DEFAULT };
+      ? { default: computed, schema: object.default(computed) }
+      : { default: NO_DEFAULT, schema: object }
   }
 
   if (schema instanceof z.ZodArray) {
-    const element = transform(schema.element as z.ZodType);
-    return { schema: z.array(element.schema), default: NO_DEFAULT };
+    const element = transform(schema.element as z.ZodType)
+    return { default: NO_DEFAULT, schema: z.array(element.schema) }
   }
 
-  return { schema, default: NO_DEFAULT };
+  return { default: NO_DEFAULT, schema }
+}
+
+function transform (schema: z.ZodType): {
+  default: NoDefault | unknown;
+  schema: z.ZodType;
+} {
+  const result = rebuild(schema)
+  const meta = schema.meta?.()
+  if (meta) result.schema = result.schema.meta(meta)
+  return result
 }
 
 export const quasarConfig = deepDefault(rawQuasarConfig)
@@ -429,11 +429,11 @@ export type GlagolSecurity = z.infer<typeof glagolSecurity>
 
 export interface StationInfo {
   duid: string
+  glagolSecurity: GlagolSecurity
   name: string
+  networkInfo: null | unknown
   platform: string
   quasarConfig: QuasarConfig
-  glagolSecurity: GlagolSecurity
-  networkInfo: unknown | null
 }
 
 export interface StationInfoProvider {

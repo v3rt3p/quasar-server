@@ -1,11 +1,20 @@
-import { GlagolSecurity, quasarConfig, QuasarConfig } from "./types";
-import { pki, md } from "node-forge"
+import { md, pki } from 'node-forge'
 
-export function getDefaultQuasarConfig(): QuasarConfig {
+import { GlagolSecurity, quasarConfig, QuasarConfig } from './types'
+
+export function generateGlagolSecurity (): GlagolSecurity {
+  const [certificate, privateKey] = generateGlagolKeyPair()
+  return {
+    certificate,
+    privateKey
+  }
+}
+
+export function getDefaultQuasarConfig (): QuasarConfig {
   return quasarConfig.parse({})
 }
 
-function generateGlagolKeyPair(): [string, string] {
+function generateGlagolKeyPair (): [string, string] {
   const key = pki.rsa.generateKeyPair(2048)
   const certificate = pki.createCertificate()
   certificate.publicKey = key.publicKey
@@ -31,12 +40,4 @@ function generateGlagolKeyPair(): [string, string] {
   certificate.sign(key.privateKey, md.sha256.create())
 
   return [pki.certificateToPem(certificate), pki.privateKeyToPem(key.privateKey)]
-}
-
-export function generateGlagolSecurity(): GlagolSecurity {
-  const [certificate, privateKey] = generateGlagolKeyPair()
-  return {
-    certificate,
-    privateKey
-  }
 }
