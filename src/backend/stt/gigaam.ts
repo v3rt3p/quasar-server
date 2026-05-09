@@ -2,6 +2,7 @@ import { WebSocket } from 'ws'
 
 import { OpusProcessor } from '../../codecs/opus-processor'
 import { STTBackend, STTBackendSession } from '../backend'
+import { getLogger } from '../../logger';
 
 interface GigaAMMessage {
   end_of_utt: boolean;
@@ -9,13 +10,16 @@ interface GigaAMMessage {
 }
 
 class GigaAMSTTSession extends STTBackendSession {
+  private readonly logger = getLogger<GigaAMSTTSession>()
   private opusProcessor: OpusProcessor
 
   constructor(private readonly webSocket: WebSocket) {
     super()
     this.opusProcessor = new OpusProcessor(data => new Promise((resolve, reject) => {
       if (this.webSocket.readyState !== this.webSocket.OPEN) {
-        reject(new Error('closed'))
+        this.logger.warn('Trying to send data to closed socket (data)')
+        resolve()
+        return
       }
       this.webSocket.send(data, {
         binary: true
@@ -28,7 +32,9 @@ class GigaAMSTTSession extends STTBackendSession {
       })
     }), sampleRate => new Promise((resolve, reject) => {
       if (this.webSocket.readyState !== this.webSocket.OPEN) {
-        reject(new Error('closed'))
+        this.logger.warn('Trying to send data to closed socket (sampleRate)')
+        resolve()
+        return
       }
       this.webSocket.send(JSON.stringify({
         sample_rate: sampleRate
