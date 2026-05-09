@@ -95,10 +95,10 @@ export const ttsPlayPlaceholderDirective = (onFinish?: unknown) => ({
   },
   Type: 'client_action',
   ...(onFinish
-    ? {}
-    : {
+    ? {
       OnFinish: onFinish
-    })
+    }
+    : {})
 })
 
 export interface MMSemanticFrame {
