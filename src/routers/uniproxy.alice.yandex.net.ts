@@ -708,7 +708,7 @@ export class UniProxyConnection {
                 this.logger.info(`Finished`);
                 this.currentProcessingSession = null;
             }
-        }, sessionId ?? this.activeProcessingSessionId ?? randomUUID(), sessionId !== null);
+        }, sessionId ?? this.activeProcessingSessionId ?? randomUUID(), !!sessionId);
     }
 
     private async handleTextInputEvent(clientMessage: any): Promise<void> {
