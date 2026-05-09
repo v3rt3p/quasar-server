@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import { ProcessorBackend } from '../../backend/backend'
 import { getLogger } from '../../logger'
 import { AliceDirective } from '../alice/directives'
@@ -42,15 +44,20 @@ export type VoiceInput = Input & {
 
 export class InputHandler {
   private readonly logger = getLogger()
+  private sessionId: null | string = null
 
   constructor (private readonly properties: InputHandlerProperties) {}
 
   closeSession (): void {
-    this.logger.debug('Closing session')
+    this.logger.debug(`Closing session ${this.sessionId}`)
+    this.sessionId = null
   }
 
   async openSession (): Promise<void> {
-    this.logger.debug('Opening session')
+    if (!this.sessionId) {
+      this.sessionId = randomUUID()
+    }
+    this.logger.debug(`Opening session ${this.sessionId}`)
   }
 
   async processTextInput (input: TextInput): Promise<InputResult> {
