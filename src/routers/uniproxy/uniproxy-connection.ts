@@ -210,6 +210,7 @@ export class UniProxyConnection {
 
   private async handleVoiceInputEvent (clientMessage: AnyProtobufData): Promise<void> {
     this.openSession()
+    this.voiceInputStreamId = Number.parseInt(clientMessage.Event.Header.StreamId)
     this.voiceInputReferenceMessageId = clientMessage.Event.Header.MessageId
     this.voiceInputReferenceRequestId = clientMessage.Event.VoiceInput.Header.RequestId
     this.voiceInputReferenceSequenceNumber = clientMessage.Event.VoiceInput.Header.SequenceNumber
