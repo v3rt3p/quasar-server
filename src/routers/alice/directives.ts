@@ -23,7 +23,12 @@ export interface ProcessIncomingCallDirective {
     callId: string;
 }
 
-export type AliceDirective = soundSetLevelDirective | soundQuieterDirective | SoundLouderDirective | ProcessIncomingCallDirective;
+export interface RawDirective {
+    type: "raw",
+    data: unknown
+}
+
+export type AliceDirective = soundSetLevelDirective | soundQuieterDirective | SoundLouderDirective | ProcessIncomingCallDirective | RawDirective;
 
 export const soundLouderDirective = {
     Type: "client_action",
@@ -80,8 +85,9 @@ export function convertToAliceResponseDirective(directive: AliceDirective): any 
             return soundLouderDirective
         case "soundQuieter":
             return soundQuieterDirective
-        case "processIncomingCall": {
+        case "processIncomingCall": 
             return processIncomingCallDirective(directive.callId)
-        }
+        case "raw":
+            return directive.data
     }
 }

@@ -1,9 +1,9 @@
-import {Application} from "express";
-import {getLogger} from "../logger";
-import {Server} from "node:http";
-import {RawData, Server as WSServer, WebSocket} from "ws";
-import {loadProto} from "../proto";
-import {randomUUID} from "node:crypto";
+import { Application } from "express";
+import { getLogger } from "../logger";
+import { Server } from "node:http";
+import { RawData, Server as WSServer, WebSocket } from "ws";
+import { loadProto } from "../proto";
+import { randomUUID } from "node:crypto";
 import {
     AudioFormat, AudioMetadataBackend, AudioMetadataBackendSession,
     ProcessorBackend,
@@ -16,9 +16,9 @@ import {
     ProcessorRequestSource,
     ProcessorSession
 } from "../backend/backend";
-import {AliceDirective, convertToAliceResponseDirective} from "./alice/directives";
+import { AliceDirective, convertToAliceResponseDirective } from "./alice/directives";
 import { decodeProtobufStruct } from "../protobuf";
-import {Sema} from "async-sema"
+import { Sema } from "async-sema"
 
 const logger = getLogger();
 
@@ -56,8 +56,8 @@ interface ClientProcessingSessionCallbacks {
     onStarted: () => void;
     onTranscribed: (text: string) => void;
     onFullyTranscribed: (text: string, willProcess: boolean) => void;
-    onProcessed: (text: string, requireMoreInput: boolean, sessionId: string, directives: AliceDirective[]) => void;
-    onPartiallyProcessed: (text: string, requireMoreInput: boolean, sessionId: string, 
+    onProcessed: (text: string | null, requireMoreInput: boolean, sessionId: string, directives: AliceDirective[]) => void;
+    onPartiallyProcessed: (text: string, requireMoreInput: boolean, sessionId: string,
         directives: AliceDirective[], responseNumber: number, isFinished: boolean) => void;
     onSynthesized: (format: AudioFormat, voiceOutput: Buffer) => void;
     onCancelled: () => void;
@@ -79,8 +79,8 @@ class ClientProcessingSession {
     private preparePromise: Promise<void> | null = null;
 
     constructor(private readonly backends: Backends,
-                private readonly callbacks: ClientProcessingSessionCallbacks,
-                private readonly processingBackendSessionId: string | null) {
+        private readonly callbacks: ClientProcessingSessionCallbacks,
+        private readonly processingBackendSessionId: string | null) {
     }
 
     startVoiceInput(params: VoiceInputStartParams): void {
@@ -202,7 +202,7 @@ class ClientProcessingSession {
                 }
 
                 if (response.finished) {
-                    this.callbacks.onPartiallyProcessed(response.text, response.requireMoreInput, response.sessionId, 
+                    this.callbacks.onPartiallyProcessed(response.text, response.requireMoreInput, response.sessionId,
                         response.directives, responseNumber, true)
 
                     const synthesized = await this.backends.tts.synthesize({
@@ -218,7 +218,7 @@ class ClientProcessingSession {
                     this.finish();
                     return
                 } else {
-                    this.callbacks.onPartiallyProcessed(response.text, false, response.sessionId, 
+                    this.callbacks.onPartiallyProcessed(response.text, false, response.sessionId,
                         response.directives, responseNumber, false)
 
                     const synthesized = await this.backends.tts.synthesize({
@@ -294,6 +294,42 @@ class ClientProcessingSession {
             .catch(e => {
                 this.logger.error(`Failed to synthesize: ${e}`);
             });
+    }
+
+    handleRepeat(repeatId: string): void {
+        if (this.cancelled) {
+            return;
+        }
+
+        this.callbacks.onProcessed(null, false,
+            this.processingBackendSessionId ?? randomUUID(), [{
+                type: "raw",
+                data: {
+                    Type: "server_action",
+                    Name: "@@mm_semantic_frame",
+                    Payload: {
+                        fields: {
+                            typed_semantic_frame: {
+                                structValue: {
+                                    fields: {
+                                        raw_external_event_semantic_frame: {
+                                            structValue: {
+                                                fields: {
+                                                    event: {
+                                                        stringValue: repeatId
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }]);
+
+        this.finish();
     }
 
     handleSessionClose(): void {
@@ -535,18 +571,20 @@ export class UniProxyConnection {
                                 DialogId: randomUUID()
                             },
                             VoiceResponse: {
-                                OutputSpeech: {
-                                    Text: text
-                                },
+                                ...(text === null ? {} : {
+                                    OutputSpeech: {
+                                        Text: text
+                                    }
+                                }),
                                 ShouldListen: requireMoreInput,
-                                HasVoiceResponse: true
+                                HasVoiceResponse: text === null ? false : true
                             },
                             Response: {
                                 Cards: [],
                                 Directives: [
                                     ...directives.map(directive =>
                                         convertToAliceResponseDirective(directive)),
-                                    {
+                                    ...(text === null ? [] : [{
                                         Type: "client_action",
                                         Name: "tts_play_placeholder",
                                         AnalyticsType: "tts_play_placeholder",
@@ -564,10 +602,10 @@ export class UniProxyConnection {
                                                     typed_semantic_frame: {
                                                         structValue: {
                                                             fields: {
-                                                                external_event_semantic_frame: {
+                                                                repeat_callback_event_semantic_frame: {
                                                                     structValue: {
                                                                         fields: {
-                                                                            event: {
+                                                                            repeat_id: {
                                                                                 stringValue: "жопа"
                                                                             }
                                                                         }
@@ -579,7 +617,7 @@ export class UniProxyConnection {
                                                 }
                                             }
                                         }
-                                    }
+                                    }])
                                 ],
                                 Suggest: {
                                     Items: []
@@ -745,6 +783,8 @@ export class UniProxyConnection {
                 this.currentProcessingSession?.handleExternalEvent(payload.typed_semantic_frame.external_event_semantic_frame.event, []);
             } else if (payload?.typed_semantic_frame?.raw_external_event_semantic_frame) {
                 this.currentProcessingSession?.handleRawSpeak(payload.typed_semantic_frame.raw_external_event_semantic_frame.event, []);
+            } else if (payload?.typed_semantic_frame?.repeat_callback_event_semantic_frame) {
+                this.currentProcessingSession?.handleRepeat(payload.typed_semantic_frame.repeat_callback_event_semantic_frame.repeat_id);
             } else {
                 if (payload?.typed_callback_serialized) {
                     try {
@@ -1032,7 +1072,7 @@ interface UniProxyRouter {
 }
 
 export function registerUniproxyAliceYandexNetRouter(backends: Backends, app: Application, server: Server): UniProxyRouter {
-    const wsServer = new WSServer({noServer: true});
+    const wsServer = new WSServer({ noServer: true });
 
     server.on("upgrade", (req, socket, head) => {
         if (req.url === "/uniproxy.alice.yandex.net/uni.ws") {
