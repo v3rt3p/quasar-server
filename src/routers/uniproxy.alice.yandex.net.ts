@@ -413,7 +413,10 @@ export class UniProxyConnection {
             return;
         }
 
-        const biometryInfo = clientMessage.Event.MatchedUser.Request.Event.BiometryClassification.Simple;
+        const biometryInfo = clientMessage?.Event?.MatchedUser?.Request?.Event?.BiometryClassification?.Simple;
+        if (!biometryInfo) {
+            return
+        }
 
         const ageClassNames: Record<string, string> = {
             "adult": "adult",
