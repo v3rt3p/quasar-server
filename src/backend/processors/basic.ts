@@ -1,12 +1,9 @@
-import { randomUUID } from 'node:crypto'
-import { Event, MessageEvent, WebSocket } from 'ws'
+import { Event, WebSocket } from 'ws'
 
-import { getLogger } from '../../logger'
-import { CancelCallback, ProcessorBackend, ProcessorPartialResponse, ProcessorPrepareRequest, ProcessorPrepareResponse, ProcessorRequest, ProcessorResponse, ProcessorSession } from '../backend'
+import { ProcessorBackend, ProcessorRequest, ProcessorSession, ProcessorSessionEvents } from '../backend'
+import { EventEmitter } from 'node:stream'
 
 export class BasicProcessorBackend implements ProcessorBackend {
-  private readonly logger = getLogger<BasicProcessorBackend>()
-
   constructor(private readonly url: string) { }
 
   async openSession(): Promise<ProcessorSession> {
@@ -32,53 +29,30 @@ export class BasicProcessorBackend implements ProcessorBackend {
 
     return promise
   }
-
-  async prepare(request: ProcessorPrepareRequest): Promise<ProcessorPrepareResponse> {
-    this.logger.info('Preparing processor')
-    const response = await (await fetch(this.url, {
-      body: JSON.stringify(request),
-      method: 'PATCH'
-    })).json()
-    this.logger.info(`Processor prepared: ${JSON.stringify(response, undefined, 4)}`)
-    if (!response.success) {
-      return {}
-    }
-    return response
-  }
-
-  async process(request: ProcessorRequest): Promise<ProcessorResponse> {
-    this.logger.info(`Processor request: ${JSON.stringify(request, undefined, 4)}`)
-    const response = await (await fetch(this.url, {
-      body: JSON.stringify(request),
-      headers: {
-        'content-type': 'application/json'
-      },
-      method: 'POST'
-    })).json()
-    this.logger.info(`Processor response: ${JSON.stringify(response, undefined, 4)}`)
-    if (!response.success) {
-      return {
-        directives: [],
-        requireMoreInput: false,
-        sessionId: randomUUID(),
-        text: 'Failed to process your request'
-      }
-    }
-    return response
-  }
 }
 
-export class BasicProcessorSession implements ProcessorSession {
-  constructor(private readonly webSocket: WebSocket) { }
+export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> implements ProcessorSession {
+  constructor(private readonly webSocket: WebSocket) { 
+    super()
+    this.webSocket.addEventListener('close', () => {
+      this.emit('close')
+    })
+    this.webSocket.addEventListener('message', message => {
+      const data = JSON.parse(message.data.toString())
+      if (data.type === 'partialResponse') {
+        this.emit('partialResponse', data.data)
+      }
+    })
+  }
 
   close(): void {
     this.webSocket.close()
   }
 
-  prepare(request: ProcessorPrepareRequest): Promise<void> {
+  prepare(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.webSocket.send(JSON.stringify({
-        data: request,
+        data: {},
         type: 'prepare'
       }), error => {
         if (error) {
@@ -103,38 +77,5 @@ export class BasicProcessorSession implements ProcessorSession {
         }
       })
     })
-  }
-
-  waitForPartialResponse(): [Promise<ProcessorPartialResponse>, CancelCallback] {
-    let waitResolve = (_session: ProcessorPartialResponse) => { }
-    let waitReject = (_error: Error) => { }
-    const promise = new Promise<ProcessorPartialResponse>((resolve, reject) => {
-      waitResolve = resolve
-      waitReject = reject
-    })
-
-    const errorListener = (error: Event) => {
-      waitReject(new Error(error.type))
-    }
-
-    this.webSocket.addEventListener('error', errorListener)
-    this.webSocket.addEventListener('close', errorListener)
-    const handler = (message: MessageEvent) => {
-      this.webSocket.removeEventListener('error', errorListener)
-      this.webSocket.removeEventListener('close', errorListener)
-      const messageData = JSON.parse(message.data.toString())
-      if (messageData.type === 'partialResponse') {
-        waitResolve(messageData.data)
-      }
-    }
-    this.webSocket.addEventListener('message', handler)
-
-    const webSocket = this.webSocket
-
-    return [promise, () => {
-      webSocket.removeEventListener('message', handler)
-      webSocket.removeEventListener('error', errorListener)
-      webSocket.removeEventListener('close', errorListener)
-    }]
   }
 }
