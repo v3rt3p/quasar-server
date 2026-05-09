@@ -704,8 +704,8 @@ export class UniProxyConnection {
                     sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
                 });
                 this.currentProcessingSession?.handleRawSpeak(payload.typed_semantic_frame.raw_external_event_semantic_frame.event, []);
-            } else if (payload?.typed_semantic_frame?.continue_callback_event_semantic_frame) {
-                this.activeProcessingSessionId = payload.typed_semantic_frame.continue_callback_event_semantic_frame.session_id
+            } else if (payload?.typed_semantic_frame?.continue_session_event_semantic_frame) {
+                this.activeProcessingSessionId = payload.typed_semantic_frame.continue_session_event_semantic_frame.session_id
                 this.recreateClientProcessingSession({
                     messageId: clientMessage.Event.Header.MessageId,
                     requestId: clientMessage.Event.TextInput.Header.RequestId,
