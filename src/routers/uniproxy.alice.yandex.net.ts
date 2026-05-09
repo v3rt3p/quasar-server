@@ -588,20 +588,37 @@ export class UniProxyConnection {
                                             }
                                         },
                                         IsLedSilent: true,
-                                        IsParallel: false,
-                                        IgnoreAnswer: false,
+                                        OnFinish: {
+                                            TypedCallbackRequest: {
+                                                fields: {
+                                                    typed_semantic_frame: {
+                                                        structValue: {
+                                                            fields: {
+                                                                continue_session_stage1_event_semantic_frame: {
+                                                                    structValue: {
+                                                                        fields: {
+                                                                            session_id: {
+                                                                                stringValue: sessionId
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }]),
-                                    ...(isFinished ? [] : [{
+                                    ...(isFinished || (!isFinished && text !== null) ? [] : [{
                                         Type: "server_action",
                                         Name: "@@mm_semantic_frame",
-                                        IsParallel: false,
-                                        IgnoreAnswer: false,
                                         Payload: {
                                             fields: {
                                                 typed_semantic_frame: {
                                                     structValue: {
                                                         fields: {
-                                                            continue_session_event_semantic_frame: {
+                                                            continue_session_stage1_event_semantic_frame: {
                                                                 structValue: {
                                                                     fields: {
                                                                         session_id: {
@@ -716,12 +733,36 @@ export class UniProxyConnection {
                     sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
                 });
                 this.currentProcessingSession?.handleRawSpeak(payload.typed_semantic_frame.raw_external_event_semantic_frame.event, []);
-            } else if (payload?.typed_semantic_frame?.continue_session_event_semantic_frame) {
+            } else if (payload?.typed_semantic_frame?.continue_session_stage1_event_semantic_frame) {
+                this.pushRawDirective({
+                    Type: "server_action",
+                    Name: "@@mm_semantic_frame",
+                    Payload: {
+                        fields: {
+                            typed_semantic_frame: {
+                                structValue: {
+                                    fields: {
+                                        continue_session_stage1_event_semantic_frame: {
+                                            structValue: {
+                                                fields: {
+                                                    session_id: {
+                                                        stringValue: payload.typed_semantic_frame.continue_session_stage1_event_semantic_frame.session_id
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            } else if (payload?.typed_semantic_frame?.continue_session_stage2_event_semantic_frame) {
                 this.recreateClientProcessingSession({
                     messageId: clientMessage.Event.Header.MessageId,
                     requestId: clientMessage.Event.TextInput.Header.RequestId,
                     sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
-                }, payload.typed_semantic_frame.continue_session_event_semantic_frame.session_id);
+                }, payload.typed_semantic_frame.continue_session_stage2_event_semantic_frame.session_id);
                 this.currentProcessingSession?.handleContinue();
             } else {
                 if (payload?.typed_callback_serialized) {
