@@ -448,10 +448,12 @@ export class UniProxyConnection {
 
       let audioData: Buffer = Buffer.from([])
       try {
-        const ttsResult = await this.parameters.tts.synthesize({
-          text: result.text
-        })
-        audioData = ttsResult.voiceOutput
+        if (result.text !== '') {
+          const ttsResult = await this.parameters.tts.synthesize({
+            text: result.text
+          })
+          audioData = ttsResult.voiceOutput
+        }
       } catch (error) {
         this.logger.error('Failed to synthesize TTS: ', error)
       }
