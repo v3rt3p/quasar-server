@@ -18,6 +18,7 @@ import {
 } from "../backend/backend";
 import {AliceDirective, convertToAliceResponseDirective} from "./alice/directives";
 import { decodeProtobufStruct } from "../protobuf";
+import {Sema} from "async-sema"
 
 const logger = getLogger();
 
@@ -329,6 +330,8 @@ export class UniProxyConnection {
 
     private currentOutputAudioStreamId: number = 1024;
 
+    private readonly sendLock = new Sema(1)
+
     constructor(private readonly webSocket: WebSocket, private readonly backends: Backends) {
         this.webSocket.on("message", (message, isBinary) => {
             this.handleMessage(message, isBinary).catch(e => {
@@ -586,6 +589,33 @@ export class UniProxyConnection {
                 });
             },
             onPartiallyProcessed: (text, requireMoreInput, sessionId, directives, responseNumber, isFinished) => {
+                if (responseNumber === 0) {
+                    this.sendServerMessage({
+                        Event: {
+                            Header: {
+                                MessageId: randomUUID(),
+                                RefMessageId: event.messageId
+                            },
+                            AliceResponse: {
+                                Header: {
+                                    RequestId: event.requestId,
+                                    SequenceNumber: event.sequenceNumber,
+                                    ResponseId: randomUUID(),
+                                    DialogId: randomUUID()
+                                },
+                                VoiceResponse: {
+                                    ShouldListen: false,
+                                    HasVoiceResponse: true
+                                },
+                                Response: {
+                                    IsStreaming: true
+                                }
+                            }
+                        },
+                        Timings: this.getTimings()
+                    });
+                }
+
                 this.logger.info(`Partially processed: '${text}', ${requireMoreInput}, ${sessionId}, ${responseNumber}, ${isFinished}`);
 
                 if (requireMoreInput) {
@@ -790,18 +820,23 @@ export class UniProxyConnection {
         }
     }
 
-    private sendRawData(data: Buffer, isBinary: boolean): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.webSocket.send(data, {
-                binary: isBinary
-            }, error => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                resolve();
+    private async sendRawData(data: Buffer, isBinary: boolean): Promise<void> {
+        await this.sendLock.acquire()
+        try {
+            await new Promise<void>((resolve, reject) => {
+                this.webSocket.send(data, {
+                    binary: isBinary
+                }, error => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve();
+                });
             });
-        });
+        } finally {
+            this.sendLock.release()
+        }
     }
 
     private async sendServerMessage(serverMessage: any): Promise<void> {
