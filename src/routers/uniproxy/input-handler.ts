@@ -61,9 +61,9 @@ export class InputHandler {
     this.logger.debug('Processing voice input')
     return {
       directives: [
-        // {
-        //   type: 'ttsPlayPlaceholder'
-        // }
+        {
+          type: 'ttsPlayPlaceholder'
+        }
       ],
       shouldListen: true,
       text: null
