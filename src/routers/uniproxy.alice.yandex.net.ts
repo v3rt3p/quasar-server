@@ -224,6 +224,7 @@ class ClientProcessingSession {
             const response = await this.pooler.waitForPartialResponse(this.processingBackendSessionId)
             if (!response) {
                 this.callbacks.onPartiallyProcessed(null, false, this.processingBackendSessionId, [], false)
+                this.finish();
                 return
             }
 
@@ -603,7 +604,7 @@ export class UniProxyConnection {
                                                             continue_session_event_semantic_frame: {
                                                                 structValue: {
                                                                     fields: {
-                                                                        event: {
+                                                                        session_id: {
                                                                             stringValue: sessionId
                                                                         }
                                                                     }
