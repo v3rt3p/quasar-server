@@ -50,6 +50,7 @@ export class InputHandler {
 
   closeSession (): void {
     if (this.session) {
+      this.partialResponses = []
       this.session.close()
       this.session = null
       this.logger.debug('Session closed')
