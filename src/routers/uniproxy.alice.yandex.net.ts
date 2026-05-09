@@ -465,6 +465,8 @@ export class UniProxyConnection {
             this.currentProcessingSession = null;
         }
 
+        this.logger.info(`Recreating session for ${sessionId}`)
+
         this.currentProcessingSession = new ClientProcessingSession(this.backends, this.pooler, {
             onStarted: () => {
                 this.logger.info("Started");
