@@ -20,6 +20,7 @@ import {
 import { AliceDirective, convertToAliceResponseDirective } from "./alice/directives";
 import { decodeProtobufStruct } from "../protobuf";
 import { Sema } from "async-sema"
+import { Logger } from "tslog";
 
 const logger = getLogger();
 
@@ -65,15 +66,19 @@ interface ClientProcessingSessionCallbacks {
 }
 
 class ProcessorSessionPooler {
+    private readonly logger = getLogger<ProcessorSessionPooler>()
+
     private readonly pool: Map<string, ProcessorSession> = new Map()
 
     constructor(private readonly processor: ProcessorBackend) {
     }
 
     async prepare(sessionId: string): Promise<void> {
+        this.logger.info(`Requesting session ${sessionId}`)
         if (this.pool.has(sessionId)) {
             return
         }
+        this.logger.info(`Preparing session ${sessionId}`)
         const webSocket = await this.processor.openSession()
         await webSocket.prepare({
             sessionId: sessionId
@@ -82,13 +87,16 @@ class ProcessorSessionPooler {
     }
 
     async process(sessionId: string, request: ProcessorRequest): Promise<void> {
+        this.logger.info(`Processing to session ${sessionId}`)
         const session = this.pool.get(sessionId)
         if (!session) {
             throw new Error('session not found')
         }
+        // await session.process(request)
     }
 
     async waitForPartialResponse(sessionId: string): Promise<ProcessorPartialResponse | null> {
+        this.logger.info(`Waiting for session ${sessionId}`)
         const session = this.pool.get(sessionId)
         if (!session) {
             throw new Error('session not found')
@@ -105,6 +113,7 @@ class ProcessorSessionPooler {
     }
 
     close(sessionId: string): void {
+        this.logger.info(`Closing session ${sessionId}`)
         this.pool.get(sessionId)?.close()
         this.pool.delete(sessionId)
     }
