@@ -209,7 +209,7 @@ class ClientProcessingSession {
         const postProcess = async () => {
             if (this.preparePromise) {
                 await this.preparePromise
-            } else {
+            } else if (!this.continueExistingSession) {
                 await this.pooler.prepare(this.processingBackendSessionId)
             }
 
