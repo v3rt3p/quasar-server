@@ -63,7 +63,6 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   close (): void {
     this.lastTranscribeResult = ''
     this.audioMetadata = {}
-    this.audioDataQueue = []
   }
 
   async handleVoiceInputAudioEvent (data: VoiceInputAudioEvent): Promise<void> {
@@ -148,12 +147,15 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     this.audioMetadataSession = null
     this.sttSession?.close()
     this.sttSession = null
+    this.audioDataQueue = []
   }
 
   private transcribeFinished (): void {
+    const audioMetadata = this.audioMetadata
+    this.audioMetadata = {}
     this.logger.debug(`VoiceInputHandler transcribe finished: ${this.lastTranscribeResult}`)
     this.emit('finish', {
-      metadata: this.audioMetadata,
+      metadata: audioMetadata,
       text: this.lastTranscribeResult
     })
   }
