@@ -596,6 +596,7 @@ export class UniProxyConnection {
                                             }
                                         },
                                         IsLedSilent: true,
+                                        IgnoreAnswer: false,
                                         OnFinish: {
                                             TypedCallbackRequest: {
                                                 fields: {
