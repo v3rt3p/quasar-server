@@ -97,6 +97,7 @@ class ProcessorSessionPooler {
         const waitForPartialResponsePromise = session.waitForPartialResponse()
 
         const result = await Promise.race([waitForPartialResponsePromise, new Promise(resolve => setTimeout(resolve, 5000, null))])
+        console.info(result, waitForPartialResponsePromise)
         if (result === null) {
             waitForPartialResponsePromise.cancel()
             return null
