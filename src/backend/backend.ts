@@ -65,6 +65,19 @@ export interface ProcessorResponse {
     directives: AliceDirective[];
 }
 
+export type ProcessorPartialResponse = {
+    text: string;
+    finished: false;
+    sessionId: string;
+    directives: AliceDirective[];
+} | {
+    text: string;
+    finished: true;
+    requireMoreInput: boolean;
+    sessionId: string;
+    directives: AliceDirective[];
+}
+
 export interface ProcessorPrepareRequest {
     sessionId?: string;
 }
@@ -73,9 +86,17 @@ export interface ProcessorPrepareResponse {
     sessionId?: string;
 }
 
+export interface ProcessorSession {
+    prepare(request: ProcessorPrepareRequest): Promise<void>;
+    process(request: Omit<ProcessorRequest, 'sessionId'>): Promise<void>;
+    waitForPartialResponse(): Promise<ProcessorPartialResponse>;
+    close(): void;
+}
+
 export interface ProcessorBackend {
     prepare(request: ProcessorPrepareRequest): Promise<ProcessorPrepareResponse>;
     process(request: ProcessorRequest): Promise<ProcessorResponse>;
+    openSession(): Promise<ProcessorSession>;
 }
 
 export interface TTSRequest {

@@ -13,7 +13,8 @@ import {
     STTBackendSession,
     STTChunkTranscribeResult,
     TTSBackend,
-    ProcessorRequestSource
+    ProcessorRequestSource,
+    ProcessorSession
 } from "../backend/backend";
 import {AliceDirective, convertToAliceResponseDirective} from "./alice/directives";
 import { decodeProtobufStruct } from "../protobuf";
@@ -55,6 +56,8 @@ interface ClientProcessingSessionCallbacks {
     onTranscribed: (text: string) => void;
     onFullyTranscribed: (text: string, willProcess: boolean) => void;
     onProcessed: (text: string, requireMoreInput: boolean, sessionId: string, directives: AliceDirective[]) => void;
+    onPartiallyProcessed: (text: string, requireMoreInput: boolean, sessionId: string, 
+        directives: AliceDirective[], responseNumber: number, isFinished: boolean) => void;
     onSynthesized: (format: AudioFormat, voiceOutput: Buffer) => void;
     onCancelled: () => void;
     onFinished: () => void;
@@ -71,6 +74,7 @@ class ClientProcessingSession {
     private finalTranscribedChunk: STTChunkTranscribeResult | null = null;
     private stationMetadata: object = {};
     private preparedSessionId: string | null = null;
+    private preparedSession: ProcessorSession | null = null;
     private preparePromise: Promise<void> | null = null;
 
     constructor(private readonly backends: Backends,
@@ -80,17 +84,12 @@ class ClientProcessingSession {
 
     startVoiceInput(params: VoiceInputStartParams): void {
         (async () => {
-            let prepareResolve: (() => void) | null = null;
-            const preparePromise = new Promise<void>((resolve) => prepareResolve = resolve)
-            this.backends.processor.prepare({
-                sessionId: this.preparedSessionId ?? undefined
-            }).then(result => {
-                this.preparedSessionId = result.sessionId ?? null
-            }).catch(error => this.logger.warn(`Processor prepare failed: ${error}`)).finally(() => {
-                if (prepareResolve) {
-                    prepareResolve()
-                }
-            })
+            this.preparePromise = (async () => {
+                this.preparedSession = await this.backends.processor.openSession()
+                await this.preparedSession.prepare({
+                    sessionId: this.processingBackendSessionId ?? undefined
+                })
+            })()
             const [sttSession, audioMetadataSession] = await Promise.all([
                 this.backends.stt.startTranscribing({
                     format: params.format
@@ -120,6 +119,7 @@ class ClientProcessingSession {
             return;
         }
         this.cancelled = true;
+        this.preparedSession?.close()
     }
 
     finish(): void {
@@ -128,6 +128,7 @@ class ClientProcessingSession {
         }
         this.finished = true;
         this.callbacks.onFinished();
+        this.preparedSession?.close()
     }
 
     handleVoiceInputAudioData(audioData: Buffer): void {
@@ -151,50 +152,92 @@ class ClientProcessingSession {
     }
 
     private process(text: string, metadata: object, isExternalEvent: boolean, externalDirectives: AliceDirective[]): void {
-        const postProcess = () => {
-            this.backends.processor.process({
+        const postProcess = async () => {
+            if (this.preparePromise) {
+                await this.preparePromise
+            } else {
+                this.preparedSession = await this.backends.processor.openSession()
+                await this.preparedSession.prepare({
+                    sessionId: this.processingBackendSessionId ?? undefined
+                })
+            }
+
+            const session = this.preparedSession
+
+            if (!session) {
+                throw new Error('no session?')
+            }
+
+            await session.process({
                 text: text,
-                sessionId: this.processingBackendSessionId ?? (this.preparedSessionId ?? undefined),
                 metadata: {
                     ...this.stationMetadata,
                     ...metadata
                 },
                 isExternalEvent
             })
-                .then(result => {
+
+            let responseNumber = 0
+
+            while (true) {
+                const response = await session.waitForPartialResponse()
+
+                if (response.finished && responseNumber == 0) {
+                    this.callbacks.onProcessed(response.text, response.requireMoreInput,
+                        response.sessionId, response.directives);
+
+                    const synthesized = await this.backends.tts.synthesize({
+                        text: response.text
+                    })
+
                     if (this.cancelled) {
-                        return;
+                        return
                     }
 
-                    this.callbacks.onProcessed(result.text, result.requireMoreInput,
-                        result.sessionId, result.directives);
+                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
 
-                    this.backends.tts.synthesize({
-                        text: result.text
+                    this.finish();
+                    return;
+                }
+
+                responseNumber++
+
+                if (response.finished) {
+                    this.callbacks.onPartiallyProcessed(response.text, response.requireMoreInput, response.sessionId, 
+                        response.directives, responseNumber, true)
+
+                    const synthesized = await this.backends.tts.synthesize({
+                        text: response.text
                     })
-                        .then(result => {
-                            if (this.cancelled) {
-                                return;
-                            }
 
-                            this.callbacks.onSynthesized(result.format, result.voiceOutput);
+                    if (this.cancelled) {
+                        return
+                    }
 
-                            this.finish();
-                        })
-                        .catch(e => {
-                            this.logger.error(`Failed to synthesize: ${e}`);
-                        });
-                })
-                .catch(e => {
-                    this.logger.error(`Failed to process: ${e}`);
-                });
+                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
+
+                    this.finish();
+                    return
+                } else {
+                    this.callbacks.onPartiallyProcessed(response.text, false, response.sessionId, 
+                        response.directives, responseNumber, false)
+
+                    const synthesized = await this.backends.tts.synthesize({
+                        text: response.text
+                    })
+
+                    if (this.cancelled) {
+                        return
+                    }
+
+                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
+                }
+            }
         }
 
-        if (this.preparePromise) {
-            this.preparePromise.then(() => postProcess())
-        } else {
-            postProcess()
-        }
+        postProcess().catch(error => {
+            this.logger.error(`Failed to process: ${error}`);
+        })
     }
 
     handleVoiceInputEnd(): void {
@@ -537,6 +580,53 @@ export class UniProxyConnection {
                                 Error: {},
                                 ForceServerRequest: false
                             }
+                        }
+                    },
+                    Timings: this.getTimings()
+                });
+            },
+            onPartiallyProcessed: (text, requireMoreInput, sessionId, directives, responseNumber, isFinished) => {
+                this.logger.info(`Partially processed: '${text}', ${requireMoreInput}, ${sessionId}, ${responseNumber}, ${isFinished}`);
+
+                if (requireMoreInput) {
+                    this.activeProcessingSessionId = sessionId;
+                } else {
+                    this.activeProcessingSessionId = null;
+                }
+
+                this.sendServerMessage({
+                    Event: {
+                        Header: {
+                            MessageId: randomUUID(),
+                            RefMessageId: event.messageId
+                        },
+                        DeferredAliceResponse: {
+                            BaseResponse: {
+                                Text: text,
+                                ...(isFinished ? {
+                                    ShouldListen: requireMoreInput
+                                } : {}),
+                                Directives: [
+                                    ...directives.map(directive =>
+                                        convertToAliceResponseDirective(directive)),
+                                    {
+                                        Type: "client_action",
+                                        Name: "tts_play_placeholder",
+                                        AnalyticsType: "tts_play_placeholder",
+                                        Payload: {
+                                            fields: {
+                                                channel: {
+                                                    stringValue: "Dialog"
+                                                }
+                                            }
+                                        },
+                                        IsLedSilent: true
+                                    }
+                                ],
+                            },
+                            RequestId: event.requestId,
+                            ResponsePartialNum: responseNumber,
+                            IsLast: isFinished
                         }
                     },
                     Timings: this.getTimings()
