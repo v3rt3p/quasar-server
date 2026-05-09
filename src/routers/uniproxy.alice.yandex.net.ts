@@ -134,13 +134,16 @@ class ClientProcessingSession {
     constructor(private readonly backends: Backends,
         private readonly pooler: ProcessorSessionPooler,
         private readonly callbacks: ClientProcessingSessionCallbacks,
-        private readonly processingBackendSessionId: string) {
+        private readonly processingBackendSessionId: string,
+        private readonly continueExistingSession: boolean) {
     }
 
     startVoiceInput(params: VoiceInputStartParams): void {
         (async () => {
             this.preparePromise = (async () => {
-                await this.pooler.prepare(this.processingBackendSessionId)
+                if (!this.continueExistingSession) {
+                    await this.pooler.prepare(this.processingBackendSessionId)
+                }
             })()
             const [sttSession, audioMetadataSession] = await Promise.all([
                 this.backends.stt.startTranscribing({
@@ -705,7 +708,7 @@ export class UniProxyConnection {
                 this.logger.info(`Finished`);
                 this.currentProcessingSession = null;
             }
-        }, sessionId ?? this.activeProcessingSessionId ?? randomUUID());
+        }, sessionId ?? this.activeProcessingSessionId ?? randomUUID(), sessionId !== null);
     }
 
     private async handleTextInputEvent(clientMessage: any): Promise<void> {
