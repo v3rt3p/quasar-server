@@ -4,8 +4,8 @@ const TProcessIncomingCallDirective = loadProto(
   'alice/protos/endpoint/capabilities/phone_calls/capability.proto')
   .lookupType('NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective')
 
-export type AliceDirective = ProcessIncomingCallDirective | RawDirective | SoundLouderDirective | SoundQuieterDirective | 
-  SoundSetLevelDirective | TtsPlayPlaceholderDirective
+export type AliceDirective = ProcessIncomingCallDirective | RawDirective | SoundLouderDirective | SoundQuieterDirective |
+  SoundSetLevelDirective | TtsPlayPlaceholderDirective | MMSemanticFrame
 
 export interface ProcessIncomingCallDirective {
   callId: string;
@@ -101,6 +101,19 @@ export const ttsPlayPlaceholderDirective = (onFinish?: unknown) => ({
     })
 })
 
+export interface MMSemanticFrame {
+  type: 'mmSemanticFrame',
+  payload?: unknown,
+  payloadRaw?: string
+}
+
+export const mmSemanticFrame = (payload?: unknown, payloadRaw?: string) => ({
+  Name: '@@mm_semantic_frame',
+  Payload: payload,
+  PayloadRaw: payloadRaw,
+  Type: 'server_action'
+})
+
 export function convertToAliceResponseDirective(directive: AliceDirective): any {
   switch (directive.type) {
     case 'processIncomingCall': {
@@ -120,6 +133,9 @@ export function convertToAliceResponseDirective(directive: AliceDirective): any 
     }
     case 'ttsPlayPlaceholder': {
       return ttsPlayPlaceholderDirective(directive.onFinish)
+    }
+    case 'mmSemanticFrame': {
+      return mmSemanticFrame(directive.payload, directive.payloadRaw)
     }
   }
 }

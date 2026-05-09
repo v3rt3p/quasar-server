@@ -2,6 +2,7 @@ import { ProcessorBackend, ProcessorPartialResponse, ProcessorSession } from '..
 import { getLogger } from '../../logger'
 import { Notifier } from '../../notifier'
 import { AliceDirective } from '../alice/directives'
+import { continueSessionStage1SemanticFrame } from '../alice/typed-payloads'
 
 export interface Input {
   metadata: object
@@ -26,14 +27,10 @@ export type TextInputData = {
   kind: 'event'
 } | {
   kind: 'continue'
-  sessionId: string
-} | {
-  kind: 'continueRequest'
-  sessionId: string
 } | {
   kind: 'playButtonPress'
 } | {
-  kind: 'rawSpeak'
+  kind: 'tts'
   text: string
 }
 
@@ -99,7 +96,56 @@ export class InputHandler {
   }
 
   async processTextInput (input: TextInput): Promise<InputResult> {
-    throw new Error('???')
+    switch (input.data.kind) {
+      case 'continue': {
+        return await this.getPartialResponseResult()
+      }
+      case 'event': {
+        if (!this.session) {
+          this.logger.warn('No session opened')
+          return {
+            directives: [
+            ],
+            shouldListen: false,
+            text: null
+          }
+        }
+        await this.session.process({
+          isExternalEvent: true,
+          metadata: input.metadata,
+          text: input.data.eventText
+        })
+        return await this.getPartialResponseResult()
+      }
+      case 'playButtonPress': {
+        if (!this.session) {
+          this.logger.warn('No session opened')
+          return {
+            directives: [
+            ],
+            shouldListen: false,
+            text: null
+          }
+        }
+        await this.session.process({
+          isExternalEvent: true,
+          metadata: input.metadata,
+          text: 'play button pressed on speaker'
+        })
+        return await this.getPartialResponseResult()
+      }
+      case 'tts': {
+        return {
+          directives: [
+            {
+              type: 'ttsPlayPlaceholder'
+            }
+          ],
+          shouldListen: false,
+          text: input.data.text
+        }
+      }
+    }
   }
 
   async processVoiceInput (input: VoiceInput): Promise<InputResult> {
@@ -117,10 +163,32 @@ export class InputHandler {
       text: input.text
     })
 
+    return await this.getPartialResponseResult()
+  }
+
+  private async getPartialResponseResult (): Promise<InputResult> {
+    if (!this.session) {
+      return {
+        directives: [
+        ],
+        shouldListen: false,
+        text: null
+      }
+    }
+
     const partialResponse = await this.getPartialResponse()
 
     if (partialResponse === null) {
-      throw new Error('idk what to do otherwise')
+      return {
+        directives: [
+          {
+            payload: continueSessionStage1SemanticFrame,
+            type: 'mmSemanticFrame'
+          }
+        ],
+        shouldListen: false,
+        text: null
+      }
     }
 
     if (partialResponse.finished) {
@@ -136,6 +204,18 @@ export class InputHandler {
       }
     }
 
-    throw new Error('idk what to do otherwise')
+    return {
+      directives: [
+        ...partialResponse.directives,
+        {
+          onFinish: {
+            TypedCallbackRequest: continueSessionStage1SemanticFrame
+          },
+          type: 'ttsPlayPlaceholder'
+        }
+      ],
+      shouldListen: false,
+      text: partialResponse.text
+    }
   }
 }

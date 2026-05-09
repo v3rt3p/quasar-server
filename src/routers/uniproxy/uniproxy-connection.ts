@@ -5,8 +5,10 @@ import { RawData, WebSocket } from 'ws'
 import { AudioMetadataBackend, ProcessorBackend, STTBackend, TTSBackend } from '../../backend/backend'
 import { getLogger } from '../../logger'
 import { loadProto } from '../../proto'
+import { decodeProtobufStruct } from '../../protobuf'
 import { AliceDirective, convertToAliceResponseDirective as convertToAliceDirective } from '../alice/directives'
-import { InputHandler, InputResult } from './input-handler'
+import { continueSessionStage2SemanticFrame, externalEventSemanticFrame, ttsSemanticFrame } from '../alice/typed-payloads'
+import { InputHandler, InputResult, TextInput } from './input-handler'
 import { VoiceInputHandler } from './voice-input-handler'
 
 const TClientMessageProto = loadProto(
@@ -15,6 +17,9 @@ const TClientMessageProto = loadProto(
 const TServerMessageProto = loadProto(
   'alice/protos/api/alicekit/protocol/server/server_message.proto')
   .lookupType('NAlice.NAliceApi.TServerMessage')
+const TSemanticFrameRequestData = loadProto(
+  'alice/protos/api/alicekit/scenarios/frames/frame.proto')
+  .lookupType('NAlice.NAliceApi.TSemanticFrameRequestData')
 
 export interface UniProxyConnectionParameters {
   audioMetadata: AudioMetadataBackend
@@ -50,13 +55,27 @@ export class UniProxyConnection {
     this.setupVoiceInputHandlers()
   }
 
-  async push (eventText: string): Promise<void> {}
+  async pushEvent (text: string): Promise<void> {
+    await this.sendPush([
+      {
+        payload: externalEventSemanticFrame(text),
+        type: 'mmSemanticFrame'
+      }
+    ])
+  }
 
-  async pushRaw (eventText: string): Promise<void> {}
+  async pushRawDirective (directive: unknown): Promise<void> {
+    await this.sendPush([], [directive])
+  }
 
-  async pushRawDirective (directive: unknown): Promise<void> {}
-
-  async rawDirectivePush (eventText: string): Promise<void> {}
+  async pushTts (text: string): Promise<void> {
+    await this.sendPush([
+      {
+        payload: ttsSemanticFrame(text),
+        type: 'mmSemanticFrame'
+      }
+    ])
+  }
 
   private closeConnection (): void {
     this.webSocket.close()
@@ -202,7 +221,92 @@ export class UniProxyConnection {
     }
   }
 
-  private async handleTextInputEvent (clientMessage: AnyProtobufData): Promise<void> {}
+  private async handleTextInputEvent (clientMessage: AnyProtobufData): Promise<void> {
+    let textInput: null | TextInput = null
+
+    const event = clientMessage.Event.TextInput.Request.Event
+
+    if (event.Type === 'server_action' && event.Payload) {
+      const payload = decodeProtobufStruct(event.Payload)
+      if (payload?.typed_semantic_frame?.music_play_semantic_frame) {
+        textInput = {
+          data: {
+            kind: 'playButtonPress'
+          },
+          metadata: {}
+        }
+      } else if (payload?.typed_semantic_frame?.external_event_semantic_frame) {
+        textInput = {
+          data: {
+            eventText: payload.typed_semantic_frame.external_event_semantic_frame.event,
+            kind: 'event'
+          },
+          metadata: {}
+        }
+      } else if (payload?.typed_semantic_frame?.tts_semantic_frame) {
+        textInput = {
+          data: {
+            kind: 'tts',
+            text: payload.typed_semantic_frame.tts_semantic_frame.text
+          },
+          metadata: {}
+        }
+      } else if (payload?.typed_semantic_frame?.continue_session_stage1_semantic_frame) {
+        await this.sendPush([{
+          payload: continueSessionStage2SemanticFrame,
+          type: 'mmSemanticFrame'
+        }], [])
+      } else if (payload?.typed_semantic_frame?.continue_session_stage2_semantic_frame) {
+        textInput = {
+          data: {
+            kind: 'continue'
+          },
+          metadata: {}
+        }
+      } else {
+        this.logger.info(`Received unknown TextInput server_action: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+      }
+    } else if (event.Type === 'server_action' && event.Name === '@@mm_semantic_frame' && event.PayloadRaw) {
+      const rawPayload = Buffer.from(event.PayloadRaw, 'base64')
+      const decoded = TSemanticFrameRequestData.decode(rawPayload).toJSON()
+      if (decoded?.TypedSemanticFrame?.MusicPlaySemanticFrame) {
+        textInput = {
+          data: {
+            kind: 'playButtonPress'
+          },
+          metadata: {}
+        }
+      } else {
+        this.logger.info(`Received unknown TextInput semantic frame: ${JSON.stringify(decoded)} ${JSON.stringify(event)}`)
+      }
+    } else {
+      this.logger.info(`Received unknown TextInput: ${JSON.stringify(event)}`)
+    }
+
+    if (textInput === null) {
+      return
+    }
+
+    let inputResult: InputResult
+
+    try {
+      this.openSession()
+      await this.inputHandlerOpenSessionPromise
+      inputResult = await this.inputHandler.processTextInput(textInput)
+    } catch (error) {
+      this.logger.warn('Failed to processTextInput on InputHandler: ', error)
+      this.handleServerCancel()
+      return
+    }
+
+    try {
+      await this.sendInputResult(inputResult, this.voiceInputReferenceRequestId,
+        this.voiceInputReferenceMessageId, this.voiceInputReferenceSequenceNumber)
+    } catch (error) {
+      this.logger.warn('Failed to send input result: ', error)
+      this.closeConnection()
+    }
+  }
 
   private async handleTextMessage (message: string): Promise<void> {
     // ignore for now
@@ -363,7 +467,7 @@ export class UniProxyConnection {
     }
   }
 
-  private async sendPush (directives: AliceDirective[]): Promise<void> {
+  private async sendPush (directives: AliceDirective[], rawDirectives?: unknown[]): Promise<void> {
     await this.sendServerMessage({
       Event: {
         Header: {
@@ -373,7 +477,10 @@ export class UniProxyConnection {
         Push: {
           AnalyticsMetaInfo: {},
           DeduplicationPushId: randomUUID(),
-          Directives: directives.map(directive => convertToAliceDirective(directive)),
+          Directives: [
+            ...directives.map(directive => convertToAliceDirective(directive)),
+            ...(rawDirectives ?? [])
+          ],
           PushIds: [
             randomUUID()
           ]

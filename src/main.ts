@@ -123,7 +123,7 @@ apiServer.get('/devices', async () => {
 
 apiServer.post('/devices/:duid/push', async ({ body, params: { duid } }) => {
   runForConnections(duid, connection => {
-    connection.push(body.eventText).catch(error => logger.warn(`Failed to push event to UniProxy connection: ${error}`))
+    connection.pushEvent(body.eventText).catch(error => logger.warn(`Failed to push event to UniProxy connection: ${error}`))
   })
 
   return {}
@@ -147,7 +147,7 @@ apiServer.post('/devices/:duid/push', async ({ body, params: { duid } }) => {
 
 apiServer.post('/devices/:duid/push-raw', async ({ body, params: { duid } }) => {
   runForConnections(duid, connection => {
-    connection.pushRaw(body.eventText).catch(error => logger.warn(`Failed to push raw event to UniProxy connection: ${error}`))
+    connection.pushTts(body.eventText).catch(error => logger.warn(`Failed to push raw event to UniProxy connection: ${error}`))
   })
 
   return {}
