@@ -21,6 +21,8 @@ class BufferedAudioMetadataBackendSession extends AudioMetadataBackendSession {
     })
   }
 
+  close (): void {}
+
   async finish (): Promise<object> {
     if (this.sampleRate == null) {
       return {}

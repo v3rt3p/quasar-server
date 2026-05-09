@@ -81,6 +81,8 @@ export interface TTSResponse {
 }
 
 export abstract class AudioMetadataBackendSession {
+  abstract close(): void
+
   abstract finish(): Promise<object>
 
   abstract processChunk(chunk: Buffer): Promise<void>
