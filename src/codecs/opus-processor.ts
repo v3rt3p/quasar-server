@@ -20,7 +20,7 @@ export class OpusProcessor {
   async handleAudioData (audioData: Buffer): Promise<void> {
     const oggPages = OggParser.parse(audioData)
     for (const page of oggPages) {
-      console.info(audioData, page.pageSequenceNumber)
+      console.info(audioData, page.pageSequenceNumber, this.encoder)
       await this.handleOpusPage(page)
     }
   }
