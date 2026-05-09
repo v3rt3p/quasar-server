@@ -742,7 +742,7 @@ export class UniProxyConnection {
                             typed_semantic_frame: {
                                 structValue: {
                                     fields: {
-                                        continue_session_stage1_event_semantic_frame: {
+                                        continue_session_stage2_event_semantic_frame: {
                                             structValue: {
                                                 fields: {
                                                     session_id: {
