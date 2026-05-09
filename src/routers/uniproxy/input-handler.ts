@@ -66,7 +66,7 @@ export class InputHandler {
         }
       ],
       shouldListen: true,
-      text: null
+      text: ''
     }
   }
 }
