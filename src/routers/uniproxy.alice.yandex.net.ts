@@ -459,7 +459,7 @@ export class UniProxyConnection {
         });
     }
 
-    private recreateClientProcessingSession(event: ClientEventData): void {
+    private recreateClientProcessingSession(event: ClientEventData, sessionId?: string): void {
         if (this.currentProcessingSession) {
             this.currentProcessingSession.cancel();
             this.currentProcessingSession = null;
@@ -683,7 +683,7 @@ export class UniProxyConnection {
                 this.logger.info(`Finished`);
                 this.currentProcessingSession = null;
             }
-        }, this.activeProcessingSessionId ?? randomUUID());
+        }, sessionId ?? this.activeProcessingSessionId ?? randomUUID());
     }
 
     private async handleTextInputEvent(clientMessage: any): Promise<void> {
@@ -714,12 +714,11 @@ export class UniProxyConnection {
                 });
                 this.currentProcessingSession?.handleRawSpeak(payload.typed_semantic_frame.raw_external_event_semantic_frame.event, []);
             } else if (payload?.typed_semantic_frame?.continue_session_event_semantic_frame) {
-                this.activeProcessingSessionId = payload.typed_semantic_frame.continue_session_event_semantic_frame.session_id
                 this.recreateClientProcessingSession({
                     messageId: clientMessage.Event.Header.MessageId,
                     requestId: clientMessage.Event.TextInput.Header.RequestId,
                     sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
-                });
+                }, payload.typed_semantic_frame.continue_session_event_semantic_frame.session_id);
                 this.currentProcessingSession?.handleContinue();
             } else {
                 if (payload?.typed_callback_serialized) {
