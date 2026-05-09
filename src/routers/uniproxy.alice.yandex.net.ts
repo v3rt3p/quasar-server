@@ -607,7 +607,7 @@ export class UniProxyConnection {
                                     DialogId: randomUUID()
                                 },
                                 VoiceResponse: {
-                                    ShouldListen: true,
+                                    ShouldListen: false,
                                     HasVoiceResponse: true
                                 },
                                 Response: {
@@ -643,7 +643,19 @@ export class UniProxyConnection {
                                 Directives: [
                                     ...directives.map(directive =>
                                         convertToAliceResponseDirective(directive)),
-                                   
+                                    {
+                                        Type: "client_action",
+                                        Name: "tts_play_placeholder",
+                                        AnalyticsType: "tts_play_placeholder",
+                                        Payload: {
+                                            fields: {
+                                                channel: {
+                                                    stringValue: "Dialog"
+                                                }
+                                            }
+                                        },
+                                        IsLedSilent: true
+                                    }
                                 ],
                             },
                             RequestId: event.requestId,
@@ -677,9 +689,7 @@ export class UniProxyConnection {
                     StreamControl: {
                         StreamId: this.currentOutputAudioStreamId,
                         MessageId: randomUUID(),
-                        Close: {
-                            Reason: 0
-                        }
+                        Close: {}
                     },
                     Timings: this.getTimings()
                 });
