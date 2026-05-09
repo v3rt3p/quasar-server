@@ -97,6 +97,7 @@ export class InputHandler {
   }
 
   async processTextInput (input: TextInput): Promise<InputResult> {
+    this.logger.debug(`Received TextInput with kind: ${input.data.kind}`)
     switch (input.data.kind) {
       case 'continue': {
         return await this.getPartialResponseResult()
@@ -150,6 +151,7 @@ export class InputHandler {
   }
 
   async processVoiceInput (input: VoiceInput): Promise<InputResult> {
+    this.logger.debug(`Received VoiceInput: ${input.text}`)
     if (!this.session) {
       this.logger.warn('No session opened')
       return {
@@ -180,6 +182,7 @@ export class InputHandler {
     const partialResponse = await this.getPartialResponse()
 
     if (partialResponse === null) {
+      this.logger.debug('No partial response, sending continue')
       return {
         directives: [
           {
@@ -193,6 +196,7 @@ export class InputHandler {
     }
 
     if (partialResponse.finished) {
+      this.logger.debug('Partial response is finished')
       return {
         directives: [
           ...partialResponse.directives,
@@ -205,6 +209,7 @@ export class InputHandler {
       }
     }
 
+    this.logger.debug('Partial response is not finished, sending continue')
     return {
       directives: [
         ...partialResponse.directives,
