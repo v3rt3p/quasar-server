@@ -580,7 +580,8 @@ export class UniProxyConnection {
                                                     }
                                                 }
                                             }
-                                        }
+                                        },
+                                        IsLedSilent: true
                                     }
                                 ],
                                 Suggest: {
