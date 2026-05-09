@@ -94,12 +94,11 @@ class ProcessorSessionPooler {
             throw new Error('session not found')
         }
 
-        const waitForPartialResponsePromise = session.waitForPartialResponse()
+        const [waitForPartialResponsePromise, cancel] = session.waitForPartialResponse()
 
         const result = await Promise.race([waitForPartialResponsePromise, new Promise(resolve => setTimeout(resolve, 5000, null))])
-        console.info(result, waitForPartialResponsePromise)
         if (result === null) {
-            waitForPartialResponsePromise.cancel()
+            cancel()
             return null
         }
         return result as ProcessorPartialResponse

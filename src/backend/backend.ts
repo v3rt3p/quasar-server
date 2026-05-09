@@ -90,10 +90,12 @@ export type CancellablePromise<T> = Promise<T> & {
     cancel(): void
 }
 
+export type CancelCallback = () => void
+
 export interface ProcessorSession {
     prepare(request: ProcessorPrepareRequest): Promise<void>;
     process(request: Omit<ProcessorRequest, 'sessionId'>): Promise<void>;
-    waitForPartialResponse(): CancellablePromise<ProcessorPartialResponse>;
+    waitForPartialResponse(): [Promise<ProcessorPartialResponse>, CancelCallback];
     close(): void;
 }
 

@@ -1,6 +1,6 @@
 import { Event, WebSocket, MessageEvent } from "ws";
 import {getLogger} from "../../logger";
-import {CancellablePromise, ProcessorBackend, ProcessorPartialResponse, ProcessorPrepareRequest, ProcessorPrepareResponse, ProcessorRequest, ProcessorResponse, ProcessorSession} from "../backend";
+import {CancelCallback, CancellablePromise, ProcessorBackend, ProcessorPartialResponse, ProcessorPrepareRequest, ProcessorPrepareResponse, ProcessorRequest, ProcessorResponse, ProcessorSession} from "../backend";
 import {randomUUID} from "node:crypto";
 
 export class BasicProcessorSession implements ProcessorSession {
@@ -37,7 +37,7 @@ export class BasicProcessorSession implements ProcessorSession {
         })
     }
     
-    waitForPartialResponse(): CancellablePromise<ProcessorPartialResponse> {
+    waitForPartialResponse(): [Promise<ProcessorPartialResponse>, CancelCallback] {
         let waitResolve = (_session: ProcessorPartialResponse) => {}
         let waitReject = (_error: Error) => {}
         const promise = new Promise<ProcessorPartialResponse>((resolve, reject) => {
@@ -63,14 +63,11 @@ export class BasicProcessorSession implements ProcessorSession {
 
         const webSocket = this.webSocket
 
-        return {
-            ...promise,
-            cancel() {
-                webSocket.removeEventListener('message', handler)
-                webSocket.removeEventListener('error', errorListener)
-                webSocket.removeEventListener('close', errorListener)
-            }
-        }
+        return [promise, () => {
+            webSocket.removeEventListener('message', handler)
+            webSocket.removeEventListener('error', errorListener)
+            webSocket.removeEventListener('close', errorListener)
+        }]
     }
     
     close(): void {

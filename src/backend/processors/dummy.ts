@@ -1,4 +1,4 @@
-import {ProcessorBackend, ProcessorPrepareRequest, ProcessorPrepareResponse, ProcessorRequest, ProcessorResponse, ProcessorSession} from "../backend";
+import {CancellablePromise, ProcessorBackend, ProcessorPrepareRequest, ProcessorPrepareResponse, ProcessorRequest, ProcessorResponse, ProcessorSession} from "../backend";
 import {sleep} from "../../utils";
 import {randomUUID} from "node:crypto";
 
@@ -19,11 +19,8 @@ export class DummyProcessorBackend implements ProcessorBackend {
                     finished: true,
                     sessionId: randomUUID(),
                     directives: []
-                })
-                return {
-                    ...promise,
-                    cancel() {}
-                }
+                });
+                return [promise, () => {}]
             }
         }
     }
