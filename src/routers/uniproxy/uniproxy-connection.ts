@@ -300,8 +300,8 @@ export class UniProxyConnection {
     }
 
     try {
-      await this.sendInputResult(inputResult, this.voiceInputReferenceRequestId,
-        this.voiceInputReferenceMessageId, this.voiceInputReferenceSequenceNumber)
+      await this.sendInputResult(inputResult, clientMessage.Event.TextInput.Header.RequestId,
+        clientMessage.Event.Header.MessageId, clientMessage.Event.TextInput.Header.SequenceNumber)
     } catch (error) {
       this.logger.warn('Failed to send input result: ', error)
       this.closeConnection()
