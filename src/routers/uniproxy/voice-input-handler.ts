@@ -68,9 +68,11 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
 
   async handleVoiceInputAudioEvent (data: VoiceInputAudioEvent): Promise<void> {
     if (this.audioMetadataSession && this.sttSession) {
+      this.logger.debug('VoiceInputHandler received audio, sending')
       await Promise.all([this.audioMetadataSession.processChunk(data.buffer),
         this.sttSession.transcribeChunk(data.buffer)])
     } else {
+      this.logger.debug('VoiceInputHandler received audio, queueing')
       this.audioDataQueue.push(data.buffer)
     }
   }
