@@ -117,7 +117,7 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
       for (const data of copy) {
         await Promise.all([audioMetadataSession.processChunk(data), sttSession.transcribeChunk(data)])
       }
-      this.audioDataQueue.slice(copy.length)
+      this.audioDataQueue = this.audioDataQueue.slice(copy.length)
     }
 
     this.audioMetadataSession = audioMetadataSession
