@@ -588,17 +588,19 @@ export class UniProxyConnection {
                                             }
                                         },
                                         IsLedSilent: true,
-                                        OnFinish: {
-                                            TypedCallbackRequest: {
-                                                fields: {
-                                                    typed_semantic_frame: {
-                                                        structValue: {
-                                                            fields: {
-                                                                continue_session_stage1_event_semantic_frame: {
-                                                                    structValue: {
-                                                                        fields: {
-                                                                            session_id: {
-                                                                                stringValue: sessionId
+                                        ...(isFinished ? {} : {
+                                            OnFinish: {
+                                                TypedCallbackRequest: {
+                                                    fields: {
+                                                        typed_semantic_frame: {
+                                                            structValue: {
+                                                                fields: {
+                                                                    continue_session_stage1_event_semantic_frame: {
+                                                                        structValue: {
+                                                                            fields: {
+                                                                                session_id: {
+                                                                                    stringValue: sessionId
+                                                                                }
                                                                             }
                                                                         }
                                                                     }
@@ -608,7 +610,7 @@ export class UniProxyConnection {
                                                     }
                                                 }
                                             }
-                                        }
+                                        })
                                     }]),
                                     ...(isFinished || (!isFinished && text !== null) ? [] : [{
                                         Type: "server_action",
