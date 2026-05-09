@@ -432,6 +432,8 @@ export class UniProxyConnection {
 
   private setupVoiceInputHandlers (): void {
     this.voiceInputHandler.on('finish', async event => {
+      this.voiceInputStreamId = -1
+
       try {
         await this.sendAsrResult(event.text, true)
       } catch (error) {
