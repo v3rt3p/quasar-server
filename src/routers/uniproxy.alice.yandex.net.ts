@@ -92,7 +92,7 @@ class ProcessorSessionPooler {
         if (!session) {
             throw new Error('session not found')
         }
-        await session.process(request)
+        // await session.process(request)
     }
 
     async waitForPartialResponse(sessionId: string): Promise<ProcessorPartialResponse | null> {
