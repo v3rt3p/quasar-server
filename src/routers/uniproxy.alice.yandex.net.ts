@@ -564,7 +564,7 @@ export class UniProxyConnection {
                                                     typed_semantic_frame: {
                                                         structValue: {
                                                             fields: {
-                                                                raw_external_event_semantic_frame: {
+                                                                external_event_semantic_frame: {
                                                                     structValue: {
                                                                         fields: {
                                                                             event: {
