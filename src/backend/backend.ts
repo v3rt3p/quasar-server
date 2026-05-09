@@ -86,10 +86,14 @@ export interface ProcessorPrepareResponse {
     sessionId?: string;
 }
 
+export type CancellablePromise<T> = Promise<T> & {
+    cancel(): void
+}
+
 export interface ProcessorSession {
     prepare(request: ProcessorPrepareRequest): Promise<void>;
     process(request: Omit<ProcessorRequest, 'sessionId'>): Promise<void>;
-    waitForPartialResponse(): Promise<ProcessorPartialResponse>;
+    waitForPartialResponse(): CancellablePromise<ProcessorPartialResponse>;
     close(): void;
 }
 

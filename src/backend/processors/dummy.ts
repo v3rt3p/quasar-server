@@ -12,13 +12,17 @@ export class DummyProcessorBackend implements ProcessorBackend {
             async prepare() {},
             async process() {},
             close() {},
-            async waitForPartialResponse() {
-                return {
+            waitForPartialResponse() {
+                const promise = Promise.resolve({
                     text: "я хуй знает",
                     requireMoreInput: false,
                     finished: true,
                     sessionId: randomUUID(),
                     directives: []
+                })
+                return {
+                    ...promise,
+                    cancel() {}
                 }
             }
         }

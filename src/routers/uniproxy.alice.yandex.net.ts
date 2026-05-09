@@ -14,7 +14,8 @@ import {
     STTChunkTranscribeResult,
     TTSBackend,
     ProcessorRequestSource,
-    ProcessorSession
+    ProcessorSession,
+    ProcessorPartialResponse
 } from "../backend/backend";
 import { AliceDirective, convertToAliceResponseDirective } from "./alice/directives";
 import { decodeProtobufStruct } from "../protobuf";
@@ -56,12 +57,57 @@ interface ClientProcessingSessionCallbacks {
     onStarted: () => void;
     onTranscribed: (text: string) => void;
     onFullyTranscribed: (text: string, willProcess: boolean) => void;
-    onProcessed: (text: string | null, requireMoreInput: boolean, sessionId: string, directives: AliceDirective[]) => void;
-    onPartiallyProcessed: (text: string, requireMoreInput: boolean, sessionId: string,
-        directives: AliceDirective[], responseNumber: number, isFinished: boolean) => void;
+    onPartiallyProcessed: (text: string | null, requireMoreInput: boolean, sessionId: string,
+        directives: AliceDirective[], isFinished: boolean) => void;
     onSynthesized: (format: AudioFormat, voiceOutput: Buffer) => void;
     onCancelled: () => void;
     onFinished: () => void;
+}
+
+class ProcessorSessionPooler {
+    private readonly pool: Map<string, ProcessorSession> = new Map()
+
+    constructor(private readonly processor: ProcessorBackend) {
+    }
+
+    async prepare(sessionId: string): Promise<void> {
+        if (this.pool.has(sessionId)) {
+            return
+        }
+        const webSocket = await this.processor.openSession()
+        await webSocket.prepare({
+            sessionId: sessionId
+        })
+        this.pool.set(sessionId, webSocket)
+    }
+
+    async process(sessionId: string, request: ProcessorRequest): Promise<void> {
+        const session = this.pool.get(sessionId)
+        if (!session) {
+            throw new Error('session not found')
+        }
+    }
+
+    async waitForPartialResponse(sessionId: string): Promise<ProcessorPartialResponse | null> {
+        const session = this.pool.get(sessionId)
+        if (!session) {
+            throw new Error('session not found')
+        }
+
+        const waitForPartialResponsePromise = session.waitForPartialResponse()
+
+        const result = await Promise.race([waitForPartialResponsePromise, new Promise(resolve => setTimeout(resolve, 5000, null))])
+        if (result === null) {
+            waitForPartialResponsePromise.cancel()
+            return null
+        }
+        return result as ProcessorPartialResponse
+    }
+
+    close(sessionId: string): void {
+        this.pool.get(sessionId)?.close()
+        this.pool.delete(sessionId)
+    }
 }
 
 class ClientProcessingSession {
@@ -74,22 +120,18 @@ class ClientProcessingSession {
     private finished: boolean = false;
     private finalTranscribedChunk: STTChunkTranscribeResult | null = null;
     private stationMetadata: object = {};
-    private preparedSessionId: string | null = null;
-    private preparedSession: ProcessorSession | null = null;
     private preparePromise: Promise<void> | null = null;
 
     constructor(private readonly backends: Backends,
+        private readonly pooler: ProcessorSessionPooler,
         private readonly callbacks: ClientProcessingSessionCallbacks,
-        private readonly processingBackendSessionId: string | null) {
+        private readonly processingBackendSessionId: string) {
     }
 
     startVoiceInput(params: VoiceInputStartParams): void {
         (async () => {
             this.preparePromise = (async () => {
-                this.preparedSession = await this.backends.processor.openSession()
-                await this.preparedSession.prepare({
-                    sessionId: this.processingBackendSessionId ?? undefined
-                })
+                await this.pooler.prepare(this.processingBackendSessionId)
             })()
             const [sttSession, audioMetadataSession] = await Promise.all([
                 this.backends.stt.startTranscribing({
@@ -120,7 +162,7 @@ class ClientProcessingSession {
             return;
         }
         this.cancelled = true;
-        this.preparedSession?.close()
+        this.pooler.close(this.processingBackendSessionId)
     }
 
     finish(): void {
@@ -129,7 +171,6 @@ class ClientProcessingSession {
         }
         this.finished = true;
         this.callbacks.onFinished();
-        this.preparedSession?.close()
     }
 
     handleVoiceInputAudioData(audioData: Buffer): void {
@@ -152,87 +193,48 @@ class ClientProcessingSession {
         };
     }
 
-    private process(text: string, metadata: object, isExternalEvent: boolean, externalDirectives: AliceDirective[]): void {
+    private process(text: string | null, metadata: object, isExternalEvent: boolean, externalDirectives: AliceDirective[]): void {
         const postProcess = async () => {
             if (this.preparePromise) {
                 await this.preparePromise
             } else {
-                this.preparedSession = await this.backends.processor.openSession()
-                await this.preparedSession.prepare({
-                    sessionId: this.processingBackendSessionId ?? undefined
+                await this.pooler.prepare(this.processingBackendSessionId)
+            }
+
+            if (text !== null) {
+                await this.pooler.process(this.processingBackendSessionId, {
+                    text: text,
+                    metadata: {
+                        ...this.stationMetadata,
+                        ...metadata
+                    },
+                    isExternalEvent
                 })
             }
 
-            const session = this.preparedSession
-
-            if (!session) {
-                throw new Error('no session?')
+            const response = await this.pooler.waitForPartialResponse(this.processingBackendSessionId)
+            if (!response) {
+                this.callbacks.onPartiallyProcessed(null, false, this.processingBackendSessionId, [], false)
+                return
             }
 
-            await session.process({
-                text: text,
-                metadata: {
-                    ...this.stationMetadata,
-                    ...metadata
-                },
-                isExternalEvent
+            this.callbacks.onPartiallyProcessed(response.text, response.finished ? response.requireMoreInput : false, this.processingBackendSessionId,
+                response.directives, response.finished)
+
+            const synthesized = await this.backends.tts.synthesize({
+                text: response.text
             })
 
-            let responseNumber = 0
+            if (this.cancelled) {
+                return
+            }
 
-            while (true) {
-                const response = await session.waitForPartialResponse()
+            this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
 
-                if (response.finished && responseNumber == 0) {
-                    this.callbacks.onProcessed(response.text, response.requireMoreInput,
-                        response.sessionId, response.directives);
+            this.finish();
 
-                    const synthesized = await this.backends.tts.synthesize({
-                        text: response.text
-                    })
-
-                    if (this.cancelled) {
-                        return
-                    }
-
-                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
-
-                    this.finish();
-                    return;
-                }
-
-                if (response.finished) {
-                    this.callbacks.onPartiallyProcessed(response.text, response.requireMoreInput, response.sessionId,
-                        response.directives, responseNumber, true)
-
-                    const synthesized = await this.backends.tts.synthesize({
-                        text: response.text
-                    })
-
-                    if (this.cancelled) {
-                        return
-                    }
-
-                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
-
-                    this.finish();
-                    return
-                } else {
-                    this.callbacks.onPartiallyProcessed(response.text, false, response.sessionId,
-                        response.directives, responseNumber, false)
-
-                    const synthesized = await this.backends.tts.synthesize({
-                        text: response.text
-                    })
-
-                    if (this.cancelled) {
-                        return
-                    }
-
-                    this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
-                }
-
-                responseNumber++
+            if (response.finished) {
+                this.pooler.close(this.processingBackendSessionId)
             }
         }
 
@@ -276,8 +278,8 @@ class ClientProcessingSession {
             return;
         }
 
-        this.callbacks.onProcessed(text, false,
-            this.processingBackendSessionId ?? randomUUID(), externalDirectives);
+        this.callbacks.onPartiallyProcessed(text, false,
+            this.processingBackendSessionId, externalDirectives, true);
 
         this.backends.tts.synthesize({
             text: text
@@ -296,40 +298,12 @@ class ClientProcessingSession {
             });
     }
 
-    handleRepeat(repeatId: string): void {
+    handleContinue(): void {
         if (this.cancelled) {
             return;
         }
 
-        this.callbacks.onProcessed(null, false,
-            this.processingBackendSessionId ?? randomUUID(), [{
-                type: "raw",
-                data: {
-                    Type: "server_action",
-                    Name: "@@mm_semantic_frame",
-                    Payload: {
-                        fields: {
-                            typed_semantic_frame: {
-                                structValue: {
-                                    fields: {
-                                        raw_external_event_semantic_frame: {
-                                            structValue: {
-                                                fields: {
-                                                    event: {
-                                                        stringValue: repeatId
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }]);
-
-        this.finish();
+        this.process(null, {}, false, [])
     }
 
     handleSessionClose(): void {
@@ -368,7 +342,10 @@ export class UniProxyConnection {
 
     private readonly sendLock = new Sema(1)
 
+    private readonly pooler: ProcessorSessionPooler
+
     constructor(private readonly webSocket: WebSocket, private readonly backends: Backends) {
+        this.pooler = new ProcessorSessionPooler(backends.processor)
         this.webSocket.on("message", (message, isBinary) => {
             this.handleMessage(message, isBinary).catch(e => {
                 this.logger.error(`Failed to handle message: ${e}`);
@@ -476,7 +453,7 @@ export class UniProxyConnection {
             this.currentProcessingSession = null;
         }
 
-        this.currentProcessingSession = new ClientProcessingSession(this.backends, {
+        this.currentProcessingSession = new ClientProcessingSession(this.backends, this.pooler, {
             onStarted: () => {
                 this.logger.info("Started");
 
@@ -548,8 +525,8 @@ export class UniProxyConnection {
                     Timings: this.getTimings()
                 })
             },
-            onProcessed: (text, requireMoreInput, sessionId, directives) => {
-                this.logger.info(`Processed: '${text}', ${requireMoreInput}, ${sessionId}`);
+            onPartiallyProcessed: (text, requireMoreInput, sessionId, directives, isFinished) => {
+                this.logger.info(`Partially processed: '${text}', ${requireMoreInput}, ${sessionId}, ${isFinished}`);
 
                 if (requireMoreInput) {
                     this.activeProcessingSessionId = sessionId;
@@ -599,7 +576,7 @@ export class UniProxyConnection {
                                         IsParallel: false,
                                         IgnoreAnswer: false,
                                     }]),
-                                    {
+                                    ...(isFinished ? [] : [{
                                         Type: "server_action",
                                         Name: "@@mm_semantic_frame",
                                         IsParallel: false,
@@ -609,7 +586,7 @@ export class UniProxyConnection {
                                                 typed_semantic_frame: {
                                                     structValue: {
                                                         fields: {
-                                                            raw_external_event_semantic_frame: {
+                                                            continue_session_event_semantic_frame: {
                                                                 structValue: {
                                                                     fields: {
                                                                         event: {
@@ -623,7 +600,7 @@ export class UniProxyConnection {
                                                 }
                                             }
                                         }
-                                    }
+                                    }])
                                 ],
                                 Suggest: {
                                     Items: []
@@ -651,81 +628,6 @@ export class UniProxyConnection {
                                 Error: {},
                                 ForceServerRequest: false
                             }
-                        }
-                    },
-                    Timings: this.getTimings()
-                });
-            },
-            onPartiallyProcessed: (text, requireMoreInput, sessionId, directives, responseNumber, isFinished) => {
-                if (responseNumber === 0) {
-                    this.sendServerMessage({
-                        Event: {
-                            Header: {
-                                MessageId: randomUUID(),
-                                RefMessageId: event.messageId
-                            },
-                            AliceResponse: {
-                                Header: {
-                                    RequestId: event.requestId,
-                                    SequenceNumber: event.sequenceNumber,
-                                    ResponseId: randomUUID(),
-                                    DialogId: randomUUID()
-                                },
-                                VoiceResponse: {
-                                    ShouldListen: false,
-                                    HasVoiceResponse: true
-                                },
-                                Response: {
-                                    IsStreaming: true
-                                },
-                                ForceServerRequest: true
-                            },
-                        },
-                        Timings: this.getTimings()
-                    });
-                }
-
-                this.logger.info(`Partially processed: '${text}', ${requireMoreInput}, ${sessionId}, ${responseNumber}, ${isFinished}`);
-
-                if (requireMoreInput) {
-                    this.activeProcessingSessionId = sessionId;
-                } else {
-                    this.activeProcessingSessionId = null;
-                }
-
-                this.sendServerMessage({
-                    Event: {
-                        Header: {
-                            MessageId: randomUUID(),
-                            RefMessageId: event.messageId
-                        },
-                        DeferredAliceResponse: {
-                            BaseResponse: {
-                                Text: text,
-                                ...(isFinished ? {
-                                    ShouldListen: requireMoreInput
-                                } : {}),
-                                Directives: [
-                                    ...directives.map(directive =>
-                                        convertToAliceResponseDirective(directive)),
-                                    {
-                                        Type: "client_action",
-                                        Name: "tts_play_placeholder",
-                                        AnalyticsType: "tts_play_placeholder",
-                                        Payload: {
-                                            fields: {
-                                                channel: {
-                                                    stringValue: "Dialog"
-                                                }
-                                            }
-                                        },
-                                        IsLedSilent: true
-                                    }
-                                ],
-                            },
-                            RequestId: event.requestId,
-                            ResponsePartialNum: responseNumber,
-                            IsLast: isFinished
                         }
                     },
                     Timings: this.getTimings()
@@ -769,28 +671,44 @@ export class UniProxyConnection {
                 this.logger.info(`Finished`);
                 this.currentProcessingSession = null;
             }
-        }, this.activeProcessingSessionId);
+        }, this.activeProcessingSessionId ?? randomUUID());
     }
 
     private async handleTextInputEvent(clientMessage: any): Promise<void> {
-        this.recreateClientProcessingSession({
-            messageId: clientMessage.Event.Header.MessageId,
-            requestId: clientMessage.Event.TextInput.Header.RequestId,
-            sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
-        });
 
         const event = clientMessage.Event.TextInput.Request.Event;
 
         if (event.Type === "server_action" && event.Payload) {
             const payload = decodeProtobufStruct(event.Payload);
             if (payload?.typed_semantic_frame?.music_play_semantic_frame) {
+                this.recreateClientProcessingSession({
+                    messageId: clientMessage.Event.Header.MessageId,
+                    requestId: clientMessage.Event.TextInput.Header.RequestId,
+                    sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                });
                 this.currentProcessingSession?.handleExternalEvent("play button was pressed on speaker", []);
             } else if (payload?.typed_semantic_frame?.external_event_semantic_frame) {
+                this.recreateClientProcessingSession({
+                    messageId: clientMessage.Event.Header.MessageId,
+                    requestId: clientMessage.Event.TextInput.Header.RequestId,
+                    sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                });
                 this.currentProcessingSession?.handleExternalEvent(payload.typed_semantic_frame.external_event_semantic_frame.event, []);
             } else if (payload?.typed_semantic_frame?.raw_external_event_semantic_frame) {
+                this.recreateClientProcessingSession({
+                    messageId: clientMessage.Event.Header.MessageId,
+                    requestId: clientMessage.Event.TextInput.Header.RequestId,
+                    sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                });
                 this.currentProcessingSession?.handleRawSpeak(payload.typed_semantic_frame.raw_external_event_semantic_frame.event, []);
-            } else if (payload?.typed_semantic_frame?.repeat_callback_event_semantic_frame) {
-                this.currentProcessingSession?.handleRepeat(payload.typed_semantic_frame.repeat_callback_event_semantic_frame.repeat_id);
+            } else if (payload?.typed_semantic_frame?.continue_callback_event_semantic_frame) {
+                this.activeProcessingSessionId = payload.typed_semantic_frame.continue_callback_event_semantic_frame.session_id
+                this.recreateClientProcessingSession({
+                    messageId: clientMessage.Event.Header.MessageId,
+                    requestId: clientMessage.Event.TextInput.Header.RequestId,
+                    sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                });
+                this.currentProcessingSession?.handleContinue();
             } else {
                 if (payload?.typed_callback_serialized) {
                     try {
@@ -802,6 +720,11 @@ export class UniProxyConnection {
                                 const phoneCapabilityRaw = environmentState.Endpoints[0].Capabilities.find((item: any) => item.type_url === 'type.googleapis.com/NAlice.TPhoneCallsCapability')?.value
                                 if (phoneCapabilityRaw) {
                                     const phoneCapability = TPhoneCallsCapability.decode(Buffer.from(phoneCapabilityRaw, 'base64')).toJSON()
+                                    this.recreateClientProcessingSession({
+                                        messageId: clientMessage.Event.Header.MessageId,
+                                        requestId: clientMessage.Event.TextInput.Header.RequestId,
+                                        sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                                    });
                                     this.currentProcessingSession?.handleRawSpeak("кто-то звонит!", [
                                         {
                                             type: 'processIncomingCall',
@@ -828,6 +751,11 @@ export class UniProxyConnection {
             const rawPayload = Buffer.from(event.PayloadRaw, 'base64')
             const decoded = TSemanticFrameRequestData.decode(rawPayload).toJSON()
             if (decoded?.TypedSemanticFrame?.MusicPlaySemanticFrame) {
+                this.recreateClientProcessingSession({
+                    messageId: clientMessage.Event.Header.MessageId,
+                    requestId: clientMessage.Event.TextInput.Header.RequestId,
+                    sequenceNumber: clientMessage.Event.TextInput.Header.SequenceNumber
+                });
                 this.currentProcessingSession?.handleExternalEvent("play button was pressed on speaker", []);
             } else {
                 this.logger.info(`Received unknown TextInput semantic frame: ${JSON.stringify(decoded)} ${JSON.stringify(event)}`)
