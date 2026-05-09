@@ -596,19 +596,24 @@ export class UniProxyConnection {
                                             }
                                         },
                                         IsLedSilent: true,
+                                        IsParallel: false,
                                         IgnoreAnswer: false,
-                                        OnFinish: {
-                                            TypedCallbackRequest: {
-                                                fields: {
-                                                    typed_semantic_frame: {
-                                                        structValue: {
-                                                            fields: {
-                                                                repeat_callback_event_semantic_frame: {
-                                                                    structValue: {
-                                                                        fields: {
-                                                                            repeat_id: {
-                                                                                stringValue: "жопа"
-                                                                            }
+                                    }]),
+                                    {
+                                        Type: "server_action",
+                                        Name: "@@mm_semantic_frame",
+                                        IsParallel: false,
+                                        IgnoreAnswer: false,
+                                        Payload: {
+                                            fields: {
+                                                typed_semantic_frame: {
+                                                    structValue: {
+                                                        fields: {
+                                                            raw_external_event_semantic_frame: {
+                                                                structValue: {
+                                                                    fields: {
+                                                                        event: {
+                                                                            stringValue: "жопа"
                                                                         }
                                                                     }
                                                                 }
@@ -618,7 +623,7 @@ export class UniProxyConnection {
                                                 }
                                             }
                                         }
-                                    }])
+                                    }
                                 ],
                                 Suggest: {
                                     Items: []
