@@ -643,19 +643,7 @@ export class UniProxyConnection {
                                 Directives: [
                                     ...directives.map(directive =>
                                         convertToAliceResponseDirective(directive)),
-                                    {
-                                        Type: "client_action",
-                                        Name: "tts_play_placeholder",
-                                        AnalyticsType: "tts_play_placeholder",
-                                        Payload: {
-                                            fields: {
-                                                channel: {
-                                                    stringValue: "Dialog"
-                                                }
-                                            }
-                                        },
-                                        IsLedSilent: true
-                                    }
+                                   
                                 ],
                             },
                             RequestId: event.requestId,
