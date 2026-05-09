@@ -201,8 +201,6 @@ class ClientProcessingSession {
                     return;
                 }
 
-                responseNumber++
-
                 if (response.finished) {
                     this.callbacks.onPartiallyProcessed(response.text, response.requireMoreInput, response.sessionId, 
                         response.directives, responseNumber, true)
@@ -233,6 +231,8 @@ class ClientProcessingSession {
 
                     this.callbacks.onSynthesized(synthesized.format, synthesized.voiceOutput);
                 }
+
+                responseNumber++
             }
         }
 
