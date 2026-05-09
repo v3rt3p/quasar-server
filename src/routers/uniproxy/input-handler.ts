@@ -65,7 +65,7 @@ export class InputHandler {
         //   type: 'ttsPlayPlaceholder'
         // }
       ],
-      shouldListen: false,
+      shouldListen: true,
       text: null
     }
   }
