@@ -197,6 +197,10 @@ export class InputHandler {
 
     if (partialResponse.finished) {
       this.logger.debug('Partial response is finished')
+      if (partialResponse.finished && !partialResponse.requireMoreInput) {
+        this.logger.debug('Partial response is finished, and no more input is required - closing')
+        this.closeSession()
+      }
       return {
         directives: [
           ...partialResponse.directives,
