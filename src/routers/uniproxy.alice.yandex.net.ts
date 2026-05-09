@@ -218,6 +218,8 @@ class ClientProcessingSession {
                 return
             }
 
+            logger.info(JSON.stringify(response))
+
             this.callbacks.onPartiallyProcessed(response.text, response.finished ? response.requireMoreInput : false, this.processingBackendSessionId,
                 response.directives, response.finished)
 
@@ -591,7 +593,7 @@ export class UniProxyConnection {
                                                                 structValue: {
                                                                     fields: {
                                                                         event: {
-                                                                            stringValue: "жопа"
+                                                                            stringValue: sessionId
                                                                         }
                                                                     }
                                                                 }
