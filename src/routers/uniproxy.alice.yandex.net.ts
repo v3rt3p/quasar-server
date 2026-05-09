@@ -607,13 +607,14 @@ export class UniProxyConnection {
                                     DialogId: randomUUID()
                                 },
                                 VoiceResponse: {
-                                    ShouldListen: false,
+                                    ShouldListen: true,
                                     HasVoiceResponse: true
                                 },
                                 Response: {
                                     IsStreaming: true
-                                }
-                            }
+                                },
+                                ForceServerRequest: true
+                            },
                         },
                         Timings: this.getTimings()
                     });
