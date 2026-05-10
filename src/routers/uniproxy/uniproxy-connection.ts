@@ -198,7 +198,7 @@ export class UniProxyConnection {
   }
 
   private async handleStreamControl (clientMessage: TClientMessage): Promise<void> {
-    const streamId = clientMessage.StreamControl!.StreamId
+    const streamId = clientMessage.StreamControl!.StreamId!
     if (compareWithLong(streamId, this.voiceInputStreamId)) {
       return
     }

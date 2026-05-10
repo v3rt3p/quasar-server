@@ -87,6 +87,7 @@ export class InputHandler {
         this.closeSession()
       })
       this.session.addListener('partialResponse', data => {
+        this.logger.debug(`Received partial response: ${JSON.stringify(data)}`)
         this.partialResponses.push(data)
         this.notifier.notifyAll()
       })
