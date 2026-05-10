@@ -11,9 +11,6 @@ importers:
       '@bksp/style-guide':
         specifier: ^1.5.0
         version: 1.5.0(eslint@9.39.4)(typescript@5.9.3)
-      '@bufbuild/protobuf':
-        specifier: ^2.12.0
-        version: 2.12.0
       '@discordjs/opus':
         specifier: ^0.10.0
         version: 0.10.0
@@ -108,9 +105,6 @@ importers:
       '@bufbuild/buf':
         specifier: ^1.69.0
         version: 1.69.0
-      '@protobuf-ts/plugin':
-        specifier: ^2.11.1
-        version: 2.11.1
       protobufjs-cli:
         specifier: ^2.2.0
         version: 2.2.0(protobufjs@8.2.0)
@@ -245,12 +239,6 @@ packages:
     resolution: {integrity: sha512-hWk7cW6Z/7g6jpybePaf15QUUFd2+s4lJCeaAkBeo3tWPGoSgNJaJdMqIUy2y99uYy4yMjq9GYmjc5dSrfIn5A==}
     engines: {node: '>=12'}
     hasBin: true
-
-  '@bufbuild/protobuf@2.12.0':
-    resolution: {integrity: sha512-B/XlCaFIP8LOwzo+bz5uFzATYokcwCKQcghqnlfwSmM5eX/qTkvDBnDPs+gXtX/RyjxJ4DRikECcPJbyALA8FA==}
-
-  '@bufbuild/protoplugin@2.12.0':
-    resolution: {integrity: sha512-ORlDITp8AFUXzIhLRoMCG+ud+D3MPKWb5HQXBoskMMnjeyEjE1H1qLonVNPyOr8lkx3xSfYUo8a0dvOZJVAzow==}
 
   '@discordjs/node-pre-gyp@0.4.5':
     resolution: {integrity: sha512-YJOVVZ545x24mHzANfYoy0BJX5PDyeZlpiJjDkUBM/V/Ao7TFX9lcUvCN4nr0tbr5ubeaXxtEBILUrHtTphVeQ==}
@@ -515,20 +503,6 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protobuf-ts/plugin@2.11.1':
-    resolution: {integrity: sha512-HyuprDcw0bEEJqkOWe1rnXUP0gwYLij8YhPuZyZk6cJbIgc/Q0IFgoHQxOXNIXAcXM4Sbehh6kjVnCzasElw1A==}
-    hasBin: true
-
-  '@protobuf-ts/protoc@2.11.1':
-    resolution: {integrity: sha512-mUZJaV0daGO6HUX90o/atzQ6A7bbN2RSuHtdwo8SSF2Qoe3zHwa4IHyCN1evftTeHfLmdz+45qo47sL+5P8nyg==}
-    hasBin: true
-
-  '@protobuf-ts/runtime-rpc@2.11.1':
-    resolution: {integrity: sha512-4CqqUmNA+/uMz00+d3CYKgElXO9VrEbucjnBFEjqI4GuDrEQ32MaI3q+9qPBvIGOlL4PmHXrzM32vBPWRhQKWQ==}
-
-  '@protobuf-ts/runtime@2.11.1':
-    resolution: {integrity: sha512-KuDaT1IfHkugM2pyz+FwiY80ejWrkH1pAtOBOZFuR6SXEFTsnb/jiQWQ1rCIrcKx2BtyxnxW6BWwsVSA/Ie+WQ==}
-
   '@sinclair/typebox@0.34.49':
     resolution: {integrity: sha512-brySQQs7Jtn0joV8Xh9ZV/hZb9Ozb0pmazDIASBkYKCjXrXU3mpcFahmK/z4YDhGkQvP9mWJbVyahdtU5wQA+A==}
 
@@ -663,11 +637,6 @@ packages:
   '@typescript-eslint/visitor-keys@8.59.2':
     resolution: {integrity: sha512-NwjLUnGy8/Zfx23fl50tRC8rYaYnM52xNRYFAXvmiil9yh1+K6aRVQMnzW6gQB/1DLgWt977lYQn7C+wtgXZiA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript/vfs@1.6.4':
-    resolution: {integrity: sha512-PJFXFS4ZJKiJ9Qiuix6Dz/OwEIqHD7Dme1UwZhTK11vR+5dqW2ACbdndWQexBzCx+CPuMe5WBYQWCsFyGlQLlQ==}
-    peerDependencies:
-      typescript: '*'
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -2409,16 +2378,6 @@ packages:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
-  typescript@3.9.10:
-    resolution: {integrity: sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -2719,16 +2678,6 @@ snapshots:
       '@bufbuild/buf-win32-arm64': 1.69.0
       '@bufbuild/buf-win32-x64': 1.69.0
 
-  '@bufbuild/protobuf@2.12.0': {}
-
-  '@bufbuild/protoplugin@2.12.0':
-    dependencies:
-      '@bufbuild/protobuf': 2.12.0
-      '@typescript/vfs': 1.6.4(typescript@5.4.5)
-      typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
-
   '@discordjs/node-pre-gyp@0.4.5':
     dependencies:
       detect-libc: 2.1.2
@@ -2939,25 +2888,6 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@protobuf-ts/plugin@2.11.1':
-    dependencies:
-      '@bufbuild/protobuf': 2.12.0
-      '@bufbuild/protoplugin': 2.12.0
-      '@protobuf-ts/protoc': 2.11.1
-      '@protobuf-ts/runtime': 2.11.1
-      '@protobuf-ts/runtime-rpc': 2.11.1
-      typescript: 3.9.10
-    transitivePeerDependencies:
-      - supports-color
-
-  '@protobuf-ts/protoc@2.11.1': {}
-
-  '@protobuf-ts/runtime-rpc@2.11.1':
-    dependencies:
-      '@protobuf-ts/runtime': 2.11.1
-
-  '@protobuf-ts/runtime@2.11.1': {}
-
   '@sinclair/typebox@0.34.49': {}
 
   '@sqltools/formatter@1.2.5': {}
@@ -3143,13 +3073,6 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.59.2
       eslint-visitor-keys: 5.0.1
-
-  '@typescript/vfs@1.6.4(typescript@5.4.5)':
-    dependencies:
-      debug: 4.4.3
-      typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
 
   abbrev@1.1.1: {}
 
@@ -5106,10 +5029,6 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
-
-  typescript@3.9.10: {}
-
-  typescript@5.4.5: {}
 
   typescript@5.9.3: {}
 

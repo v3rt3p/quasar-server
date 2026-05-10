@@ -6,11 +6,11 @@
   "author": "radioegor146",
   "license": "MIT",
   "scripts": {
-    "start": "tsx src/main.ts"
+    "start": "tsx src/main.ts",
+    "generate-proto": "buf generate"
   },
   "dependencies": {
     "@bksp/style-guide": "^1.5.0",
-    "@bufbuild/protobuf": "^2.12.0",
     "@discordjs/opus": "^0.10.0",
     "@elysia/openapi": "^1.4.15",
     "@elysiajs/node": "^1.4.5",
@@ -44,7 +44,6 @@
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.69.0",
-    "@protobuf-ts/plugin": "^2.11.1",
     "protobufjs-cli": "^2.2.0",
     "protoc": "^25.9.0"
   }
