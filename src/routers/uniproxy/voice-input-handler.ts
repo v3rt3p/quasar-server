@@ -1,3 +1,4 @@
+import { Sema } from 'async-sema'
 import EventEmitter from 'node:events'
 
 import { AudioMetadataBackend, AudioMetadataBackendSession, STTBackend, STTBackendSession } from '../../backend/backend'
@@ -52,6 +53,7 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   private audioDataQueue: Buffer[] = []
   private audioMetadata: object = {}
   private audioMetadataSession: AudioMetadataBackendSession | null = null
+  private audioSendingLock = new Sema(1)
   private lastTranscribeResult: string = ''
   private readonly logger = getLogger<VoiceInputHandler>()
   private sttSession: null | STTBackendSession = null
@@ -71,11 +73,16 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   }
 
   async handleVoiceInputAudioEvent (data: VoiceInputAudioEvent): Promise<void> {
-    if (this.audioMetadataSession && this.sttSession) {
-      await Promise.all([this.audioMetadataSession.processChunk(data.buffer),
-        this.sttSession.transcribeChunk(data.buffer)])
-    } else {
-      this.audioDataQueue.push(data.buffer)
+    await this.audioSendingLock.acquire()
+    try {
+      if (this.audioMetadataSession && this.sttSession) {
+        await Promise.all([this.audioMetadataSession.processChunk(data.buffer),
+          this.sttSession.transcribeChunk(data.buffer)])
+      } else {
+        this.audioDataQueue.push(data.buffer)
+      }
+    } finally {
+      this.audioSendingLock.release()
     }
   }
 
@@ -120,16 +127,23 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
 
     this.logger.debug('VoiceInputHandler streams created')
 
-    while (this.audioDataQueue.length > 0) {
-      const copy = [...this.audioDataQueue]
-      for (const data of copy) {
-        await Promise.all([audioMetadataSession.processChunk(data), sttSession.transcribeChunk(data)])
-      }
-      this.audioDataQueue = this.audioDataQueue.slice(copy.length)
-    }
+    await this.audioSendingLock.acquire()
+    try {
+      while (this.audioDataQueue.length > 0) {
+        const copy = [...this.audioDataQueue]
 
-    this.audioMetadataSession = audioMetadataSession
-    this.sttSession = sttSession
+        for (const data of copy) {
+          await Promise.all([audioMetadataSession.processChunk(data), sttSession.transcribeChunk(data)])
+        }
+        this.logger.debug(`Sent ${this.audioDataQueue.length} chunks`)
+        this.audioDataQueue = this.audioDataQueue.slice(copy.length)
+      }
+
+      this.audioMetadataSession = audioMetadataSession
+      this.sttSession = sttSession
+    } finally {
+      this.audioSendingLock.release()
+    }
 
     this.logger.debug('VoiceInputHandler streaming started')
   }
