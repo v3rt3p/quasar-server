@@ -89,7 +89,7 @@ export class UniProxyConnection {
   }
 
   private async handleAudioMessage (streamId: number, audioData: Buffer): Promise<void> {
-    if (compareWithLong(streamId, this.voiceInputStreamId)) {
+    if (longEquals(streamId, this.voiceInputStreamId)) {
       await this.voiceInputHandler.handleVoiceInputAudioEvent({
         buffer: audioData
       })
@@ -199,7 +199,8 @@ export class UniProxyConnection {
 
   private async handleStreamControl (clientMessage: TClientMessage): Promise<void> {
     const streamId = clientMessage.StreamControl!.StreamId!
-    if (compareWithLong(streamId, this.voiceInputStreamId)) {
+    this.logger.info(streamId, this.voiceInputStreamId.toString())
+    if (longEquals(streamId, this.voiceInputStreamId)) {
       return
     }
 
@@ -596,7 +597,7 @@ export class UniProxyConnection {
   }
 }
 
-function compareWithLong (a: Long | number, b: Long | number): boolean {
+function longEquals (a: Long | number, b: Long | number): boolean {
   if (typeof a === 'number' && typeof b === 'number') {
     return a === b
   }
