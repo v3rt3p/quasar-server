@@ -12,15 +12,15 @@ interface QuasarRouterDeps {
 export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRouterDeps): void {
   const router = Router()
 
-  router.get('/check_updates', (request, res) => {
+  router.get('/check_updates', (request, response) => {
     logger.debug(`Requested updates: ${JSON.stringify(request.query)}`)
 
-    res.json({
+    response.json({
       hasUpdate: false
     })
   })
 
-  router.post('/update_device_state', async (request, res) => {
+  router.post('/update_device_state', async (request, response) => {
     try {
       const duid = String(request.query['device_id'])
       if (!duid) {
@@ -30,22 +30,22 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
 
       await deps.infoProvider.updateNetworkInfo(duid, platform, request.body)
 
-      res.status(200).json({
+      response.status(200).json({
         status: 'ok'
       })
     } catch (error) {
       logger.error(`Error on POST /update_device_state: ${error}`)
-      res.status(500).end()
+      response.status(500).end()
     }
   })
 
-  router.get('/glagol/device_list', async (request, res) => {
+  router.get('/glagol/device_list', async (request, response) => {
     try {
       logger.debug(`Requested glagol device list: ${JSON.stringify(request.query)}`)
 
       const stationInfos = await deps.infoProvider.getStationInfos()
 
-      res.json({
+      response.json({
         devices: stationInfos.map(info => ({
           activation_code: Math.floor(Math.random() * 1_000_000_000),
           activation_region: 'RU',
@@ -67,11 +67,11 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
       })
     } catch (error) {
       logger.error(`Error on GET /glagol/device_list: ${error}`)
-      res.status(500).end()
+      response.status(500).end()
     }
   })
 
-  router.get('/get_sync_info', async (request, res) => {
+  router.get('/get_sync_info', async (request, response) => {
     logger.debug(`Get sync info: ${JSON.stringify(request.query)}`)
 
     try {
@@ -83,7 +83,7 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
 
       const info = await deps.infoProvider.getInfo(duid, platform)
 
-      res.status(200).json({
+      response.status(200).json({
         alice_pro_subscription: {
           enabled: info.quasarConfig.aliceProSubscription.enabled,
           ttl: info.quasarConfig.aliceProSubscription.enabled ? info.quasarConfig.aliceProSubscription.ttl : undefined
@@ -103,7 +103,7 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
       })
     } catch (error) {
       logger.error(`Error on GET /get_sync_info: ${error}`)
-      res.status(500).end()
+      response.status(500).end()
     }
   })
 
@@ -250,11 +250,13 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
     'com.yandex.capabilities': {
       appLaunchCapabilityEnabled: system.comYandexCapabilities.appLaunchCapabilityEnabled,
       detailsCapability: {
-        openPurchaseProcessDirectiveEnabled: system.comYandexCapabilities.detailsCapability.openPurchaseProcessDirectiveEnabled
+        openPurchaseProcessDirectiveEnabled: system.comYandexCapabilities.detailsCapability
+          .openPurchaseProcessDirectiveEnabled
       },
       detailsCapabilityEnabled: system.comYandexCapabilities.detailsCapabilityEnabled,
       serialNavigatorCapability: {
-        openPurchaseDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability.openPurchaseDirectiveEnabled,
+        openPurchaseDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability
+          .openPurchaseDirectiveEnabled,
         showEpisodeDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability.showEpisodeDirectiveEnabled
       },
       serialNavigatorCapabilityEnabled: system.comYandexCapabilities.serialNavigatorCapabilityEnabled
@@ -441,14 +443,20 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
         spotterLoggingRareEventPercent: system.voiceDialogSettings.commandSpotterSettings.spotterLoggingRareEventPercent
       },
       intonationInterruptionSpotterSettings: {
-        spotterLoggingRareEventPercent: system.voiceDialogSettings.intonationInterruptionSpotterSettings.spotterLoggingRareEventPercent,
-        spotterLoggingRareEventTailMillis: system.voiceDialogSettings.intonationInterruptionSpotterSettings.spotterLoggingRareEventTailMillis,
-        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings.intonationInterruptionSpotterSettings.spotterLoggingVeryRareEventTailMillis
+        spotterLoggingRareEventPercent: system.voiceDialogSettings
+          .intonationInterruptionSpotterSettings.spotterLoggingRareEventPercent,
+        spotterLoggingRareEventTailMillis: system.voiceDialogSettings
+          .intonationInterruptionSpotterSettings.spotterLoggingRareEventTailMillis,
+        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
+          .intonationInterruptionSpotterSettings.spotterLoggingVeryRareEventTailMillis
       },
       intonationSpotterSettings: {
-        spotterLoggingRareEventPercent: system.voiceDialogSettings.intonationSpotterSettings.spotterLoggingRareEventPercent,
-        spotterLoggingRareEventTailMillis: system.voiceDialogSettings.intonationSpotterSettings.spotterLoggingRareEventTailMillis,
-        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings.intonationSpotterSettings.spotterLoggingVeryRareEventTailMillis
+        spotterLoggingRareEventPercent: system.voiceDialogSettings
+          .intonationSpotterSettings.spotterLoggingRareEventPercent,
+        spotterLoggingRareEventTailMillis: system.voiceDialogSettings
+          .intonationSpotterSettings.spotterLoggingRareEventTailMillis,
+        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
+          .intonationSpotterSettings.spotterLoggingVeryRareEventTailMillis
       },
       protoAliceApi: {
         clientEventsWhitelist: system.voiceDialogSettings.protoAliceApi.clientEventsWhitelist,

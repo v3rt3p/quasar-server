@@ -308,7 +308,7 @@ export class UniProxyConnection {
     }
   }
 
-  private async handleTextMessage (message: string): Promise<void> {
+  private async handleTextMessage (_message: string): Promise<void> {
     // ignore for now
   }
 

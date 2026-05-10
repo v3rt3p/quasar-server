@@ -15,9 +15,9 @@ import { getLogger } from './logger'
 import { pushUpdateConfigDirective } from './routers/alice/directives'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
+import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { PostgresDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
-import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 
 dotenv.config({
   path: '.env.local'
@@ -47,15 +47,16 @@ const POSTGRES_URL = process.env.POSTGRES_URL ?? 'postgres://quasar:quasar@local
 
 const storage = new PostgresDatabaseStationInfoStorage(POSTGRES_URL)
 
+// eslint-disable-next-line unicorn/prefer-top-level-await
 storage.initialize().catch(error => logger.fatal(error))
 
 const app = express()
 
 app.use(bodyParser.json())
 
-const server = app.listen(PORT, e => {
-  if (e) {
-    logger.error(`Quasar failed to start on :${PORT}: ${e}`)
+const server = app.listen(PORT, error => {
+  if (error) {
+    logger.error(`Quasar failed to start on :${PORT}: ${error}`)
     return
   }
   logger.info(`Started quasar on :${PORT}`)
@@ -233,7 +234,7 @@ try {
   logger.error(`API failed to start on :${API_PORT}: ${error}`)
 }
 
-app.use((request, res) => {
+app.use((request, response) => {
   logger.debug(`Got unknown request: ${request.method} ${request.url}`)
-  res.status(500).end()
+  response.status(500).end()
 })

@@ -1,4 +1,5 @@
-import { EventEmitter } from 'node:stream';
+import { EventEmitter } from 'node:stream'
+
 import { AliceDirective } from '../routers/alice/directives'
 
 export interface AudioMetadataBackend {
@@ -26,15 +27,15 @@ export interface ProcessorRequest {
   text: string;
 }
 
-export interface ProcessorSessionEvents {
-  partialResponse: [ProcessorPartialResponse]
-  close: []
-}
-
 export interface ProcessorSession extends EventEmitter<ProcessorSessionEvents> {
   close(): void;
   prepare(): Promise<void>;
   process(request: ProcessorRequest): Promise<void>;
+}
+
+export interface ProcessorSessionEvents {
+  close: []
+  partialResponse: [ProcessorPartialResponse]
 }
 
 export interface STTBackend {
@@ -57,30 +58,30 @@ export interface TTSRequest {
 }
 
 export interface TTSResponse {
-  format: string; 
+  format: string;
   voiceOutput: Buffer;
 }
 
 export abstract class AudioMetadataBackendSession {
-  abstract close(): void
+  abstract close (): void
 
-  abstract finish(): Promise<object>
+  abstract finish (): Promise<object>
 
-  abstract processChunk(chunk: Buffer): Promise<void>
+  abstract processChunk (chunk: Buffer): Promise<void>
 }
 
 export abstract class STTBackendSession {
   private callback: null | STTChunkTranscribeCallback = null
 
-  abstract close(): void
+  abstract close (): void
 
-  setCallback(callback: STTChunkTranscribeCallback): void {
+  setCallback (callback: STTChunkTranscribeCallback): void {
     this.callback = callback
   }
 
-  abstract transcribeChunk(chunk: Buffer): void
+  abstract transcribeChunk (chunk: Buffer): void
 
-  protected chunkTranscribed(result: STTChunkTranscribeResult): void {
+  protected chunkTranscribed (result: STTChunkTranscribeResult): void {
     if (this.callback) {
       this.callback(result)
     }

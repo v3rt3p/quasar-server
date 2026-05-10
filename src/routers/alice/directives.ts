@@ -4,8 +4,8 @@ const TProcessIncomingCallDirective = loadProto(
   'alice/protos/endpoint/capabilities/phone_calls/capability.proto')
   .lookupType('NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective')
 
-export type AliceDirective = ProcessIncomingCallDirective | RawDirective | SoundLouderDirective | SoundQuieterDirective |
-  SoundSetLevelDirective | TtsPlayPlaceholderDirective | MMSemanticFrame
+export type AliceDirective = MMSemanticFrame | ProcessIncomingCallDirective | RawDirective |
+SoundLouderDirective | SoundQuieterDirective | SoundSetLevelDirective | TtsPlayPlaceholderDirective
 
 export interface ProcessIncomingCallDirective {
   callId: string;
@@ -31,8 +31,8 @@ export interface SoundSetLevelDirective {
 }
 
 export interface TtsPlayPlaceholderDirective {
-  type: 'ttsPlayPlaceholder'
   onFinish?: unknown
+  type: 'ttsPlayPlaceholder'
 }
 
 export const soundLouderDirective = {
@@ -96,15 +96,15 @@ export const ttsPlayPlaceholderDirective = (onFinish?: unknown) => ({
   Type: 'client_action',
   ...(onFinish
     ? {
-      OnFinish: onFinish
-    }
+        OnFinish: onFinish
+      }
     : {})
 })
 
 export interface MMSemanticFrame {
-  type: 'mmSemanticFrame',
   payload?: unknown,
   payloadRaw?: string
+  type: 'mmSemanticFrame',
 }
 
 export const mmSemanticFrame = (payload?: unknown, payloadRaw?: string) => ({
@@ -114,8 +114,11 @@ export const mmSemanticFrame = (payload?: unknown, payloadRaw?: string) => ({
   Type: 'server_action'
 })
 
-export function convertToAliceResponseDirective(directive: AliceDirective): any {
+export function convertToAliceResponseDirective (directive: AliceDirective): unknown {
   switch (directive.type) {
+    case 'mmSemanticFrame': {
+      return mmSemanticFrame(directive.payload, directive.payloadRaw)
+    }
     case 'processIncomingCall': {
       return processIncomingCallDirective(directive.callId)
     }
@@ -133,9 +136,6 @@ export function convertToAliceResponseDirective(directive: AliceDirective): any 
     }
     case 'ttsPlayPlaceholder': {
       return ttsPlayPlaceholderDirective(directive.onFinish)
-    }
-    case 'mmSemanticFrame': {
-      return mmSemanticFrame(directive.payload, directive.payloadRaw)
     }
   }
 }

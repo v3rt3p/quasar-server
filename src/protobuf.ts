@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export function decodeProtobufStruct (value: any): any {
   const result: Record<string, any> = {}
   if (!('fields' in value)) {

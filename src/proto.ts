@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { Root } from 'protobufjs'
 
-export function loadProto(protoPath: string): Root {
+export function loadProto (protoPath: string): Root {
   const protoDirectoryRoot = path.join(process.cwd(), 'protos')
   const root = new Root()
   root.resolvePath = function (_origin: string, target: string) {

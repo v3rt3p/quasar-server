@@ -47,7 +47,7 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
   async getStationInfos (): Promise<StationInfo[]> {
     const stations = await this.dataSource.getRepository<Station>(Station).find()
 
-    return stations.map(toInfo)
+    return stations.map(station => toInfo(station))
   }
 
   async initialize (): Promise<void> {
@@ -64,7 +64,8 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
     })
   }
 
-  async updateNameAndQuasarConfig (duid: string, name: string | undefined, config: QuasarConfig | undefined): Promise<StationInfo> {
+  async updateNameAndQuasarConfig (duid: string, name: string | undefined,
+    config: QuasarConfig | undefined): Promise<StationInfo> {
     return toInfo(await this.dataSource.transaction(async manager => {
       const repository = manager.getRepository<Station>(Station)
 
