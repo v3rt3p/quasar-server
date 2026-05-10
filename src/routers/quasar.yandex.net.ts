@@ -22,6 +22,10 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
     })
   })
 
+  router.post('/push_subscribe', (_request, response) => {
+    response.status(500).end()
+  })
+
   router.post('/update_device_state', async (request, response) => {
     try {
       const duid = String(request.query['device_id'])
@@ -42,6 +46,8 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.post('/glagol/check_token', async (request, response) => {
+    logger.debug(`Checking glagol token: ${JSON.stringify(request.query)}`)
+
     try {
       try {
         await jwtVerify(request.body.toString('utf8'), Buffer.from(properties.glagolJwtKey))
@@ -64,6 +70,8 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.post('/glagol/v2.0/check_token', async (request, response) => {
+    logger.debug(`Checking glagol token (v2): ${JSON.stringify(request.query)}`)
+
     try {
       try {
         await jwtVerify(request.body.toString('utf8'), Buffer.from(properties.glagolJwtKey))
@@ -88,6 +96,8 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.get('/glagol/token', async (request, response) => {
+    logger.debug(`Requesting glagol token: ${JSON.stringify(request.query)}`)
+
     try {
       const duid = String(request.query['device_id'])
       if (!duid) {
@@ -117,9 +127,8 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.get('/glagol/device_list', async (request, response) => {
+    logger.debug(`Requested glagol device list: ${JSON.stringify(request.query)}`)
     try {
-      logger.debug(`Requested glagol device list: ${JSON.stringify(request.query)}`)
-
       const stationInfos = await properties.infoProvider.getStationInfos()
 
       response.json({
@@ -149,7 +158,7 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.get('/get_sync_info', async (request, response) => {
-    logger.debug(`Get sync info: ${JSON.stringify(request.query)}`)
+    logger.debug(`Requesting sync info: ${JSON.stringify(request.query)}`)
 
     try {
       const duid = String(request.query['device_id'])
