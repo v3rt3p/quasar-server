@@ -1,7 +1,6 @@
 import openapi from '@elysia/openapi'
 import node from '@elysiajs/node'
 import bodyParser from 'body-parser'
-import dotenv from 'dotenv'
 import Elysia, { t } from 'elysia'
 import express from 'express'
 import { OpenAI } from 'openai'
@@ -11,8 +10,8 @@ import { BufferedAudioMetadataBackend } from './backend/audio-metadata/buffered'
 import { BasicProcessorBackend } from './backend/processors/basic'
 import { GigaAMSTTBackend } from './backend/stt/gigaam'
 import { OpenAITTSBackend } from './backend/tts/openai'
+import { getEnvironment } from './environment'
 import { getLogger } from './logger'
-import { pushUpdateConfigDirective } from './routers/alice/directives'
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
 import { registerReportAppMetricaYandexNetRouter } from './routers/report.appmetrica.yandex.net'
@@ -21,65 +20,58 @@ import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { PostgresDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
 
-dotenv.config({
-  path: '.env.local'
-})
-
-dotenv.config()
-
 const logger = getLogger()
+const environment = getEnvironment()
 
-const PORT = Number.parseInt(process.env.PORT ?? '31115')
-const API_PORT = Number.parseInt(process.env.API_PORT ?? '31116')
-
-const STT_GIGAAM_URL = process.env.STT_GIGAAM_URL ?? 'ws://10.0.3.137:8080'
-
-const PROCESSOR_BASIC_URL = process.env.PROCESSOR_BASIC_URL ?? 'http://localhost:8080'
-
-const TTS_OPENAI_BASE_URL = process.env.TTS_OPENAI_BASE_URL ?? 'http://10.0.3.137:8000'
-const TTS_OPENAI_API_KEY = process.env.TTS_OPENAI_API_KEY ?? ''
-const TTS_OPENAI_MODEL = process.env.TTS_OPENAI_MODEL ?? ''
-const TTS_OPENAI_VOICE = process.env.TTS_OPENAI_VOICE ?? 'IVONA 2 Tatyana OEM'
-const TTS_OPENAI_SPEED = Number.parseFloat(process.env.TTS_OPENAI_SPEED ?? '1')
-
-const AUDIO_METADATA_URLS = (process.env.AUDIO_METADATA_URLS ?? '').split(',')
-  .filter(Boolean)
-
-const POSTGRES_URL = process.env.POSTGRES_URL ?? 'postgres://quasar:quasar@localhost/quasar'
-
-const storage = new PostgresDatabaseStationInfoStorage(POSTGRES_URL)
+const storage = new PostgresDatabaseStationInfoStorage(environment.POSTGRES_URL)
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 storage.initialize().catch(error => logger.fatal(error))
 
 const app = express()
 
-app.use(bodyParser.json())
+// fuck Yandex
+app.use('/quasar.yandex.net/glagol/check_token', (request, _response, next) => {
+  request.headers['content-type'] = 'text/yandex-token';
+  next();
+});
+app.use('/quasar.yandex.net/glagol/v2.0/check_token', (request, _response, next) => {
+  request.headers['content-type'] = 'text/yandex-token';
+  next();
+});
+// unfuck Yandex
 
-const server = app.listen(PORT, error => {
+app.use(bodyParser.json())
+app.use(bodyParser.raw({
+   type: 'text/yandex-token',
+   inflate: true
+}))
+
+const server = app.listen(environment.PORT, error => {
   if (error) {
-    logger.error(`Quasar failed to start on :${PORT}: ${error}`)
+    logger.error(`Quasar failed to start on :${environment.PORT}: ${error}`)
     return
   }
-  logger.info(`Started quasar on :${PORT}`)
+  logger.info(`Started quasar on :${environment.PORT}`)
 })
 
 registerClckYandexNetRouter(app)
 registerReportAppMetricaYandexNetRouter(app)
 registerQuasarYandexNetRouter(app, {
+  glagolJwtKey: environment.GLAGOL_JWT_KEY,
   infoProvider: storage
 })
 const uniProxyRouter = registerUniproxyAliceYandexNetRouter({
-  audioMetadata: new BufferedAudioMetadataBackend(AUDIO_METADATA_URLS),
-  processor: new BasicProcessorBackend(PROCESSOR_BASIC_URL),
-  stt: new GigaAMSTTBackend(STT_GIGAAM_URL),
+  audioMetadata: new BufferedAudioMetadataBackend(environment.AUDIO_METADATA_URLS),
+  processor: new BasicProcessorBackend(environment.PROCESSOR_BASIC_URL),
+  stt: new GigaAMSTTBackend(environment.STT_GIGAAM_URL),
   tts: new OpenAITTSBackend(new OpenAI({
-    apiKey: TTS_OPENAI_API_KEY,
-    baseURL: TTS_OPENAI_BASE_URL
+    apiKey: environment.TTS_OPENAI_API_KEY,
+    baseURL: environment.TTS_OPENAI_BASE_URL
   }), {
-    model: TTS_OPENAI_MODEL,
-    speed: TTS_OPENAI_SPEED,
-    voice: TTS_OPENAI_VOICE
+    model: environment.TTS_OPENAI_MODEL,
+    speed: environment.TTS_OPENAI_SPEED,
+    voice: environment.TTS_OPENAI_VOICE
   })
 }, server)
 
@@ -201,7 +193,7 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
 
   runForConnections(duid, connection => {
     connection.pushDirective({
-        type: 'pushUpdateConfig'
+      type: 'pushUpdateConfig'
     }).catch(error =>
       logger.warn(`Failed to push config update directive to UniProxy connection: ${error}`))
   })
@@ -233,11 +225,11 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
 })
 
 try {
-  apiServer.listen(API_PORT, () => {
-    logger.info(`Started API on :${API_PORT}`)
+  apiServer.listen(environment.API_PORT, () => {
+    logger.info(`Started API on :${environment.API_PORT}`)
   })
 } catch (error) {
-  logger.error(`API failed to start on :${API_PORT}: ${error}`)
+  logger.error(`API failed to start on :${environment.API_PORT}: ${error}`)
 }
 
 app.use((request, response) => {

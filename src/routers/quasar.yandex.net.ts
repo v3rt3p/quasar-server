@@ -1,15 +1,17 @@
 import { Application, Router } from 'express'
+import { jwtVerify, SignJWT } from 'jose'
 
 import { getLogger } from '../logger'
 import { StationInfo, StationInfoProvider } from '../storage/types'
 
 const logger = getLogger()
 
-interface QuasarRouterDeps {
+interface QuasarRouterProperties {
+  glagolJwtKey: string
   infoProvider: StationInfoProvider
 }
 
-export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRouterDeps): void {
+export function registerQuasarYandexNetRouter (app: Application, properties: QuasarRouterProperties): void {
   const router = Router()
 
   router.get('/check_updates', (request, response) => {
@@ -28,7 +30,7 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
       }
       const platform = String(request.query['platform']) ?? 'unknown'
 
-      await deps.infoProvider.updateNetworkInfo(duid, platform, request.body)
+      await properties.infoProvider.updateNetworkInfo(duid, platform, request.body)
 
       response.status(200).json({
         status: 'ok'
@@ -39,11 +41,86 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
     }
   })
 
+  router.post('/glagol/check_token', async (request, response) => {
+    try {
+      try {
+        await jwtVerify(request.body.toString('utf8'), Buffer.from(properties.glagolJwtKey))
+      } catch {
+        response.status(200).json({
+          status: 'ok',
+          valid: false
+        })
+        return
+      }
+
+      response.status(200).json({
+        status: 'ok',
+        valid: true
+      })
+    } catch (error) {
+      logger.error(`Error on GET /glagol/check_token: ${error}`)
+      response.status(500).end()
+    }
+  })
+
+  router.post('/glagol/v2.0/check_token', async (request, response) => {
+    try {
+      try {
+        await jwtVerify(request.body.toString('utf8'), Buffer.from(properties.glagolJwtKey))
+      } catch {
+        response.status(200).json({
+          guest: false,
+          owner: false,
+          status: 'ok'
+        })
+        return
+      }
+
+      response.status(200).json({
+        guest: false,
+        owner: true,
+        status: 'ok'
+      })
+    } catch (error) {
+      logger.error(`Error on GET /glagol/check_token: ${error}`)
+      response.status(500).end()
+    }
+  })
+
+  router.get('/glagol/token', async (request, response) => {
+    try {
+      const duid = String(request.query['device_id'])
+      if (!duid) {
+        throw new Error('No device_id present in query')
+      }
+      const platform = String(request.query['platform']) ?? 'unknown'
+
+      const jwt = await new SignJWT({
+        plt: platform
+      })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setSubject(duid)
+        .setIssuer('quasar-backend')
+        .setAudience('glagol')
+        .setExpirationTime('1d')
+        .sign(Buffer.from(properties.glagolJwtKey))
+
+      response.status(200).json({
+        status: 'ok',
+        token: jwt
+      })
+    } catch (error) {
+      logger.error(`Error on GET /glagol/token: ${error}`)
+      response.status(500).end()
+    }
+  })
+
   router.get('/glagol/device_list', async (request, response) => {
     try {
       logger.debug(`Requested glagol device list: ${JSON.stringify(request.query)}`)
 
-      const stationInfos = await deps.infoProvider.getStationInfos()
+      const stationInfos = await properties.infoProvider.getStationInfos()
 
       response.json({
         devices: stationInfos.map(info => ({
@@ -81,7 +158,7 @@ export function registerQuasarYandexNetRouter (app: Application, deps: QuasarRou
       }
       const platform = String(request.query['platform']) ?? 'unknown'
 
-      const info = await deps.infoProvider.getInfo(duid, platform)
+      const info = await properties.infoProvider.getInfo(duid, platform)
 
       response.status(200).json({
         alice_pro_subscription: {
