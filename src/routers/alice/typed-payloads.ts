@@ -1,9 +1,9 @@
 import { encodeProtobufStruct } from '../../protobuf'
 
-export const externalEventSemanticFrame = (text: string) => encodeProtobufStruct({
+export const externalEventSemanticFrame = (event: string) => encodeProtobufStruct({
   typed_semantic_frame: {
     external_event_semantic_frame: {
-      text
+      event
     }
   }
 })
