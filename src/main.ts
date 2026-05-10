@@ -13,7 +13,9 @@ import { GigaAMSTTBackend } from './backend/stt/gigaam'
 import { OpenAITTSBackend } from './backend/tts/openai'
 import { getLogger } from './logger'
 import { pushUpdateConfigDirective } from './routers/alice/directives'
+import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
+import { registerReportAppMetricaYandexNetRouter } from './routers/report.appmetrica.yandex.net'
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { PostgresDatabaseStationInfoStorage } from './storage/database'
@@ -62,6 +64,8 @@ const server = app.listen(PORT, error => {
   logger.info(`Started quasar on :${PORT}`)
 })
 
+registerClckYandexNetRouter(app)
+registerReportAppMetricaYandexNetRouter(app)
 registerQuasarYandexNetRouter(app, {
   infoProvider: storage
 })
