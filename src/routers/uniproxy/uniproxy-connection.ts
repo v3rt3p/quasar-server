@@ -55,6 +55,10 @@ export class UniProxyConnection {
     this.setupVoiceInputHandlers()
   }
 
+  async pushDirective (...directives: AliceDirective[]): Promise<void> {
+    await this.sendPush(directives)
+  }
+
   async pushEvent (text: string): Promise<void> {
     await this.sendPush([
       {

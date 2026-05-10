@@ -5,11 +5,15 @@ const TProcessIncomingCallDirective = loadProto(
   .lookupType('NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective')
 
 export type AliceDirective = MMSemanticFrame | ProcessIncomingCallDirective | RawDirective |
-SoundLouderDirective | SoundQuieterDirective | SoundSetLevelDirective | TtsPlayPlaceholderDirective
+SoundLouderDirective | SoundQuieterDirective | SoundSetLevelDirective | TtsPlayPlaceholderDirective | PushUpdateConfig
 
 export interface ProcessIncomingCallDirective {
   callId: string;
   type: 'processIncomingCall'
+}
+
+export interface PushUpdateConfig {
+  type: 'pushUpdateConfig'
 }
 
 export interface RawDirective {
@@ -136,6 +140,9 @@ export function convertToAliceResponseDirective (directive: AliceDirective): unk
     }
     case 'ttsPlayPlaceholder': {
       return ttsPlayPlaceholderDirective(directive.onFinish)
+    }
+    case 'pushUpdateConfig': {
+      return pushUpdateConfigDirective
     }
   }
 }

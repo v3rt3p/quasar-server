@@ -200,7 +200,9 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
   const info = await storage.updateNameAndQuasarConfig(duid, body.name, body.quasarConfig)
 
   runForConnections(duid, connection => {
-    connection.pushRawDirective(pushUpdateConfigDirective).catch(error =>
+    connection.pushDirective({
+        type: 'pushUpdateConfig'
+    }).catch(error =>
       logger.warn(`Failed to push config update directive to UniProxy connection: ${error}`))
   })
 
