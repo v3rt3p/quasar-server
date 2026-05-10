@@ -40,7 +40,9 @@ export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> 
       this.emit('close')
     })
     this.webSocket.addEventListener('message', message => {
+      console.info(message.data)
       const data = JSON.parse(message.data.toString())
+      console.info(data)
       if (data.type === 'partialResponse') {
         this.emit('partialResponse', data.data)
       }
