@@ -1,8 +1,9 @@
-import { loadProto } from '../../proto'
+import { encodeProtobufStruct } from '../../protobuf'
+import proto from '../../protos/protos'
 
-const TProcessIncomingCallDirective = loadProto(
-  'alice/protos/endpoint/capabilities/phone_calls/capability.proto')
-  .lookupType('NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective')
+type TDirective = proto.NAlice.NAliceApi.ITDirective
+
+const TProcessIncomingCallDirectiveClass = proto.NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective
 
 export type AliceDirective = MMSemanticFrame | ProcessIncomingCallDirective | PushUpdateConfig |
 RawDirective | SoundLouderDirective | SoundQuieterDirective | SoundSetLevelDirective | TtsPlayPlaceholderDirective
@@ -17,7 +18,7 @@ export interface PushUpdateConfig {
 }
 
 export interface RawDirective {
-  data: unknown
+  data: TDirective
   type: 'raw',
 }
 
@@ -35,7 +36,7 @@ export interface SoundSetLevelDirective {
 }
 
 export interface TtsPlayPlaceholderDirective {
-  onFinish?: unknown
+  onFinish?: proto.NAlice.NAliceApi.TDirective.ITOnFinishEvent
   type: 'ttsPlayPlaceholder'
 }
 
@@ -59,25 +60,19 @@ export const soundSetLevelDirective = (level: number) => ({
   AnalyticsType: 'sound_set_level',
   IsLedSilent: true,
   Name: 'sound_set_level',
-  Payload: {
-    fields: {
-      new_level: {
-        numberValue: level
-      },
-      new_percent_level: {
-        numberValue: level * 10
-      }
-    }
-  },
+  Payload: encodeProtobufStruct({
+    new_level: level,
+    new_percent_level: level * 10
+  }),
   Type: 'client_action'
 })
 
 export const processIncomingCallDirective = (callId: string) => ({
   IsLedSilent: true,
   Name: 'phone_calls_process_incoming_call',
-  PayloadRaw: Buffer.from(TProcessIncomingCallDirective.encode({
+  PayloadRaw: TProcessIncomingCallDirectiveClass.encode({
     CallId: callId
-  }).finish()).toString('base64'),
+  }).finish(),
   Type: 'client_action'
 })
 
@@ -86,17 +81,13 @@ export const pushUpdateConfigDirective = {
   Type: 'client_action'
 }
 
-export const ttsPlayPlaceholderDirective = (onFinish?: unknown) => ({
+export const ttsPlayPlaceholderDirective = (onFinish?: proto.NAlice.NAliceApi.TDirective.ITOnFinishEvent) => ({
   AnalyticsType: 'tts_play_placeholder',
   IsLedSilent: true,
   Name: 'tts_play_placeholder',
-  Payload: {
-    fields: {
-      channel: {
-        stringValue: 'Dialog'
-      }
-    }
-  },
+  Payload: encodeProtobufStruct({
+    channel: 'Dialog'
+  }),
   Type: 'client_action',
   ...(onFinish
     ? {
@@ -106,19 +97,19 @@ export const ttsPlayPlaceholderDirective = (onFinish?: unknown) => ({
 })
 
 export interface MMSemanticFrame {
-  payload?: unknown,
-  payloadRaw?: string
+  payload?: proto.google.protobuf.IStruct,
+  payloadRaw?: Buffer
   type: 'mmSemanticFrame',
 }
 
-export const mmSemanticFrame = (payload?: unknown, payloadRaw?: string) => ({
+export const mmSemanticFrame = (payload?: proto.google.protobuf.IStruct, payloadRaw?: Buffer) => ({
   Name: '@@mm_semantic_frame',
   Payload: payload,
   PayloadRaw: payloadRaw,
   Type: 'server_action'
 })
 
-export function convertToAliceResponseDirective (directive: AliceDirective): unknown {
+export function convertToAliceResponseDirective (directive: AliceDirective): TDirective {
   switch (directive.type) {
     case 'mmSemanticFrame': {
       return mmSemanticFrame(directive.payload, directive.payloadRaw)

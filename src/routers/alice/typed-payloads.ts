@@ -1,75 +1,29 @@
-export const externalEventSemanticFrame = (text: string) => (
-  {
-    fields: {
-      typed_semantic_frame: {
-        structValue: {
-          fields: {
-            external_event_semantic_frame: {
-              structValue: {
-                fields: {
-                  event: {
-                    stringValue: text
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-)
+import { encodeProtobufStruct } from '../../protobuf'
 
-export const ttsSemanticFrame = (text: string) => (
-  {
-    fields: {
-      typed_semantic_frame: {
-        structValue: {
-          fields: {
-            tts_semantic_frame: {
-              structValue: {
-                fields: {
-                  text: {
-                    stringValue: text
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+export const externalEventSemanticFrame = (text: string) => encodeProtobufStruct({
+  typed_semantic_frame: {
+    external_event_semantic_frame: {
+      text
     }
   }
-)
+})
 
-export const continueSessionStage1SemanticFrame = {
-  fields: {
-    typed_semantic_frame: {
-      structValue: {
-        fields: {
-          continue_session_stage1_semantic_frame: {
-            structValue: {
-              fields: {}
-            }
-          }
-        }
-      }
+export const ttsSemanticFrame = (text: string) => encodeProtobufStruct({
+  typed_semantic_frame: {
+    tts_semantic_frame: {
+      text
     }
   }
-}
+})
 
-export const continueSessionStage2SemanticFrame = {
-  fields: {
-    typed_semantic_frame: {
-      structValue: {
-        fields: {
-          continue_session_stage2_semantic_frame: {
-            structValue: {
-              fields: {}
-            }
-          }
-        }
-      }
-    }
+export const continueSessionStage1SemanticFrame = encodeProtobufStruct({
+  typed_semantic_frame: {
+    continue_session_stage1_semantic_frame: {}
   }
-}
+})
+
+export const continueSessionStage2SemanticFrame = encodeProtobufStruct({
+  typed_semantic_frame: {
+    continue_session_stage2_semantic_frame: {}
+  }
+})

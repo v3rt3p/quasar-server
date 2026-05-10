@@ -1,0 +1,10 @@
+version: v2
+inputs:
+  - directory: protos
+plugins:
+  - local: protoc-gen-pbjs
+    out: src/protos
+    strategy: all
+    opt: 
+      - dts
+      - file=protos.js

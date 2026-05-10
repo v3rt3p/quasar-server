@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bksp/style-guide": "^1.5.0",
+    "@bufbuild/protobuf": "^2.12.0",
     "@discordjs/opus": "^0.10.0",
     "@elysia/openapi": "^1.4.15",
     "@elysiajs/node": "^1.4.5",
@@ -28,10 +29,11 @@
     "express": "^5.2.1",
     "jose": "^6.2.3",
     "js-yaml": "^4.1.1",
+    "long": "^5.3.2",
     "node-forge": "^1.4.0",
     "openai": "^5.23.2",
     "pg": "^8.20.0",
-    "protobufjs": "^7.5.6",
+    "protobufjs": "^8.2.0",
     "quasar-server": "link:",
     "tslog": "^4.10.2",
     "tsx": "^4.21.0",
@@ -39,5 +41,11 @@
     "typescript": "^5.9.3",
     "ws": "^8.20.0",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.69.0",
+    "@protobuf-ts/plugin": "^2.11.1",
+    "protobufjs-cli": "^2.2.0",
+    "protoc": "^25.9.0"
   }
 }

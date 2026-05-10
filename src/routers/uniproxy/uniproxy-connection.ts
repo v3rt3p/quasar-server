@@ -4,22 +4,20 @@ import { RawData, WebSocket } from 'ws'
 
 import { AudioMetadataBackend, ProcessorBackend, STTBackend, TTSBackend } from '../../backend/backend'
 import { getLogger } from '../../logger'
-import { loadProto } from '../../proto'
-import { decodeProtobufStruct } from '../../protobuf'
+import { decodeProtobufStruct, getValue } from '../../protobuf'
+import proto from '../../protos/protos'
 import { AliceDirective, convertToAliceResponseDirective as convertToAliceDirective } from '../alice/directives'
 import { continueSessionStage2SemanticFrame, externalEventSemanticFrame, ttsSemanticFrame } from '../alice/typed-payloads'
 import { InputHandler, InputResult, TextInput } from './input-handler'
 import { VoiceInputHandler } from './voice-input-handler'
 
-const TClientMessageProto = loadProto(
-  'alice/protos/api/alicekit/protocol/client/client_message.proto')
-  .lookupType('NAlice.NAliceApi.TClientMessage')
-const TServerMessageProto = loadProto(
-  'alice/protos/api/alicekit/protocol/server/server_message.proto')
-  .lookupType('NAlice.NAliceApi.TServerMessage')
-const TSemanticFrameRequestData = loadProto(
-  'alice/protos/api/alicekit/scenarios/frames/frame.proto')
-  .lookupType('NAlice.NAliceApi.TSemanticFrameRequestData')
+type TServerMessage = proto.NAlice.NAliceApi.ITServerMessage
+const TServerMessageClass = proto.NAlice.NAliceApi.TServerMessage
+
+type TClientMessage = proto.NAlice.NAliceApi.ITClientMessage
+const TClientMessageClass = proto.NAlice.NAliceApi.TClientMessage
+
+const TSemanticFrameRequestDataClass = proto.NAlice.NAliceApi.TSemanticFrameRequestData
 
 export interface UniProxyConnectionParameters {
   audioMetadata: AudioMetadataBackend
@@ -27,9 +25,6 @@ export interface UniProxyConnectionParameters {
   stt: STTBackend
   tts: TTSBackend
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyProtobufData = any
 
 export class UniProxyConnection {
   private inputHandler: InputHandler
@@ -45,7 +40,7 @@ export class UniProxyConnection {
 
   private voiceInputReferenceSequenceNumber: number = -1
 
-  private voiceInputStreamId: number = -1
+  private voiceInputStreamId: Long | number = -1
 
   constructor (private readonly webSocket: WebSocket, private readonly parameters: UniProxyConnectionParameters) {
     this.voiceInputHandler = new VoiceInputHandler(parameters)
@@ -68,7 +63,7 @@ export class UniProxyConnection {
     ])
   }
 
-  async pushRawDirective (directive: unknown): Promise<void> {
+  async pushRawDirective (directive: proto.NAlice.NAliceApi.ITDirective): Promise<void> {
     await this.sendPush([], [directive])
   }
 
@@ -85,7 +80,7 @@ export class UniProxyConnection {
     this.webSocket.close()
   }
 
-  private getTimings () {
+  private getTimings (): proto.NAlice.NAliceApi.TServerMessage.ITTimings {
     return {
       SendingTime: {
         seconds: Math.floor(Date.now() / 1000)
@@ -107,7 +102,7 @@ export class UniProxyConnection {
     }
     if (message.subarray(0, 4).equals(new Uint8Array([0x41, 0x41, 0x50, 0x49]))) {
       const rawClientMessage = message.subarray(4)
-      const clientMessage = TClientMessageProto.decode(rawClientMessage).toJSON()
+      const clientMessage = TClientMessageClass.decode(rawClientMessage)
       await this.handleClientMessage(clientMessage)
     } else {
       const streamId = new DataView(message.buffer, message.byteOffset, message.length).getUint32(0, false)
@@ -121,7 +116,7 @@ export class UniProxyConnection {
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
   }
 
-  private async handleClientMessage (clientMessage: AnyProtobufData): Promise<void> {
+  private async handleClientMessage (clientMessage: TClientMessage): Promise<void> {
     if (clientMessage.StreamControl) {
       await this.handleStreamControl(clientMessage)
     }
@@ -147,12 +142,12 @@ export class UniProxyConnection {
     this.voiceInputHandler.close()
   }
 
-  private async handleLogSpotterEvent (clientMessage: AnyProtobufData): Promise<void> {
+  private async handleLogSpotterEvent (clientMessage: TClientMessage): Promise<void> {
     await this.sendServerMessage({
       Event: {
         Header: {
           MessageId: randomUUID(),
-          RefMessageId: clientMessage.Event.Header.MessageId
+          RefMessageId: clientMessage.Event!.Header!.MessageId
         },
         LogAck: {}
       },
@@ -160,7 +155,7 @@ export class UniProxyConnection {
     })
   }
 
-  private async handleMatchedUserEvent (clientMessage: AnyProtobufData): Promise<void> {
+  private async handleMatchedUserEvent (clientMessage: TClientMessage): Promise<void> {
     if (!this.voiceInputHandler) {
       return
     }
@@ -182,8 +177,8 @@ export class UniProxyConnection {
 
     await this.voiceInputHandler.handleVoiceInputSpeakerMetadataEvent({
       metadata: {
-        age: ageClassNames[biometryInfo.find((item: AnyProtobufData) => item.Tag === 'children')?.ClassName] ?? 'unknown',
-        gender: genderClassNames[biometryInfo.find((item: AnyProtobufData) => item.Tag === 'gender')?.ClassName] ?? 'unknown',
+        age: ageClassNames[biometryInfo.find(item => item.Tag === 'children')!.ClassName!] ?? 'unknown',
+        gender: genderClassNames[biometryInfo.find(item => item.Tag === 'gender')!.ClassName!] ?? 'unknown',
       }
     })
   }
@@ -202,19 +197,19 @@ export class UniProxyConnection {
     })
   }
 
-  private async handleStreamControl (clientMessage: AnyProtobufData): Promise<void> {
-    const streamId = Number.parseInt(clientMessage.StreamControl.StreamId)
+  private async handleStreamControl (clientMessage: TClientMessage): Promise<void> {
+    const streamId = clientMessage.StreamControl!.StreamId
     if (this.voiceInputStreamId !== streamId) {
       return
     }
 
-    const closeReason = clientMessage.StreamControl.Close?.Reason
+    const closeReason = clientMessage.StreamControl!.Close?.Reason
     if (!closeReason) {
       return
     }
 
     switch (closeReason) {
-      case 'CANCEL': {
+      case proto.NAlice.NAliceApi.TStreamControl.TActionClose.EReason.CANCEL: {
         this.handleClientCancel()
         break
       }
@@ -225,42 +220,42 @@ export class UniProxyConnection {
     }
   }
 
-  private async handleTextInputEvent (clientMessage: AnyProtobufData): Promise<void> {
+  private async handleTextInputEvent (clientMessage: TClientMessage): Promise<void> {
     let textInput: null | TextInput = null
 
-    const event = clientMessage.Event.TextInput.Request.Event
+    const event = clientMessage.Event!.TextInput!.Request!.Event!
 
-    if (event.Type === 'server_action' && event.Payload) {
+    if (event.Type === proto.NAlice.EEventType.server_action && event.Payload) {
       const payload = decodeProtobufStruct(event.Payload)
-      if (payload?.typed_semantic_frame?.music_play_semantic_frame) {
+      if (getValue(payload, 'any', 'typed_semantic_frame', 'music_play_semantic_frame')) {
         textInput = {
           data: {
             kind: 'playButtonPress'
           },
           metadata: {}
         }
-      } else if (payload?.typed_semantic_frame?.external_event_semantic_frame) {
+      } else if (getValue(payload, 'string', 'typed_semantic_frame', 'external_event_semantic_frame', 'event')) {
         textInput = {
           data: {
-            eventText: payload.typed_semantic_frame.external_event_semantic_frame.event,
+            eventText: getValue(payload, 'string', 'typed_semantic_frame', 'external_event_semantic_frame', 'event')!,
             kind: 'event'
           },
           metadata: {}
         }
-      } else if (payload?.typed_semantic_frame?.tts_semantic_frame) {
+      } else if (getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')) {
         textInput = {
           data: {
             kind: 'tts',
-            text: payload.typed_semantic_frame.tts_semantic_frame.text
+            text: getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')!
           },
           metadata: {}
         }
-      } else if (payload?.typed_semantic_frame?.continue_session_stage1_semantic_frame) {
+      } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage1_semantic_frame')) {
         await this.sendPush([{
           payload: continueSessionStage2SemanticFrame,
           type: 'mmSemanticFrame'
         }], [])
-      } else if (payload?.typed_semantic_frame?.continue_session_stage2_semantic_frame) {
+      } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame')) {
         textInput = {
           data: {
             kind: 'continue'
@@ -270,9 +265,9 @@ export class UniProxyConnection {
       } else {
         this.logger.info(`Received unknown TextInput server_action: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
       }
-    } else if (event.Type === 'server_action' && event.Name === '@@mm_semantic_frame' && event.PayloadRaw) {
-      const rawPayload = Buffer.from(event.PayloadRaw, 'base64')
-      const decoded = TSemanticFrameRequestData.decode(rawPayload).toJSON()
+    } else if (event.Type === proto.NAlice.EEventType.server_action && event.Name === '@@mm_semantic_frame' && event.PayloadRaw) {
+      const rawPayload = Buffer.from(event.PayloadRaw)
+      const decoded = TSemanticFrameRequestDataClass.decode(rawPayload)
       if (decoded?.TypedSemanticFrame?.MusicPlaySemanticFrame) {
         textInput = {
           data: {
@@ -304,8 +299,8 @@ export class UniProxyConnection {
     }
 
     try {
-      await this.sendInputResult(inputResult, clientMessage.Event.TextInput.Header.RequestId,
-        clientMessage.Event.Header.MessageId, clientMessage.Event.TextInput.Header.SequenceNumber)
+      await this.sendInputResult(inputResult, clientMessage.Event!.TextInput!.Header!.RequestId!,
+        clientMessage.Event!.Header!.MessageId!, clientMessage.Event!.TextInput!.Header!.SequenceNumber!)
     } catch (error) {
       this.logger.warn('Failed to send input result: ', error)
       this.closeConnection()
@@ -316,15 +311,17 @@ export class UniProxyConnection {
     // ignore for now
   }
 
-  private async handleVoiceInputEvent (clientMessage: AnyProtobufData): Promise<void> {
-    if (!clientMessage.Event.VoiceInput.Header.DialogId) {
+  private async handleVoiceInputEvent (clientMessage: TClientMessage): Promise<void> {
+    const voiceInputHeader = clientMessage.Event!.VoiceInput!.Header!
+    const eventHeader = clientMessage.Event!.Header!
+    if (!voiceInputHeader.DialogId) {
       this.inputHandler.closeSession()
     }
     this.openSession()
-    this.voiceInputStreamId = Number.parseInt(clientMessage.Event.Header.StreamId)
-    this.voiceInputReferenceMessageId = clientMessage.Event.Header.MessageId
-    this.voiceInputReferenceRequestId = clientMessage.Event.VoiceInput.Header.RequestId
-    this.voiceInputReferenceSequenceNumber = clientMessage.Event.VoiceInput.Header.SequenceNumber
+    this.voiceInputStreamId = eventHeader.StreamId!
+    this.voiceInputReferenceMessageId = eventHeader.MessageId!
+    this.voiceInputReferenceRequestId = voiceInputHeader.RequestId!
+    this.voiceInputReferenceSequenceNumber = voiceInputHeader.SequenceNumber!
     this.voiceInputHandler.handleVoiceInputEvent({})
   }
 
@@ -341,6 +338,7 @@ export class UniProxyConnection {
     await this.sendServerMessage({
       Event: {
         AliceResponse: {
+          ForceServerRequest: false,
           Header: {
             DialogId: randomUUID(),
             RequestId: requestId,
@@ -364,17 +362,7 @@ export class UniProxyConnection {
               ...directives.map(directive =>
                 convertToAliceDirective(directive)),
             ],
-            Error: {},
-            ForceServerRequest: false,
             IsStreaming: false,
-            MegamindAnalyticsInfo: {
-              AnalyticsInfo: [],
-              ChosenUtterance: 'test',
-              IoTUserInfo: {},
-              WinnerScenario: {
-                Name: 'test-name'
-              }
-            },
             Suggest: {
               Items: []
             }
@@ -473,11 +461,12 @@ export class UniProxyConnection {
     }
   }
 
-  private async sendPush (directives: AliceDirective[], rawDirectives?: unknown[]): Promise<void> {
+  private async sendPush (directives: AliceDirective[],
+    rawDirectives?: proto.NAlice.NAliceApi.ITDirective[]): Promise<void> {
     await this.sendServerMessage({
       Event: {
         Header: {
-          Ack: Date.now().toFixed(0),
+          Ack: Date.now(),
           MessageId: randomUUID()
         },
         Push: {
@@ -514,8 +503,8 @@ export class UniProxyConnection {
     }
   }
 
-  private async sendServerMessage (serverMessage: AnyProtobufData): Promise<void> {
-    const encoded = TServerMessageProto.encode(serverMessage).finish()
+  private async sendServerMessage (serverMessage: TServerMessage): Promise<void> {
+    const encoded = TServerMessageClass.encode(serverMessage).finish()
     await this.sendRawData(Buffer.concat([Buffer.from('AAPI', 'ascii'), encoded]), true)
   }
 

@@ -12,6 +12,7 @@ import { GigaAMSTTBackend } from './backend/stt/gigaam'
 import { OpenAITTSBackend } from './backend/tts/openai'
 import { getEnvironment } from './environment'
 import { getLogger } from './logger'
+import proto from './protos/protos'
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
 import { registerReportAppMetricaYandexNetRouter } from './routers/report.appmetrica.yandex.net'
@@ -32,19 +33,19 @@ const app = express()
 
 // fuck Yandex
 app.use('/quasar.yandex.net/glagol/check_token', (request, _response, next) => {
-  request.headers['content-type'] = 'text/yandex-token';
-  next();
-});
+  request.headers['content-type'] = 'text/yandex-token'
+  next()
+})
 app.use('/quasar.yandex.net/glagol/v2.0/check_token', (request, _response, next) => {
-  request.headers['content-type'] = 'text/yandex-token';
-  next();
-});
+  request.headers['content-type'] = 'text/yandex-token'
+  next()
+})
 // unfuck Yandex
 
 app.use(bodyParser.json())
 app.use(bodyParser.raw({
-   type: 'text/yandex-token',
-   inflate: true
+  inflate: true,
+  type: 'text/yandex-token'
 }))
 
 const server = app.listen(environment.PORT, error => {
@@ -168,7 +169,8 @@ apiServer.post('/devices/:duid/push-raw', async ({ body, params: { duid } }) => 
 
 apiServer.post('/devices/:duid/push-directive', async ({ body, params: { duid } }) => {
   runForConnections(duid, connection => {
-    connection.pushRawDirective(body).catch(error => logger.warn(`Failed to push raw directive to UniProxy connection: ${error}`))
+    connection.pushRawDirective(proto.NAlice.NAliceApi.TDirective.fromObject(body as { [k: string]: unknown }))
+      .catch(error => logger.warn(`Failed to push raw directive to UniProxy connection: ${error}`))
   })
 
   return {}
