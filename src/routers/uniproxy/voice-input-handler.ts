@@ -98,6 +98,9 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   }
 
   async handleVoiceInputEvent (request: VoiceInputEvent): Promise<void> {
+    this.logger.debug('VoiceInputHandler received Input')
+    this.close()
+
     if (request.dialogSpan) {
       this.voiceSpan = startInactiveSpan({
         name: 'VoiceInputHandler processing',
@@ -105,9 +108,6 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
         parentSpan: request.dialogSpan
       })
     }
-
-    this.logger.debug('VoiceInputHandler received Input')
-    this.close()
 
     let audioMetadataSession: AudioMetadataBackendSession
     let sttSession: STTBackendSession
