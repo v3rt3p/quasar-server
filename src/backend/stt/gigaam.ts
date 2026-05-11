@@ -13,17 +13,9 @@ interface GigaAMMessage {
 class GigaAMSTTSession extends STTBackendSession {
   private readonly logger = getLogger<GigaAMSTTSession>()
   private opusProcessor: OpusProcessor
-  private span: null | Span = null
 
-  constructor (private readonly webSocket: WebSocket, parentSpan?: Span) {
+  constructor (private readonly webSocket: WebSocket, private readonly span?: Span) {
     super()
-    if (parentSpan) {
-      this.span = startInactiveSpan({
-        name: 'GigaAM STT transcribing',
-        op: 'gigaam-stt',
-        parentSpan
-      })
-    }
     this.opusProcessor = new OpusProcessor(data => new Promise((resolve, reject) => {
       if (this.webSocket.readyState !== this.webSocket.OPEN) {
         this.logger.warn('Trying to send data to closed socket (data)')
@@ -82,10 +74,18 @@ export class GigaAMSTTBackend implements STTBackend {
   constructor (private readonly endpoint: string) {}
 
   startTranscribing (parentSpan?: Span): Promise<STTBackendSession> {
+    let span: Span | undefined
+    if (parentSpan) {
+      span = startInactiveSpan({
+        name: 'GigaAM STT transcribing',
+        op: 'gigaam-stt',
+        parentSpan
+      })
+    }
     const webSocket = new WebSocket(this.endpoint, {
       headers: {
         ...getTraceData({
-          span: parentSpan
+          span
         })
       }
     })
@@ -97,7 +97,7 @@ export class GigaAMSTTBackend implements STTBackend {
         reject(new Error('Unexpected close'))
       })
       webSocket.on('open', () => {
-        resolve(new GigaAMSTTSession(webSocket, parentSpan))
+        resolve(new GigaAMSTTSession(webSocket, span))
       })
     })
   }
