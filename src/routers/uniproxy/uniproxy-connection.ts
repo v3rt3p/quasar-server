@@ -337,6 +337,12 @@ export class UniProxyConnection {
       this.openDialog()
     }
 
+    this.inputSpan = startInactiveSpan({
+      name: 'TextInput processing',
+      op: 'text-input',
+      parentSpan: this.dialogSpan
+    })
+
     let inputResult: InputResult
 
     try {
@@ -356,6 +362,11 @@ export class UniProxyConnection {
       this.logger.warn('Failed to send input result: ', error)
       this.closeConnection()
     }
+
+    this.inputSpan?.setAttribute('result', JSON.stringify(inputResult, undefined, 2))
+    this.inputSpan?.setAttribute('endReason', 'finish')
+    this.inputSpan?.end()
+    this.inputSpan = undefined
   }
 
   private async handleTextMessage (_message: string): Promise<void> {
@@ -380,7 +391,8 @@ export class UniProxyConnection {
     })
     if (this.dialogSpan) {
       this.inputSpan = startInactiveSpan({
-        name: 'voice-input',
+        name: 'VoiceInput processing',
+        op: 'voice-input',
         parentSpan: this.dialogSpan
       })
     }
@@ -395,7 +407,8 @@ export class UniProxyConnection {
       attributes: {
         dialogId: this.dialogId
       },
-      name: 'dialog',
+      name: `Dialog ${this.dialogId}`,
+      op: 'dialog',
       parentSpan: null
     })
 
@@ -522,7 +535,8 @@ export class UniProxyConnection {
           attributes: {
             text: result.text
           },
-          name: 'tts',
+          name: 'TTS synthesizing',
+          op: 'tts',
           parentSpan: this.inputSpan ?? this.dialogSpan
         })
       }

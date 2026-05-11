@@ -19,7 +19,8 @@ class GigaAMSTTSession extends STTBackendSession {
     super()
     if (parentSpan) {
       this.span = startInactiveSpan({
-        name: 'gigaam-stt',
+        name: 'GigaAM STT transcribing',
+        op: 'gigaam-stt',
         parentSpan
       })
     }

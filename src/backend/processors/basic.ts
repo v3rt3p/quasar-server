@@ -41,7 +41,8 @@ export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> 
     let span: Span | undefined
     if (parentSpan) {
       span = startInactiveSpan({
-        name: 'basic-processor',
+        name: 'Basic processor processing',
+        op: 'basic-processor',
         parentSpan
       })
     }

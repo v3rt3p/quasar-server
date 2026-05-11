@@ -91,7 +91,8 @@ export class InputHandler {
     } else {
       if (parentSpan) {
         this.span = startInactiveSpan({
-          name: 'input-handler',
+          name: 'InputHandler session processing',
+          op: 'input-handler-session',
           parentSpan
         })
       }
@@ -202,9 +203,19 @@ export class InputHandler {
       }
     }
 
+    let span: Span | undefined
+    if (this.span) {
+      span = startInactiveSpan({
+        name: 'InputHandler waiting for partial response',
+        op: 'input-handler-get-partial-response',
+        parentSpan: this.span
+      })
+    }
     const partialResponse = await this.getPartialResponse()
 
     if (partialResponse === null) {
+      span?.setAttribute('endReason', 'no-partial-response')
+      span?.end()
       this.logger.debug('No partial response, sending continue')
       return {
         dialogFinished: false,
@@ -220,6 +231,11 @@ export class InputHandler {
     }
 
     if (partialResponse.finished) {
+      span?.setAttribute('endReason', 'partial-response-finished')
+      span?.setAttribute('text', partialResponse.text)
+      span?.setAttribute('require-more-input', partialResponse.requireMoreInput)
+      span?.setAttribute('directives', JSON.stringify(partialResponse.directives, undefined, 2))
+      span?.end()
       this.logger.debug('Partial response is finished')
       if (partialResponse.finished && !partialResponse.requireMoreInput) {
         this.logger.debug('Partial response is finished, and no more input is required - closing')
@@ -239,6 +255,10 @@ export class InputHandler {
     }
 
     this.logger.debug('Partial response is not finished, sending continue')
+    span?.setAttribute('endReason', 'partial-response-not-finished')
+    span?.setAttribute('text', partialResponse.text)
+    span?.setAttribute('directives', JSON.stringify(partialResponse.directives, undefined, 2))
+    span?.end()
     return {
       dialogFinished: false,
       directives: [

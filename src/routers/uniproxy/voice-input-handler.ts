@@ -100,7 +100,8 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   async handleVoiceInputEvent (request: VoiceInputEvent): Promise<void> {
     if (request.dialogSpan) {
       this.voiceSpan = startInactiveSpan({
-        name: 'voice-input-handler',
+        name: 'VoiceInputHandler processing',
+        op: 'voice-input-handler',
         parentSpan: request.dialogSpan
       })
     }

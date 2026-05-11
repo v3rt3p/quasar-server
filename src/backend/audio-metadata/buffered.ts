@@ -1,4 +1,4 @@
-import { Span, startInactiveSpan, startSpan } from '@sentry/node'
+import { Span, startInactiveSpan } from '@sentry/node'
 
 import { OpusProcessor } from '../../codecs/opus-processor'
 import { getLogger } from '../../logger'

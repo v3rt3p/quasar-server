@@ -16,7 +16,8 @@ export class OpenAITTSBackend implements TTSBackend {
     let span: Span | undefined
     if (request.parentSpan) {
       span = startInactiveSpan({
-        name: 'openai-tts',
+        name: 'OpenAI TTS synthesizing',
+        op: 'openai-tts',
         parentSpan: request.parentSpan
       })
     }
