@@ -22,8 +22,10 @@ export const continueSessionStage1SemanticFrame = encodeProtobufStruct({
   }
 })
 
-export const continueSessionStage2SemanticFrame = encodeProtobufStruct({
+export const continueSessionStage2SemanticFrame = (dialogId: null | string) => encodeProtobufStruct({
   typed_semantic_frame: {
-    continue_session_stage2_semantic_frame: {}
+    continue_session_stage2_semantic_frame: {
+      dialog_id: dialogId
+    }
   }
 })

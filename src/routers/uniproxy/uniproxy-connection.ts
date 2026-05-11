@@ -100,7 +100,7 @@ export class UniProxyConnection {
     this.dialogSpan.end()
     this.dialogSpan = null
     this.dialogId = null
-    this.logger.info(`Dialog ${this.dialogId} ended`)
+    this.logger.info(`Dialog ${this.dialogId} ended: ${reason}`)
   }
 
   private getTimings (): proto.NAlice.NAliceApi.TServerMessage.ITTimings {
@@ -249,11 +249,7 @@ export class UniProxyConnection {
   private async handleTextInputEvent (clientMessage: TClientMessage): Promise<void> {
     let textInput: null | TextInput = null
 
-    const dialogId = clientMessage.Event?.TextInput?.Header?.DialogId
-    if (!dialogId || dialogId !== this.dialogId) {
-      this.closeDialog(CloseDialogReason.INTERRUPTION)
-    }
-    this.openDialog()
+    let dialogId = clientMessage.Event?.TextInput?.Header?.DialogId
 
     const event = clientMessage.Event!.TextInput!.Request!.Event!
 
@@ -284,10 +280,11 @@ export class UniProxyConnection {
         }
       } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage1_semantic_frame')) {
         await this.sendPush([{
-          payload: continueSessionStage2SemanticFrame,
+          payload: continueSessionStage2SemanticFrame(this.dialogId),
           type: 'mmSemanticFrame'
         }], [])
       } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame')) {
+        dialogId = getValue(payload, 'string', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame', 'dialog_id')
         textInput = {
           data: {
             kind: 'continue'
@@ -316,6 +313,11 @@ export class UniProxyConnection {
 
     if (textInput === null) {
       return
+    }
+
+    if (!dialogId || dialogId !== this.dialogId) {
+      this.closeDialog(CloseDialogReason.INTERRUPTION)
+      this.openDialog()
     }
 
     let inputResult: InputResult
@@ -349,8 +351,8 @@ export class UniProxyConnection {
     if (!voiceInputHeader.DialogId || voiceInputHeader.DialogId !== this.dialogId) {
       this.inputHandler.closeSession()
       this.closeDialog(CloseDialogReason.INTERRUPTION)
+      this.openDialog()
     }
-    this.openDialog()
     this.openSession()
     this.voiceInputStreamId = eventHeader.StreamId!
     this.voiceInputReferenceMessageId = eventHeader.MessageId!
