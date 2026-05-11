@@ -82,6 +82,7 @@ export class GigaAMSTTBackend implements STTBackend {
         parentSpan
       })
     }
+    console.info(span?.spanContext().spanId)
     const webSocket = new WebSocket(this.endpoint, {
       headers: {
         ...getTraceData({
