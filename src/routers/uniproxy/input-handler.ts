@@ -112,11 +112,11 @@ export class InputHandler {
     }
   }
 
-  async processTextInput (input: TextInput): Promise<InputResult> {
+  async processTextInput (input: TextInput, parentSpan?: Span): Promise<InputResult> {
     this.logger.debug(`Received TextInput with kind: ${input.data.kind}`)
     switch (input.data.kind) {
       case 'continue': {
-        return await this.getPartialResponseResult()
+        return await this.getPartialResponseResult(parentSpan)
       }
       case 'event': {
         if (!this.session) {
@@ -135,7 +135,7 @@ export class InputHandler {
           text: input.data.eventText
         })
         this.requestSent = true
-        return await this.getPartialResponseResult()
+        return await this.getPartialResponseResult(parentSpan)
       }
       case 'playButtonPress': {
         if (!this.session) {
@@ -154,7 +154,7 @@ export class InputHandler {
           text: 'play button pressed on speaker'
         })
         this.requestSent = true
-        return await this.getPartialResponseResult()
+        return await this.getPartialResponseResult(parentSpan)
       }
       case 'tts': {
         return {
@@ -171,7 +171,7 @@ export class InputHandler {
     }
   }
 
-  async processVoiceInput (input: VoiceInput): Promise<InputResult> {
+  async processVoiceInput (input: VoiceInput, parentSpan?: Span): Promise<InputResult> {
     this.logger.debug(`Received VoiceInput: ${input.text}`)
     if (!this.session) {
       this.logger.warn('No session opened')
@@ -189,10 +189,10 @@ export class InputHandler {
       text: input.text
     })
     this.requestSent = true
-    return await this.getPartialResponseResult()
+    return await this.getPartialResponseResult(parentSpan)
   }
 
-  private async getPartialResponseResult (): Promise<InputResult> {
+  private async getPartialResponseResult (parentSpan?: Span): Promise<InputResult> {
     if (!this.session || !this.requestSent) {
       return {
         dialogFinished: true,
@@ -204,11 +204,14 @@ export class InputHandler {
     }
 
     let span: Span | undefined
-    if (this.span) {
+    if (this.span && parentSpan) {
       span = startInactiveSpan({
+        links: [{
+          context: this.span?.spanContext()
+        }],
         name: 'InputHandler waiting for partial response',
         op: 'input-handler-get-partial-response',
-        parentSpan: this.span
+        parentSpan
       })
     }
     const partialResponse = await this.getPartialResponse()
