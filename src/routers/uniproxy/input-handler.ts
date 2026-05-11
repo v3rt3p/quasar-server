@@ -215,7 +215,7 @@ export class InputHandler {
         this.closeSession()
       }
       return {
-        dialogFinished: partialResponse.requireMoreInput,
+        dialogFinished: !partialResponse.requireMoreInput,
         directives: [
           ...partialResponse.directives,
           {
