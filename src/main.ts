@@ -26,6 +26,7 @@ const logger = getLogger()
 const environment = getEnvironment()
 
 Sentry.init({
+  defaultIntegrations: false,
   dsn: environment.SENTRY_DSN,
   tracesSampleRate: 1
 })
