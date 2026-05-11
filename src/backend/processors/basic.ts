@@ -1,3 +1,4 @@
+import { Span, startInactiveSpan } from '@sentry/node'
 import { EventEmitter } from 'node:stream'
 import { Event, WebSocket } from 'ws'
 
@@ -6,7 +7,7 @@ import { ProcessorBackend, ProcessorRequest, ProcessorSession, ProcessorSessionE
 export class BasicProcessorBackend implements ProcessorBackend {
   constructor (private readonly url: string) {}
 
-  async openSession (): Promise<ProcessorSession> {
+  async openSession (span?: Span): Promise<ProcessorSession> {
     const webSocket = new WebSocket(this.url.replace('http://', 'ws://').replace('https://', 'wss://'))
     let openResolve = (_session: ProcessorSession) => {}
     // eslint-disable-next-line unicorn/consistent-function-scoping
@@ -25,7 +26,7 @@ export class BasicProcessorBackend implements ProcessorBackend {
     webSocket.addEventListener('open', () => {
       webSocket.removeEventListener('error', errorListener)
       webSocket.removeEventListener('close', errorListener)
-      openResolve(new BasicProcessorSession(webSocket))
+      openResolve(new BasicProcessorSession(webSocket, span))
     })
 
     return promise
@@ -34,10 +35,20 @@ export class BasicProcessorBackend implements ProcessorBackend {
 
 // eslint-disable-next-line unicorn/prefer-event-target
 export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> implements ProcessorSession {
-  constructor (private readonly webSocket: WebSocket) {
+  constructor (private readonly webSocket: WebSocket, parentSpan?: Span) {
     super()
+
+    let span: Span | undefined
+    if (parentSpan) {
+      span = startInactiveSpan({
+        name: 'basic-processor',
+        parentSpan
+      })
+    }
+
     this.webSocket.addEventListener('close', () => {
       this.emit('close')
+      span?.end()
     })
     this.webSocket.addEventListener('message', message => {
       console.info(message.data)

@@ -1,3 +1,5 @@
+import { Span, startInactiveSpan } from '@sentry/node'
+
 import { ProcessorBackend, ProcessorPartialResponse, ProcessorSession } from '../../backend/backend'
 import { getLogger } from '../../logger'
 import { Notifier } from '../../notifier'
@@ -47,6 +49,7 @@ export class InputHandler {
   private partialResponses: ProcessorPartialResponse[] = []
   private requestSent: boolean = false
   private session: null | ProcessorSession = null
+  private span: Span | undefined
 
   constructor (private readonly properties: InputHandlerProperties) {}
 
@@ -57,6 +60,8 @@ export class InputHandler {
       this.session = null
       this.requestSent = false
       this.logger.debug('Session closed')
+      this.span?.end()
+      this.span = undefined
     } else {
       this.logger.debug('Session already closed')
     }
@@ -80,12 +85,18 @@ export class InputHandler {
     return null
   }
 
-  async openSession (): Promise<void> {
+  async openSession (parentSpan?: Span): Promise<void> {
     if (this.session) {
       this.logger.debug('Session already opened')
     } else {
+      if (parentSpan) {
+        this.span = startInactiveSpan({
+          name: 'input-handler',
+          parentSpan
+        })
+      }
       this.logger.debug('Opening new session')
-      this.session = await this.properties.processor.openSession()
+      this.session = await this.properties.processor.openSession(parentSpan)
       this.session.addListener('close', () => {
         this.closeSession()
       })

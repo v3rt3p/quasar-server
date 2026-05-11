@@ -37,21 +37,24 @@ export interface UniProxyConnectionParameters {
 
 export class UniProxyConnection {
   private dialogId: null | string = null
-  private dialogSpan: null | Span = null
+  private dialogSpan: Span | undefined = undefined
 
   private inputHandler: InputHandler
 
   private inputHandlerOpenSessionPromise: null | Promise<void> = null
+
+  private inputSpan: Span | undefined = undefined
+
   private lastOutputAudioStreamId: number = 1024
   private readonly logger = getLogger<UniProxyConnection>()
   private readonly sendLock = new Sema(1)
   private voiceInputHandler: VoiceInputHandler
-
   private voiceInputReferenceMessageId: string = ''
 
   private voiceInputReferenceRequestId: string = ''
 
   private voiceInputReferenceSequenceNumber: number = -1
+
   private voiceInputStreamId: Long | number = -1
 
   constructor (private readonly webSocket: WebSocket, private readonly parameters: UniProxyConnectionParameters) {
@@ -93,13 +96,18 @@ export class UniProxyConnection {
   }
 
   private closeDialog (reason: CloseDialogReason): void {
-    if (this.dialogSpan === null || this.dialogId === null) {
+    if (this.dialogId === null) {
       return
     }
-    this.dialogSpan.setAttribute('endReason', reason)
-    this.dialogSpan.end()
+
+    this.inputSpan?.end()
+    this.inputSpan = undefined
+
+    this.dialogSpan?.setAttribute('endReason', reason)
+    this.dialogSpan?.end()
+    this.dialogSpan = undefined
+
     this.logger.info(`Dialog ${this.dialogId} ended: ${reason}`)
-    this.dialogSpan = null
     this.dialogId = null
   }
 
@@ -135,6 +143,9 @@ export class UniProxyConnection {
   }
 
   private handleClientCancel (): void {
+    this.inputSpan?.setAttribute('endReason', 'clientCancel')
+    this.inputSpan?.end()
+    this.inputSpan = undefined
     this.inputHandler.closeSession()
     this.closeDialog(CloseDialogReason.CLIENT_CANCEL)
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
@@ -215,8 +226,14 @@ export class UniProxyConnection {
 
   private handleServerCancel (): void {
     this.inputHandler.closeSession()
-    this.closeDialog(CloseDialogReason.SERVER_CANCEL)
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
+
+    this.inputSpan?.setAttribute('endReason', 'serverCancel')
+    this.inputSpan?.end()
+    this.inputSpan = undefined
+
+    this.closeDialog(CloseDialogReason.SERVER_CANCEL)
+
     this.sendAsrResult('', true).catch(error => {
       this.logger.warn('Failed to send AsrResult in handleServerCancel: ', error)
       this.closeConnection()
@@ -358,7 +375,15 @@ export class UniProxyConnection {
     this.voiceInputReferenceMessageId = eventHeader.MessageId!
     this.voiceInputReferenceRequestId = voiceInputHeader.RequestId!
     this.voiceInputReferenceSequenceNumber = voiceInputHeader.SequenceNumber!
-    this.voiceInputHandler.handleVoiceInputEvent({})
+    this.voiceInputHandler.handleVoiceInputEvent({
+      dialogSpan: this.dialogSpan
+    })
+    if (this.dialogSpan) {
+      this.inputSpan = startInactiveSpan({
+        name: 'voice-input',
+        parentSpan: this.dialogSpan
+      })
+    }
   }
 
   private openDialog (): void {
@@ -378,7 +403,7 @@ export class UniProxyConnection {
   }
 
   private openSession (): void {
-    this.inputHandlerOpenSessionPromise = this.inputHandler.openSession().catch(error => {
+    this.inputHandlerOpenSessionPromise = this.inputHandler.openSession(this.dialogSpan).catch(error => {
       this.logger.error('Failed to open InputHandler session: ', error)
       this.handleServerCancel()
     })
@@ -490,10 +515,23 @@ export class UniProxyConnection {
     if (result.text !== null) {
       this.logger.info(`Synthesizing: ${result.text}`)
 
+      let span: Span | undefined
+
+      if (this.inputSpan || this.dialogSpan) {
+        span = startInactiveSpan({
+          attributes: {
+            text: result.text
+          },
+          name: 'tts',
+          parentSpan: this.inputSpan ?? this.dialogSpan
+        })
+      }
+
       let audioData: Buffer = Buffer.from([])
       try {
         if (result.text !== '') {
           const ttsResult = await this.parameters.tts.synthesize({
+            parentSpan: this.inputSpan ?? this.dialogSpan,
             text: result.text
           })
           audioData = ttsResult.voiceOutput
@@ -501,6 +539,8 @@ export class UniProxyConnection {
       } catch (error) {
         this.logger.error('Failed to synthesize TTS: ', error)
       }
+
+      span?.end()
 
       this.logger.info(`Synthesized: ${audioData.length}`)
 
@@ -623,7 +663,13 @@ export class UniProxyConnection {
       } catch (error) {
         this.logger.warn('Failed to send input result: ', error)
         this.closeConnection()
+        return
       }
+
+      this.inputSpan?.setAttribute('result', JSON.stringify(inputResult, undefined, 2))
+      this.inputSpan?.setAttribute('endReason', 'finish')
+      this.inputSpan?.end()
+      this.inputSpan = undefined
     })
     this.voiceInputHandler.on('transcribed', async event => {
       try {

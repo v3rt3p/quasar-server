@@ -1,13 +1,14 @@
+import { Span } from '@sentry/node'
 import { EventEmitter } from 'node:stream'
 
 import { AliceDirective } from '../routers/alice/directives'
 
 export interface AudioMetadataBackend {
-  startCapturing(): Promise<AudioMetadataBackendSession>;
+  startCapturing(parentSpan?: Span): Promise<AudioMetadataBackendSession>;
 }
 
 export interface ProcessorBackend {
-  openSession(): Promise<ProcessorSession>;
+  openSession(parentSpan?: Span): Promise<ProcessorSession>;
 }
 
 export type ProcessorPartialResponse = {
@@ -39,7 +40,7 @@ export interface ProcessorSessionEvents {
 }
 
 export interface STTBackend {
-  startTranscribing(): Promise<STTBackendSession>;
+  startTranscribing(span?: Span): Promise<STTBackendSession>;
 }
 
 export type STTChunkTranscribeCallback = (result: STTChunkTranscribeResult) => void
@@ -54,6 +55,7 @@ export interface TTSBackend {
 }
 
 export interface TTSRequest {
+  parentSpan?: Span
   text: string;
 }
 

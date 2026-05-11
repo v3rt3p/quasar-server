@@ -1,3 +1,4 @@
+import { Span, startInactiveSpan } from '@sentry/node'
 import { Sema } from 'async-sema'
 import EventEmitter from 'node:events'
 
@@ -12,8 +13,8 @@ export interface VoiceInputAudioEvent {
 export interface VoiceInputCancelEvent {
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface VoiceInputEvent {
+  dialogSpan?: Span
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -57,6 +58,7 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   private lastTranscribeResult: string = ''
   private readonly logger = getLogger<VoiceInputHandler>()
   private sttSession: null | STTBackendSession = null
+  private voiceSpan: null | Span = null
 
   constructor (private readonly properties: VoiceInputHandlerProperties) {
     super()
@@ -70,6 +72,10 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     this.audioDataQueue = []
     this.lastTranscribeResult = ''
     this.audioMetadata = {}
+
+    this.voiceSpan?.setAttribute('endReason', 'close')
+    this.voiceSpan?.end()
+    this.voiceSpan = null
   }
 
   async handleVoiceInputAudioEvent (data: VoiceInputAudioEvent): Promise<void> {
@@ -91,7 +97,14 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     this.close()
   }
 
-  async handleVoiceInputEvent (_request: VoiceInputEvent): Promise<void> {
+  async handleVoiceInputEvent (request: VoiceInputEvent): Promise<void> {
+    if (request.dialogSpan) {
+      this.voiceSpan = startInactiveSpan({
+        name: 'voice-input-handler',
+        parentSpan: request.dialogSpan
+      })
+    }
+
     this.logger.debug('VoiceInputHandler received Input')
     this.close()
 
@@ -99,8 +112,10 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     let sttSession: STTBackendSession
 
     try {
-      [audioMetadataSession, sttSession] = await Promise.all([this.properties.audioMetadata.startCapturing(),
-        this.properties.stt.startTranscribing()])
+      [audioMetadataSession, sttSession] = await Promise.all([
+        this.properties.audioMetadata.startCapturing(this.voiceSpan ?? undefined),
+        this.properties.stt.startTranscribing(this.voiceSpan ?? undefined)
+      ])
     } catch (error) {
       this.emit('error', {
         error
@@ -171,6 +186,11 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     this.sttSession?.close()
     this.sttSession = null
     this.audioDataQueue = []
+    this.voiceSpan?.setAttribute('endReason', 'finish')
+    this.voiceSpan?.setAttribute('text', this.lastTranscribeResult)
+    this.voiceSpan?.setAttribute('metadata', JSON.stringify(this.audioMetadata, undefined, 2))
+    this.voiceSpan?.end()
+    this.voiceSpan = null
   }
 
   private transcribeFinished (): void {

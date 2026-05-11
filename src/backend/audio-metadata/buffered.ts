@@ -1,3 +1,5 @@
+import { Span, startInactiveSpan, startSpan } from '@sentry/node'
+
 import { OpusProcessor } from '../../codecs/opus-processor'
 import { getLogger } from '../../logger'
 import { AudioMetadataBackend, AudioMetadataBackendSession } from '../backend'
@@ -9,7 +11,7 @@ class BufferedAudioMetadataBackendSession extends AudioMetadataBackendSession {
   private readonly opusProcessor: OpusProcessor
   private sampleRate: null | number = null
 
-  constructor (private readonly backendUrls: string[]) {
+  constructor (private readonly backendUrls: string[], private readonly parentSpan?: Span) {
     super()
     this.opusProcessor = new OpusProcessor(async audioData => {
       this.buffers.push(audioData)
@@ -34,14 +36,28 @@ class BufferedAudioMetadataBackendSession extends AudioMetadataBackendSession {
         try {
           const realUrl = new URL(url)
           realUrl.searchParams.set('sample_rate', this.sampleRate?.toString() ?? '')
-          const result = await fetch(realUrl.toString(), {
-            body: totalBuffer,
-            headers: {
-              'content-type': 'application/octet-stream'
-            },
-            method: 'POST'
-          })
-          return await result.json()
+          let span: Span | undefined
+          if (this.parentSpan) {
+            span = startInactiveSpan({
+              name: `audio-metadata-buffered-${realUrl.hostname}`,
+              parentSpan: this.parentSpan
+            })
+          }
+          try {
+            const result = await fetch(realUrl.toString(), {
+              body: totalBuffer,
+              headers: {
+                'content-type': 'application/octet-stream'
+              },
+              method: 'POST'
+            })
+            const metadata = await result.json()
+
+            span?.setAttribute('metadata', JSON.stringify(metadata, undefined, 2))
+            return metadata
+          } finally {
+            span?.end()
+          }
         } catch (error) {
           this.logger.warn(`Failed to get audio metadata from ${url}: ${error}`)
           return {}
@@ -68,7 +84,7 @@ class BufferedAudioMetadataBackendSession extends AudioMetadataBackendSession {
 export class BufferedAudioMetadataBackend implements AudioMetadataBackend {
   constructor (private readonly backendUrls: string[]) {}
 
-  async startCapturing (): Promise<AudioMetadataBackendSession> {
-    return new BufferedAudioMetadataBackendSession(this.backendUrls)
+  async startCapturing (parentSpan?: Span): Promise<AudioMetadataBackendSession> {
+    return new BufferedAudioMetadataBackendSession(this.backendUrls, parentSpan)
   }
 }
