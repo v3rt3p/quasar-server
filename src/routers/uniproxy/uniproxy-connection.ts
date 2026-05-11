@@ -96,7 +96,6 @@ export class UniProxyConnection {
   }
 
   private closeDialog (reason: CloseDialogReason): void {
-    this.logger.debug(`Wtf? ${this.dialogId}`)
     if (this.dialogId === null) {
       return
     }
@@ -368,6 +367,11 @@ export class UniProxyConnection {
     this.inputSpan?.setAttribute('endReason', 'finish')
     this.inputSpan?.end()
     this.inputSpan = undefined
+
+    if (inputResult.dialogFinished) {
+      this.inputHandler.closeSession()
+      this.closeDialog(CloseDialogReason.SERVER_FINISHED)
+    }
   }
 
   private async handleTextMessage (_message: string): Promise<void> {
@@ -680,8 +684,6 @@ export class UniProxyConnection {
       this.inputSpan?.setAttribute('endReason', 'finish')
       this.inputSpan?.end()
       this.inputSpan = undefined
-
-      this.logger.debug(`inputResult.dialogFinished: ${inputResult.dialogFinished}`)
 
       if (inputResult.dialogFinished) {
         this.inputHandler.closeSession()
