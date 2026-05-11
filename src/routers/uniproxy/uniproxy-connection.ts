@@ -348,7 +348,7 @@ export class UniProxyConnection {
     try {
       this.openSession()
       await this.inputHandlerOpenSessionPromise
-      inputResult = await this.inputHandler.processTextInput(textInput, this.inputSpan)
+      inputResult = await this.inputHandler.processTextInput(textInput, this.inputSpan ?? this.dialogSpan)
     } catch (error) {
       this.logger.warn('Failed to processTextInput on InputHandler: ', error)
       this.handleServerCancel()
@@ -666,7 +666,7 @@ export class UniProxyConnection {
         inputResult = await this.inputHandler.processVoiceInput({
           metadata: event.metadata,
           text: event.text
-        })
+        }, this.inputSpan ?? this.dialogSpan)
       } catch (error) {
         this.logger.warn('Failed to processVoiceInput on InputHandler: ', error)
         this.handleServerCancel()
