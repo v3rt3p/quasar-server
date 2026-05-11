@@ -1,5 +1,6 @@
 import openapi from '@elysia/openapi'
 import node from '@elysiajs/node'
+import Sentry from '@sentry/node'
 import bodyParser from 'body-parser'
 import Elysia, { t } from 'elysia'
 import express from 'express'
@@ -23,6 +24,11 @@ import { quasarConfig } from './storage/types'
 
 const logger = getLogger()
 const environment = getEnvironment()
+
+Sentry.init({
+  dsn: environment.SENTRY_DSN,
+  tracesSampleRate: 1
+})
 
 const storage = new PostgresDatabaseStationInfoStorage(environment.POSTGRES_URL)
 

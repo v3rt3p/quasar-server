@@ -14,6 +14,7 @@
     "@discordjs/opus": "^0.10.0",
     "@elysia/openapi": "^1.4.15",
     "@elysiajs/node": "^1.4.5",
+    "@sentry/node": "^10.52.0",
     "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",
     "@types/express-ws": "^3.0.6",

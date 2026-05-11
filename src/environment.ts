@@ -21,6 +21,8 @@ const environmentType = z.object({
 
   PROCESSOR_BASIC_URL: z.url().default('http://localhost:8080'),
 
+  SENTRY_DSN: z.url().default('https://test@o0.ingest.sentry.io/0'),
+
   STT_GIGAAM_URL: z.url().default('ws://10.0.3.137:8080'),
 
   TTS_OPENAI_API_KEY: z.string().default(''),

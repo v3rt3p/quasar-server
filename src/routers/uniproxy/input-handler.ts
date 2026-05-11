@@ -44,6 +44,7 @@ export class InputHandler {
   private readonly logger = getLogger()
   private notifier: Notifier = new Notifier()
   private partialResponses: ProcessorPartialResponse[] = []
+  private requestSent: boolean = false
   private session: null | ProcessorSession = null
 
   constructor (private readonly properties: InputHandlerProperties) {}
@@ -53,6 +54,7 @@ export class InputHandler {
       this.partialResponses = []
       this.session.close()
       this.session = null
+      this.requestSent = false
       this.logger.debug('Session closed')
     } else {
       this.logger.debug('Session already closed')
@@ -118,6 +120,7 @@ export class InputHandler {
           metadata: input.metadata,
           text: input.data.eventText
         })
+        this.requestSent = true
         return await this.getPartialResponseResult()
       }
       case 'playButtonPress': {
@@ -135,6 +138,7 @@ export class InputHandler {
           metadata: input.metadata,
           text: 'play button pressed on speaker'
         })
+        this.requestSent = true
         return await this.getPartialResponseResult()
       }
       case 'tts': {
@@ -166,12 +170,13 @@ export class InputHandler {
       metadata: input.metadata,
       text: input.text
     })
+    this.requestSent = true
 
     return await this.getPartialResponseResult()
   }
 
   private async getPartialResponseResult (): Promise<InputResult> {
-    if (!this.session) {
+    if (!this.session || !this.requestSent) {
       return {
         directives: [
         ],
