@@ -346,7 +346,8 @@ export class UniProxyConnection {
     let inputResult: InputResult
 
     try {
-      inputResult = await this.inputHandler.processTextInput(textInput, this.inputSpan ?? this.dialogSpan)
+      inputResult = await this.inputHandler.processTextInput(textInput,
+        this.inputSpan ?? this.dialogSpan, this.dialogSpan)
     } catch (error) {
       this.logger.warn('Failed to processTextInput on InputHandler: ', error)
       this.handleServerCancel()

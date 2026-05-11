@@ -112,7 +112,7 @@ export class InputHandler {
     }
   }
 
-  async processTextInput (input: TextInput, parentSpan?: Span): Promise<InputResult> {
+  async processTextInput (input: TextInput, parentSpan?: Span, dialogSpan?: Span): Promise<InputResult> {
     this.logger.debug(`Received TextInput with kind: ${input.data.kind}`)
     switch (input.data.kind) {
       case 'continue': {
@@ -120,7 +120,7 @@ export class InputHandler {
       }
       case 'event': {
         if (!this.session) {
-          await this.openSession(parentSpan)
+          await this.openSession(dialogSpan)
         }
         await this.session!.process({
           isExternalEvent: true,
@@ -132,7 +132,7 @@ export class InputHandler {
       }
       case 'playButtonPress': {
         if (!this.session) {
-          await this.openSession(parentSpan)
+          await this.openSession(dialogSpan)
         }
         await this.session!.process({
           isExternalEvent: true,
