@@ -681,6 +681,8 @@ export class UniProxyConnection {
       this.inputSpan?.end()
       this.inputSpan = undefined
 
+      this.logger.debug(`inputResult.dialogFinished: ${inputResult.dialogFinished}`)
+
       if (inputResult.dialogFinished) {
         this.inputHandler.closeSession()
         this.closeDialog(CloseDialogReason.SERVER_FINISHED)
