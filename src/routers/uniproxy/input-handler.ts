@@ -120,16 +120,9 @@ export class InputHandler {
       }
       case 'event': {
         if (!this.session) {
-          this.logger.warn('No session opened')
-          return {
-            dialogFinished: true,
-            directives: [
-            ],
-            shouldListen: false,
-            text: null
-          }
+          await this.openSession(parentSpan)
         }
-        await this.session.process({
+        await this.session!.process({
           isExternalEvent: true,
           metadata: input.metadata,
           text: input.data.eventText
@@ -139,16 +132,9 @@ export class InputHandler {
       }
       case 'playButtonPress': {
         if (!this.session) {
-          this.logger.warn('No session opened')
-          return {
-            dialogFinished: true,
-            directives: [
-            ],
-            shouldListen: false,
-            text: null
-          }
+          await this.openSession(parentSpan)
         }
-        await this.session.process({
+        await this.session!.process({
           isExternalEvent: true,
           metadata: input.metadata,
           text: 'play button pressed on speaker'

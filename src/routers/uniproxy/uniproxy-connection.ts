@@ -346,8 +346,6 @@ export class UniProxyConnection {
     let inputResult: InputResult
 
     try {
-      this.openSession()
-      await this.inputHandlerOpenSessionPromise
       inputResult = await this.inputHandler.processTextInput(textInput, this.inputSpan ?? this.dialogSpan)
     } catch (error) {
       this.logger.warn('Failed to processTextInput on InputHandler: ', error)
