@@ -1,3 +1,4 @@
+import { Span, startInactiveSpan } from '@sentry/node'
 import { Sema } from 'async-sema'
 import { randomUUID } from 'node:crypto'
 import { RawData, WebSocket } from 'ws'
@@ -19,6 +20,14 @@ const TClientMessageClass = proto.NAlice.NAliceApi.TClientMessage
 
 const TSemanticFrameRequestDataClass = proto.NAlice.NAliceApi.TSemanticFrameRequestData
 
+enum CloseDialogReason {
+  CLIENT_CANCEL = 'clientCancel',
+  INTERRUPTION = 'interruption',
+  SERVER_CANCEL = 'serverCancel',
+  SERVER_FINISHED = 'serverFinished',
+  WEBSOCKET_CLOSE = 'webSocketClose'
+}
+
 export interface UniProxyConnectionParameters {
   audioMetadata: AudioMetadataBackend
   processor: ProcessorBackend
@@ -27,19 +36,22 @@ export interface UniProxyConnectionParameters {
 }
 
 export class UniProxyConnection {
+  private dialogId: null | string = null
+  private dialogSpan: null | Span = null
+
   private inputHandler: InputHandler
+
   private inputHandlerOpenSessionPromise: null | Promise<void> = null
-
   private lastOutputAudioStreamId: number = 1024
-
   private readonly logger = getLogger<UniProxyConnection>()
   private readonly sendLock = new Sema(1)
   private voiceInputHandler: VoiceInputHandler
+
   private voiceInputReferenceMessageId: string = ''
+
   private voiceInputReferenceRequestId: string = ''
 
   private voiceInputReferenceSequenceNumber: number = -1
-
   private voiceInputStreamId: Long | number = -1
 
   constructor (private readonly webSocket: WebSocket, private readonly parameters: UniProxyConnectionParameters) {
@@ -80,6 +92,17 @@ export class UniProxyConnection {
     this.webSocket.close()
   }
 
+  private closeDialog (reason: CloseDialogReason): void {
+    if (this.dialogSpan === null || this.dialogId === null) {
+      return
+    }
+    this.dialogSpan.setAttribute('endReason', reason)
+    this.dialogSpan.end()
+    this.dialogSpan = null
+    this.dialogId = null
+    this.logger.info(`Dialog ${this.dialogId} ended`)
+  }
+
   private getTimings (): proto.NAlice.NAliceApi.TServerMessage.ITTimings {
     return {
       SendingTime: {
@@ -113,6 +136,7 @@ export class UniProxyConnection {
 
   private handleClientCancel (): void {
     this.inputHandler.closeSession()
+    this.closeDialog(CloseDialogReason.CLIENT_CANCEL)
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
   }
 
@@ -139,6 +163,7 @@ export class UniProxyConnection {
 
   private async handleClose (): Promise<void> {
     this.inputHandler.closeSession()
+    this.closeDialog(CloseDialogReason.WEBSOCKET_CLOSE)
     this.voiceInputHandler.close()
   }
 
@@ -190,6 +215,7 @@ export class UniProxyConnection {
 
   private handleServerCancel (): void {
     this.inputHandler.closeSession()
+    this.closeDialog(CloseDialogReason.SERVER_CANCEL)
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
     this.sendAsrResult('', true).catch(error => {
       this.logger.warn('Failed to send AsrResult in handleServerCancel: ', error)
@@ -222,6 +248,12 @@ export class UniProxyConnection {
 
   private async handleTextInputEvent (clientMessage: TClientMessage): Promise<void> {
     let textInput: null | TextInput = null
+
+    const dialogId = clientMessage.Event?.TextInput?.Header?.DialogId
+    if (!dialogId || dialogId !== this.dialogId) {
+      this.closeDialog(CloseDialogReason.INTERRUPTION)
+    }
+    this.openDialog()
 
     const event = clientMessage.Event!.TextInput!.Request!.Event!
 
@@ -314,15 +346,27 @@ export class UniProxyConnection {
   private async handleVoiceInputEvent (clientMessage: TClientMessage): Promise<void> {
     const voiceInputHeader = clientMessage.Event!.VoiceInput!.Header!
     const eventHeader = clientMessage.Event!.Header!
-    if (!voiceInputHeader.DialogId) {
+    if (!voiceInputHeader.DialogId || voiceInputHeader.DialogId !== this.dialogId) {
       this.inputHandler.closeSession()
+      this.closeDialog(CloseDialogReason.INTERRUPTION)
     }
+    this.openDialog()
     this.openSession()
     this.voiceInputStreamId = eventHeader.StreamId!
     this.voiceInputReferenceMessageId = eventHeader.MessageId!
     this.voiceInputReferenceRequestId = voiceInputHeader.RequestId!
     this.voiceInputReferenceSequenceNumber = voiceInputHeader.SequenceNumber!
     this.voiceInputHandler.handleVoiceInputEvent({})
+  }
+
+  private openDialog (): void {
+    this.dialogId = randomUUID()
+    this.dialogSpan = startInactiveSpan({
+      name: 'dialog',
+      parentSpan: null,
+    })
+
+    this.logger.info(`Dialog ${this.dialogId} started`)
   }
 
   private openSession (): void {
@@ -340,7 +384,7 @@ export class UniProxyConnection {
         AliceResponse: {
           ForceServerRequest: false,
           Header: {
-            DialogId: randomUUID(),
+            DialogId: this.dialogId,
             RequestId: requestId,
             ResponseId: randomUUID(),
             SequenceNumber: sequenceNumber
@@ -558,6 +602,11 @@ export class UniProxyConnection {
         this.logger.warn('Failed to processVoiceInput on InputHandler: ', error)
         this.handleServerCancel()
         return
+      }
+
+      if (inputResult.dialogFinished) {
+        this.closeDialog(CloseDialogReason.SERVER_FINISHED)
+        this.inputHandler.closeSession()
       }
 
       try {

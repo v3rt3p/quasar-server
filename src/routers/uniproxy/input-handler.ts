@@ -13,6 +13,7 @@ export interface InputHandlerProperties {
 }
 
 export interface InputResult {
+  dialogFinished: boolean
   directives: AliceDirective[]
   shouldListen: boolean
   text: null | string
@@ -109,6 +110,7 @@ export class InputHandler {
         if (!this.session) {
           this.logger.warn('No session opened')
           return {
+            dialogFinished: true,
             directives: [
             ],
             shouldListen: false,
@@ -127,6 +129,7 @@ export class InputHandler {
         if (!this.session) {
           this.logger.warn('No session opened')
           return {
+            dialogFinished: true,
             directives: [
             ],
             shouldListen: false,
@@ -143,6 +146,7 @@ export class InputHandler {
       }
       case 'tts': {
         return {
+          dialogFinished: true,
           directives: [
             {
               type: 'ttsPlayPlaceholder'
@@ -160,24 +164,26 @@ export class InputHandler {
     if (!this.session) {
       this.logger.warn('No session opened')
       return {
+        dialogFinished: true,
         directives: [
         ],
         shouldListen: false,
         text: null
       }
     }
+
     await this.session.process({
       metadata: input.metadata,
       text: input.text
     })
     this.requestSent = true
-
     return await this.getPartialResponseResult()
   }
 
   private async getPartialResponseResult (): Promise<InputResult> {
     if (!this.session || !this.requestSent) {
       return {
+        dialogFinished: true,
         directives: [
         ],
         shouldListen: false,
@@ -190,6 +196,7 @@ export class InputHandler {
     if (partialResponse === null) {
       this.logger.debug('No partial response, sending continue')
       return {
+        dialogFinished: false,
         directives: [
           {
             payload: continueSessionStage1SemanticFrame,
@@ -208,6 +215,7 @@ export class InputHandler {
         this.closeSession()
       }
       return {
+        dialogFinished: partialResponse.requireMoreInput,
         directives: [
           ...partialResponse.directives,
           {
@@ -221,6 +229,7 @@ export class InputHandler {
 
     this.logger.debug('Partial response is not finished, sending continue')
     return {
+      dialogFinished: false,
       directives: [
         ...partialResponse.directives,
         {
