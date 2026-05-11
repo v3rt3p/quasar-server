@@ -367,8 +367,11 @@ export class UniProxyConnection {
     }
     this.dialogId = randomUUID()
     this.dialogSpan = startInactiveSpan({
+      attributes: {
+        dialogId: this.dialogId
+      },
       name: 'dialog',
-      parentSpan: null,
+      parentSpan: null
     })
 
     this.logger.info(`Dialog ${this.dialogId} started`)
