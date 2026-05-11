@@ -98,9 +98,9 @@ export class UniProxyConnection {
     }
     this.dialogSpan.setAttribute('endReason', reason)
     this.dialogSpan.end()
+    this.logger.info(`Dialog ${this.dialogId} ended: ${reason}`)
     this.dialogSpan = null
     this.dialogId = null
-    this.logger.info(`Dialog ${this.dialogId} ended: ${reason}`)
   }
 
   private getTimings (): proto.NAlice.NAliceApi.TServerMessage.ITTimings {
@@ -362,6 +362,9 @@ export class UniProxyConnection {
   }
 
   private openDialog (): void {
+    if (this.dialogId) {
+      this.closeDialog(CloseDialogReason.INTERRUPTION)
+    }
     this.dialogId = randomUUID()
     this.dialogSpan = startInactiveSpan({
       name: 'dialog',
