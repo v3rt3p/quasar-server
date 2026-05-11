@@ -39,7 +39,8 @@ class BufferedAudioMetadataBackendSession extends AudioMetadataBackendSession {
           let span: Span | undefined
           if (this.parentSpan) {
             span = startInactiveSpan({
-              name: `audio-metadata-buffered-${realUrl.hostname}`,
+              name: `Buffered AudioMetadata request to ${realUrl.hostname}`,
+              op: `audio-metadata-buffered-${realUrl.hostname}`,
               parentSpan: this.parentSpan
             })
           }

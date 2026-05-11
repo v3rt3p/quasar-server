@@ -14,7 +14,7 @@ export interface VoiceInputCancelEvent {
 }
 
 export interface VoiceInputEvent {
-  dialogSpan?: Span
+  parentSpan?: Span
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -101,11 +101,11 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
     this.logger.debug('VoiceInputHandler received Input')
     this.close()
 
-    if (request.dialogSpan) {
+    if (request.parentSpan) {
       this.voiceSpan = startInactiveSpan({
         name: 'VoiceInputHandler processing',
         op: 'voice-input-handler',
-        parentSpan: request.dialogSpan
+        parentSpan: request.parentSpan
       })
     }
 

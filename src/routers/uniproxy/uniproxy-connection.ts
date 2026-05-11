@@ -387,13 +387,7 @@ export class UniProxyConnection {
       this.openDialog()
     }
     this.openSession()
-    this.voiceInputStreamId = eventHeader.StreamId!
-    this.voiceInputReferenceMessageId = eventHeader.MessageId!
-    this.voiceInputReferenceRequestId = voiceInputHeader.RequestId!
-    this.voiceInputReferenceSequenceNumber = voiceInputHeader.SequenceNumber!
-    this.voiceInputHandler.handleVoiceInputEvent({
-      dialogSpan: this.dialogSpan
-    })
+
     if (this.dialogSpan) {
       this.inputSpan = startInactiveSpan({
         name: 'VoiceInput processing',
@@ -401,6 +395,14 @@ export class UniProxyConnection {
         parentSpan: this.dialogSpan
       })
     }
+
+    this.voiceInputStreamId = eventHeader.StreamId!
+    this.voiceInputReferenceMessageId = eventHeader.MessageId!
+    this.voiceInputReferenceRequestId = voiceInputHeader.RequestId!
+    this.voiceInputReferenceSequenceNumber = voiceInputHeader.SequenceNumber!
+    this.voiceInputHandler.handleVoiceInputEvent({
+      parentSpan: this.inputSpan ?? this.dialogSpan
+    })
   }
 
   private openDialog (): void {
