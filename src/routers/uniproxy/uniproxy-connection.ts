@@ -96,6 +96,7 @@ export class UniProxyConnection {
   }
 
   private closeDialog (reason: CloseDialogReason): void {
+    this.logger.debug(`Wtf? ${this.dialogId}`)
     if (this.dialogId === null) {
       return
     }
