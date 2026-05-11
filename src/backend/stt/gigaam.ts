@@ -1,4 +1,4 @@
-import { Span, startInactiveSpan } from '@sentry/node'
+import { getTraceData, Span, startInactiveSpan } from '@sentry/node'
 import { WebSocket } from 'ws'
 
 import { OpusProcessor } from '../../codecs/opus-processor'
@@ -82,7 +82,13 @@ export class GigaAMSTTBackend implements STTBackend {
   constructor (private readonly endpoint: string) {}
 
   startTranscribing (parentSpan?: Span): Promise<STTBackendSession> {
-    const webSocket = new WebSocket(this.endpoint)
+    const webSocket = new WebSocket(this.endpoint, {
+      headers: {
+        ...getTraceData({
+          span: parentSpan
+        })
+      }
+    })
     return new Promise((resolve, reject) => {
       webSocket.on('error', error => {
         reject(error)
