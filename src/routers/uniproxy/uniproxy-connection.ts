@@ -666,11 +666,6 @@ export class UniProxyConnection {
         return
       }
 
-      if (inputResult.dialogFinished) {
-        this.closeDialog(CloseDialogReason.SERVER_FINISHED)
-        this.inputHandler.closeSession()
-      }
-
       try {
         await this.sendInputResult(inputResult, this.voiceInputReferenceRequestId,
           this.voiceInputReferenceMessageId, this.voiceInputReferenceSequenceNumber)
@@ -684,6 +679,11 @@ export class UniProxyConnection {
       this.inputSpan?.setAttribute('endReason', 'finish')
       this.inputSpan?.end()
       this.inputSpan = undefined
+
+      if (inputResult.dialogFinished) {
+        this.inputHandler.closeSession()
+        this.closeDialog(CloseDialogReason.SERVER_FINISHED)
+      }
     })
     this.voiceInputHandler.on('transcribed', async event => {
       try {

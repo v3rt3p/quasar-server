@@ -26,8 +26,13 @@ const logger = getLogger()
 const environment = getEnvironment()
 
 Sentry.init({
+  beforeSendSpan: (span) => {
+    logger.debug(`Sending span: ${span.span_id} ${span.parent_span_id} ${span.op}`)
+    return span
+  },
   defaultIntegrations: false,
   dsn: environment.SENTRY_DSN,
+  sampleRate: 1,
   tracesSampleRate: 1
 })
 
