@@ -552,7 +552,7 @@ export class UniProxyConnection {
       try {
         if (result.text !== '') {
           const ttsResult = await this.parameters.tts.synthesize({
-            parentSpan: this.inputSpan ?? this.dialogSpan,
+            parentSpan: span ?? this.inputSpan ?? this.dialogSpan,
             text: result.text
           })
           audioData = ttsResult.voiceOutput
