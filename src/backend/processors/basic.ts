@@ -1,4 +1,4 @@
-import { Span, startInactiveSpan } from '@sentry/node'
+import { getTraceData, Span, startInactiveSpan } from '@sentry/node'
 import { EventEmitter } from 'node:stream'
 import { Event, WebSocket } from 'ws'
 
@@ -7,8 +7,28 @@ import { ProcessorBackend, ProcessorRequest, ProcessorSession, ProcessorSessionE
 export class BasicProcessorBackend implements ProcessorBackend {
   constructor (private readonly url: string) {}
 
-  async openSession (span?: Span): Promise<ProcessorSession> {
-    const webSocket = new WebSocket(this.url.replace('http://', 'ws://').replace('https://', 'wss://'))
+  async openSession (parentSpan?: Span): Promise<ProcessorSession> {
+    let span: Span | undefined
+    if (parentSpan) {
+      span = startInactiveSpan({
+        name: 'Basic processor processing',
+        op: 'basic-processor',
+        parentSpan
+      })
+    }
+    const webSocket = new WebSocket(this.url.replace('http://', 'ws://').replace('https://', 'wss://'), span
+      ? {
+          headers: {
+            ...getTraceData({
+              span: startInactiveSpan({
+                name: 'Basic processor processing connection',
+                op: 'basic-processor-connection',
+                parentSpan: span
+              })
+            })
+          }
+        }
+      : {})
     let openResolve = (_session: ProcessorSession) => {}
     // eslint-disable-next-line unicorn/consistent-function-scoping
     let openReject = (_error: Error) => {}
@@ -26,7 +46,7 @@ export class BasicProcessorBackend implements ProcessorBackend {
     webSocket.addEventListener('open', () => {
       webSocket.removeEventListener('error', errorListener)
       webSocket.removeEventListener('close', errorListener)
-      openResolve(new BasicProcessorSession(webSocket, span))
+      openResolve(new BasicProcessorSession(webSocket, parentSpan))
     })
 
     return promise
@@ -35,17 +55,8 @@ export class BasicProcessorBackend implements ProcessorBackend {
 
 // eslint-disable-next-line unicorn/prefer-event-target
 export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> implements ProcessorSession {
-  constructor (private readonly webSocket: WebSocket, parentSpan?: Span) {
+  constructor (private readonly webSocket: WebSocket, span?: Span) {
     super()
-
-    let span: Span | undefined
-    if (parentSpan) {
-      span = startInactiveSpan({
-        name: 'Basic processor processing',
-        op: 'basic-processor',
-        parentSpan
-      })
-    }
 
     this.webSocket.addEventListener('close', () => {
       this.emit('close')
