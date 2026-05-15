@@ -74,6 +74,10 @@ export class InputHandler {
       return response ?? null
     }
 
+    if (!this.session || !this.requestSent) {
+      return null
+    }
+
     await this.notifier.wait(MAX_WAIT)
 
     if (this.partialResponses.length > 0) {
@@ -179,7 +183,7 @@ export class InputHandler {
   }
 
   private async getPartialResponseResult (parentSpan?: Span): Promise<InputResult> {
-    if (!this.session || !this.requestSent) {
+    if ((!this.session || !this.requestSent) && this.partialResponses.length === 0) {
       return {
         dialogFinished: true,
         directives: [
