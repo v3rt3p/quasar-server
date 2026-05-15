@@ -53,9 +53,11 @@ export class InputHandler {
 
   constructor (private readonly properties: InputHandlerProperties) {}
 
-  closeSession (): void {
+  closeSession (closePartially?: boolean): void {
     if (this.session) {
-      this.partialResponses = []
+      if (!closePartially) {
+        this.partialResponses = []
+      }
       this.session.close()
       this.session = null
       this.requestSent = false
@@ -101,9 +103,10 @@ export class InputHandler {
         })
       }
       this.logger.debug('Opening new session')
+      this.partialResponses = []
       this.session = await this.properties.processor.openSession(parentSpan)
       this.session.addListener('close', () => {
-        this.closeSession()
+        this.closeSession(true)
       })
       this.session.addListener('partialResponse', data => {
         this.logger.debug(`Received partial response: ${JSON.stringify(data)}`)
