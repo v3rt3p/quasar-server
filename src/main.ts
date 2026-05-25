@@ -203,7 +203,10 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
 
   runForConnections(duid, connection => {
     connection.pushDirective({
-      type: 'pushUpdateConfig'
+      data: {
+        type: 'pushUpdateConfig'
+      },
+      type: 'internalQuasar'
     }).catch(error =>
       logger.warn(`Failed to push config update directive to UniProxy connection: ${error}`))
   })
