@@ -1,5 +1,5 @@
 {
-  "name": "quasar-server",
+  "name": "@v3rt3p/quasar-server",
   "version": "1.0.0",
   "description": "Quasar Server emulator",
   "main": "src/main.ts",
