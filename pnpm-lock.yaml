@@ -44,6 +44,9 @@ importers:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
+      '@v3rt3p/types':
+        specifier: github:v3rt3p/types#1.0.2
+        version: https://codeload.github.com/v3rt3p/types/tar.gz/67ac4f2f21d758cb171d494c9702eccb07d77dc4
       async-sema:
         specifier: ^3.1.1
         version: 3.1.1
@@ -879,6 +882,10 @@ packages:
   '@typescript-eslint/visitor-keys@8.59.2':
     resolution: {integrity: sha512-NwjLUnGy8/Zfx23fl50tRC8rYaYnM52xNRYFAXvmiil9yh1+K6aRVQMnzW6gQB/1DLgWt977lYQn7C+wtgXZiA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/67ac4f2f21d758cb171d494c9702eccb07d77dc4':
+    resolution: {tarball: https://codeload.github.com/v3rt3p/types/tar.gz/67ac4f2f21d758cb171d494c9702eccb07d77dc4}
+    version: 1.0.0
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -3658,6 +3665,10 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.59.2
       eslint-visitor-keys: 5.0.1
+
+  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/67ac4f2f21d758cb171d494c9702eccb07d77dc4':
+    dependencies:
+      zod: 4.4.3
 
   abbrev@1.1.1: {}
 

@@ -1,4 +1,5 @@
 import { getTraceData, Span, startInactiveSpan } from '@sentry/node'
+import { ProcessorClientWebSocketMessage, processorServerWebSocketMessage } from '@v3rt3p/types/processor'
 import { EventEmitter } from 'node:stream'
 import { Event, WebSocket } from 'ws'
 
@@ -63,7 +64,7 @@ export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> 
       span?.end()
     })
     this.webSocket.addEventListener('message', message => {
-      const data = JSON.parse(message.data.toString())
+      const data = processorServerWebSocketMessage.parse(JSON.parse(message.data.toString()))
       if (data.type === 'partialResponse') {
         this.emit('partialResponse', data.data)
       }
@@ -75,26 +76,22 @@ export class BasicProcessorSession extends EventEmitter<ProcessorSessionEvents> 
   }
 
   prepare (): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.webSocket.send(JSON.stringify({
-        data: {},
-        type: 'prepare'
-      }), error => {
-        if (error) {
-          reject(error)
-        } else {
-          resolve()
-        }
-      })
+    return this.send({
+      data: {},
+      type: 'prepare'
     })
   }
 
   process (request: ProcessorRequest): Promise<void> {
+    return this.send({
+      data: request,
+      type: 'process'
+    })
+  }
+
+  private send (message: ProcessorClientWebSocketMessage): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.webSocket.send(JSON.stringify({
-        data: request,
-        type: 'process'
-      }), error => {
+      this.webSocket.send(JSON.stringify(message), error => {
         if (error) {
           reject(error)
         } else {

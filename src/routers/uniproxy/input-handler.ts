@@ -3,7 +3,7 @@ import { Span, startInactiveSpan } from '@sentry/node'
 import { ProcessorBackend, ProcessorPartialResponse, ProcessorSession } from '../../backend/backend'
 import { getLogger } from '../../logger'
 import { Notifier } from '../../notifier'
-import { AliceDirective } from '../alice/directives'
+import { QuasarDirective } from '../alice/directives'
 import { continueSessionStage1SemanticFrame } from '../alice/typed-payloads'
 
 export interface Input {
@@ -16,7 +16,7 @@ export interface InputHandlerProperties {
 
 export interface InputResult {
   dialogFinished: boolean
-  directives: AliceDirective[]
+  directives: QuasarDirective[]
   shouldListen: boolean
   text: null | string
 }
@@ -154,7 +154,10 @@ export class InputHandler {
           dialogFinished: true,
           directives: [
             {
-              type: 'ttsPlayPlaceholder'
+              data: {
+                type: 'ttsPlayPlaceholder'
+              },
+              type: 'internalQuasar'
             }
           ],
           shouldListen: false,
@@ -217,8 +220,11 @@ export class InputHandler {
         dialogFinished: false,
         directives: [
           {
-            payload: continueSessionStage1SemanticFrame,
-            type: 'mmSemanticFrame'
+            data: {
+              payload: continueSessionStage1SemanticFrame,
+              type: 'mmSemanticFrame'
+            },
+            type: 'internalQuasar'
           }
         ],
         shouldListen: false,
@@ -229,23 +235,26 @@ export class InputHandler {
     if (partialResponse.finished) {
       span?.setAttribute('endReason', 'partial-response-finished')
       span?.setAttribute('text', partialResponse.text)
-      span?.setAttribute('require-more-input', partialResponse.requireMoreInput)
+      span?.setAttribute('should-listen', partialResponse.shouldListen)
       span?.setAttribute('directives', JSON.stringify(partialResponse.directives, undefined, 2))
       span?.end()
       this.logger.debug('Partial response is finished')
-      if (partialResponse.finished && !partialResponse.requireMoreInput) {
+      if (partialResponse.finished && !partialResponse.shouldListen) {
         this.logger.debug('Partial response is finished, and no more input is required - closing')
         this.closeSession()
       }
       return {
-        dialogFinished: !partialResponse.requireMoreInput,
+        dialogFinished: !partialResponse.shouldListen,
         directives: [
           ...partialResponse.directives,
           {
-            type: 'ttsPlayPlaceholder'
+            data: {
+              type: 'ttsPlayPlaceholder'
+            },
+            type: 'internalQuasar'
           }
         ],
-        shouldListen: partialResponse.requireMoreInput,
+        shouldListen: partialResponse.shouldListen,
         text: partialResponse.text
       }
     }
@@ -260,10 +269,13 @@ export class InputHandler {
       directives: [
         ...partialResponse.directives,
         {
-          onFinish: {
-            TypedCallbackRequest: continueSessionStage1SemanticFrame
+          data: {
+            onFinish: {
+              TypedCallbackRequest: continueSessionStage1SemanticFrame
+            },
+            type: 'ttsPlayPlaceholder'
           },
-          type: 'ttsPlayPlaceholder'
+          type: 'internalQuasar'
         }
       ],
       shouldListen: false,

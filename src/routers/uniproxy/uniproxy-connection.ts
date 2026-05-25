@@ -7,7 +7,7 @@ import { AudioMetadataBackend, ProcessorBackend, STTBackend, TTSBackend } from '
 import { getLogger } from '../../logger'
 import { decodeProtobufStruct, getValue } from '../../protobuf'
 import proto from '../../protos/protos'
-import { AliceDirective, convertToAliceResponseDirective as convertToAliceDirective } from '../alice/directives'
+import { convertToAliceResponseDirective as convertToAliceDirective, QuasarDirective } from '../alice/directives'
 import { continueSessionStage2SemanticFrame, externalEventSemanticFrame, ttsSemanticFrame } from '../alice/typed-payloads'
 import { InputHandler, InputResult, TextInput } from './input-handler'
 import { VoiceInputHandler } from './voice-input-handler'
@@ -65,15 +65,18 @@ export class UniProxyConnection {
     this.setupVoiceInputHandlers()
   }
 
-  async pushDirective (...directives: AliceDirective[]): Promise<void> {
+  async pushDirective (...directives: QuasarDirective[]): Promise<void> {
     await this.sendPush(directives)
   }
 
   async pushEvent (text: string): Promise<void> {
     await this.sendPush([
       {
-        payload: externalEventSemanticFrame(text),
-        type: 'mmSemanticFrame'
+        data: {
+          payload: externalEventSemanticFrame(text),
+          type: 'mmSemanticFrame'
+        },
+        type: 'internalQuasar'
       }
     ])
   }
@@ -85,8 +88,11 @@ export class UniProxyConnection {
   async pushTts (text: string): Promise<void> {
     await this.sendPush([
       {
-        payload: ttsSemanticFrame(text),
-        type: 'mmSemanticFrame'
+        data: {
+          payload: ttsSemanticFrame(text),
+          type: 'mmSemanticFrame'
+        },
+        type: 'internalQuasar'
       }
     ])
   }
@@ -297,8 +303,11 @@ export class UniProxyConnection {
         }
       } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage1_semantic_frame')) {
         await this.sendPush([{
-          payload: continueSessionStage2SemanticFrame(this.dialogId),
-          type: 'mmSemanticFrame'
+          data: {
+            payload: continueSessionStage2SemanticFrame(this.dialogId),
+            type: 'mmSemanticFrame',
+          },
+          type: 'internalQuasar'
         }], [])
       } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame')) {
         dialogId = getValue(payload, 'string', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame', 'dialog_id')
@@ -428,7 +437,7 @@ export class UniProxyConnection {
     })
   }
 
-  private async sendAliceResponse (text: null | string, directives: AliceDirective[],
+  private async sendAliceResponse (text: null | string, directives: QuasarDirective[],
     shouldListen: boolean, requestId: string,
     referenceMessageId: string, sequenceNumber: number) {
     await this.sendServerMessage({
@@ -573,7 +582,7 @@ export class UniProxyConnection {
     }
   }
 
-  private async sendPush (directives: AliceDirective[],
+  private async sendPush (directives: QuasarDirective[],
     rawDirectives?: proto.NAlice.NAliceApi.ITDirective[]): Promise<void> {
     await this.sendServerMessage({
       Event: {

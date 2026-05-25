@@ -1,3 +1,5 @@
+import { Directive } from '@v3rt3p/types/directives'
+
 import { encodeProtobufStruct } from '../../protobuf'
 import proto from '../../protos/protos'
 
@@ -5,37 +7,23 @@ type TDirective = proto.NAlice.NAliceApi.ITDirective
 
 const TProcessIncomingCallDirectiveClass = proto.NAlice.TPhoneCallsCapability.TProcessIncomingCallDirective
 
-export type AliceDirective = MMSemanticFrame | ProcessIncomingCallDirective | PushUpdateConfig |
-RawDirective | SoundLouderDirective | SoundQuieterDirective | SoundSetLevelDirective | TtsPlayPlaceholderDirective
+export type InternalQuasarDirective = {
+  data: MMSemanticFrameData | ProcessIncomingCallData | PushUpdateConfigData | TtsPlayPlaceholderData
+  type: 'internalQuasar',
+}
 
-export interface ProcessIncomingCallDirective {
+export interface ProcessIncomingCallData {
   callId: string;
   type: 'processIncomingCall'
 }
 
-export interface PushUpdateConfig {
+export interface PushUpdateConfigData {
   type: 'pushUpdateConfig'
 }
 
-export interface RawDirective {
-  data: TDirective
-  type: 'raw',
-}
+export type QuasarDirective = Directive | InternalQuasarDirective
 
-export interface SoundLouderDirective {
-  type: 'soundLouder';
-}
-
-export interface SoundQuieterDirective {
-  type: 'soundQuieter';
-}
-
-export interface SoundSetLevelDirective {
-  newLevel: number;
-  type: 'soundSetLevel';
-}
-
-export interface TtsPlayPlaceholderDirective {
+export interface TtsPlayPlaceholderData {
   onFinish?: proto.NAlice.NAliceApi.TDirective.ITOnFinishEvent
   type: 'ttsPlayPlaceholder'
 }
@@ -52,6 +40,18 @@ export const soundQuieterDirective = {
   AnalyticsType: 'sound_quiter',
   IsLedSilent: true,
   Name: 'sound_quiter',
+  Payload: {},
+  Type: 'client_action'
+}
+
+export const bluetoothEnableDirective = {
+  Name: 'start_bluetooth',
+  Payload: {},
+  Type: 'client_action'
+}
+
+export const bluetoothDisableDirective = {
+  Name: 'stop_bluetooth',
   Payload: {},
   Type: 'client_action'
 }
@@ -96,7 +96,7 @@ export const ttsPlayPlaceholderDirective = (onFinish?: proto.NAlice.NAliceApi.TD
     : {})
 })
 
-export interface MMSemanticFrame {
+export interface MMSemanticFrameData {
   payload?: proto.google.protobuf.IStruct,
   payloadRaw?: Buffer
   type: 'mmSemanticFrame',
@@ -109,19 +109,34 @@ export const mmSemanticFrame = (payload?: proto.google.protobuf.IStruct, payload
   Type: 'server_action'
 })
 
-export function convertToAliceResponseDirective (directive: AliceDirective): TDirective {
+export function convertToAliceResponseDirective (directive: QuasarDirective): TDirective {
   switch (directive.type) {
-    case 'mmSemanticFrame': {
-      return mmSemanticFrame(directive.payload, directive.payloadRaw)
+    case 'bluetoothDisable': {
+      return bluetoothDisableDirective
     }
-    case 'processIncomingCall': {
-      return processIncomingCallDirective(directive.callId)
+    case 'bluetoothEnable': {
+      return bluetoothEnableDirective
     }
-    case 'pushUpdateConfig': {
-      return pushUpdateConfigDirective
+    case 'customQuasar': {
+      return directive.data as TDirective
     }
-    case 'raw': {
-      return directive.data
+    case 'internalQuasar': {
+      switch (directive.data.type) {
+        case 'mmSemanticFrame': {
+          return mmSemanticFrame(directive.data.payload, directive.data.payloadRaw)
+        }
+        case 'processIncomingCall': {
+          return processIncomingCallDirective(directive.data.callId)
+        }
+        case 'pushUpdateConfig': {
+          return pushUpdateConfigDirective
+        }
+        case 'ttsPlayPlaceholder': {
+          return ttsPlayPlaceholderDirective(directive.data.onFinish)
+        }
+      }
+      // @ts-expect-error Wut? ALALALALA
+      break
     }
     case 'soundLouder': {
       return soundLouderDirective
@@ -130,10 +145,10 @@ export function convertToAliceResponseDirective (directive: AliceDirective): TDi
       return soundQuieterDirective
     }
     case 'soundSetLevel': {
-      return soundSetLevelDirective(directive.newLevel)
+      return soundSetLevelDirective(directive.level)
     }
-    case 'ttsPlayPlaceholder': {
-      return ttsPlayPlaceholderDirective(directive.onFinish)
+    case 'customMarusya': {
+      throw new Error('custom Marusya directives are not supported on this platform')
     }
   }
 }
