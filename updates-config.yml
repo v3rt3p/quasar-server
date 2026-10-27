@@ -28,11 +28,11 @@ updates:
     version: '5000001070'
     updateId: '150068'
   yandexmicro:
-    downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmicro/ota/user/dbb517ff-eac2-4ba7-acb6-da7f21c3de80/0.372.1.8.4790672876.20261019.300.zip
-    crc32: 3616950701
-    version: 0.372.1.8.4790672876.20261019.300
-    fallbackUrl: https://quasar.s3.yandex.net/yandexmicro/ota/user/dbb517ff-eac2-4ba7-acb6-da7f21c3de80/0.372.1.8.4790672876.20261019.300.zip
-    updateId: '154280'
+    downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmicro/ota/user/5d32d90a-afee-4716-9b3e-2e627213c127/0.370.1.6.4737552926.20261002.298.zip
+    crc32: 3483073494
+    version: 0.370.1.6.4737552926.20261002.298
+    fallbackUrl: https://quasar.s3.yandex.net/yandexmicro/ota/user/5d32d90a-afee-4716-9b3e-2e627213c127/0.370.1.6.4737552926.20261002.298.zip
+    updateId: '149797'
   yandexmidi:
     downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmidi/ota/user/c0e1b863-7db9-46af-9c0f-41b30e0a63f1/0.372.1.8.4790676133.20261019.298.zip
     crc32: 150213430
