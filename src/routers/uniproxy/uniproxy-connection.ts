@@ -42,6 +42,7 @@ export interface UniProxyConnectionParameters {
 
 const spotterToAssistantNameMapping: Record<string, string> = {
   alisa: 'Алиса',
+  yandex: 'Яндекс',
   yasmina: 'Ясмина'
 }
 
