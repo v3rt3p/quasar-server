@@ -533,6 +533,14 @@ functionStateServer.put('/functions', async ({ body }) => {
     }
   }
 
+  totalFunctions['other_smart_speaker_tts'] = {
+    arguments: z.object({
+      deviceId: z.string().describe('device ID to execute on or "all" if on all'),
+      text: z.string().describe('text to speak')
+    }),
+    description: 'Say some text on other speaker (supported on all speakers)'
+  }
+
   return Object.fromEntries(Object.entries(totalFunctions)
     .map(entry => ([entry[0], {
       arguments: entry[1].arguments.toJSONSchema(),
@@ -565,6 +573,12 @@ functionStateServer.post('/functions', async ({ body }) => {
     if (connection.getDeviceId() === fromDeviceId && calledDeviceId === 'all') {
       return
     }
+
+    if (body.name === 'other_smart_speaker_tts') {
+      await connection.pushTts(String(body.arguments.text))
+      return
+    }
+
     const directive = connection.getDirectiveFunctionProvider()
       .convertToWrappedDirective({
         arguments: body.arguments['args'],
