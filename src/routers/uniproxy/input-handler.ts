@@ -174,7 +174,13 @@ export class InputHandler {
         this.notifier.notifyAll()
       })
       this.session.addListener('partialResponse', () => {})
-      await this.session.prepare(this.properties.directiveFunctionProvider.getSupportedFunctions())
+      await this.session.prepare(
+        Object.fromEntries(Object.entries(this.properties.directiveFunctionProvider.getSupportedFunctions())
+          .map(entry => ([entry[0], {
+            arguments: entry[1].arguments.toJSONSchema(),
+            description: entry[1].description
+          }])))
+      )
       this.logger.debug('Session opened')
     }
   }

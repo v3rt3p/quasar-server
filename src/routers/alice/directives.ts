@@ -1,5 +1,4 @@
 import { MusicTrack } from '@v3rt3p/types/music'
-import { ProcessorDirectiveFunctions } from '@v3rt3p/types/processor'
 import { randomUUID } from 'node:crypto'
 import z from 'zod'
 
@@ -16,8 +15,13 @@ export type DirectiveFunctionHandler<T> = (argument: T) => WrappedDirective
 
 export interface DirectiveFunctionProvider {
   convertToWrappedDirective(call: DirectiveCallData): null | WrappedDirective
-  getSupportedFunctions(): ProcessorDirectiveFunctions
+  getSupportedFunctions(): DirectiveFunctions
 }
+
+export type DirectiveFunctions = Record<string, {
+  arguments: z.ZodType<unknown>,
+  description: string
+}>
 
 export type InternalDirective = MusicDirective<'next_track'> | MusicDirective<'play'> | MusicDirective<'previous_track'> |
   MusicDirective<'recover_next_track'> | MusicDirective<'stop'> | MusicRecoverCommitDirective
@@ -65,10 +69,10 @@ export class AbstractDirectiveFunctionProvider implements DirectiveFunctionProvi
     return null
   }
 
-  getSupportedFunctions (): ProcessorDirectiveFunctions {
+  getSupportedFunctions (): DirectiveFunctions {
     return Object.fromEntries([...this.functionHandlerMap.entries()].map(
       (item) => [`smart_speaker_${item[0]}`, {
-        arguments: item[1].schema.toJSONSchema(),
+        arguments: item[1].schema,
         description: item[1].description
       }]))
   }

@@ -45,8 +45,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@v3rt3p/types':
-        specifier: github:v3rt3p/types#1.0.15
-        version: https://codeload.github.com/v3rt3p/types/tar.gz/3df6c93f2b2df92ef268a0b5bb0f5218a9a301cb
+        specifier: github:v3rt3p/types#1.0.16
+        version: https://codeload.github.com/v3rt3p/types/tar.gz/ab7dc469f9ee086c5c2b2c8b7873e23d93490594
       async-sema:
         specifier: ^3.1.1
         version: 3.1.1
@@ -883,8 +883,8 @@ packages:
     resolution: {integrity: sha512-NwjLUnGy8/Zfx23fl50tRC8rYaYnM52xNRYFAXvmiil9yh1+K6aRVQMnzW6gQB/1DLgWt977lYQn7C+wtgXZiA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/3df6c93f2b2df92ef268a0b5bb0f5218a9a301cb':
-    resolution: {tarball: https://codeload.github.com/v3rt3p/types/tar.gz/3df6c93f2b2df92ef268a0b5bb0f5218a9a301cb}
+  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/ab7dc469f9ee086c5c2b2c8b7873e23d93490594':
+    resolution: {tarball: https://codeload.github.com/v3rt3p/types/tar.gz/ab7dc469f9ee086c5c2b2c8b7873e23d93490594}
     version: 1.0.0
 
   abbrev@1.1.1:
@@ -3666,7 +3666,7 @@ snapshots:
       '@typescript-eslint/types': 8.59.2
       eslint-visitor-keys: 5.0.1
 
-  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/3df6c93f2b2df92ef268a0b5bb0f5218a9a301cb':
+  '@v3rt3p/types@https://codeload.github.com/v3rt3p/types/tar.gz/ab7dc469f9ee086c5c2b2c8b7873e23d93490594':
     dependencies:
       zod: 4.4.3
 

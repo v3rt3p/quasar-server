@@ -120,8 +120,16 @@ export class UniProxyConnection {
     return promise.promise
   }
 
+  getDeviceId (): string {
+    return this.deviceId
+  }
+
   getDirectiveFunctionProvider (): DirectiveFunctionProvider {
     return this.directiveFunctionProvider
+  }
+
+  getPlatform (): string {
+    return this.platform
   }
 
   async processWrappedDirectives (directives: WrappedDirective[],

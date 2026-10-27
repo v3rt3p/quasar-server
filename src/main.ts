@@ -1,6 +1,7 @@
 import openapi from '@elysia/openapi'
 import node from '@elysiajs/node'
 import Sentry from '@sentry/node'
+import { functions, functionStateServerCallFunctionRequest, functionStateServerCallFunctionResponse, functionStateServerGetDependantFunctionsRequest, functionStateServerGetDependantStateRequest, functionStateServerStateResponse } from '@v3rt3p/types/function-state-server'
 import bodyParser from 'body-parser'
 import Elysia, { t } from 'elysia'
 import express from 'express'
@@ -17,7 +18,7 @@ import { getEnvironment } from './environment'
 import { getLogger } from './logger'
 import { MusicManager } from './music/manager'
 import proto from './protos/protos'
-import { pushUpdateConfigDirective, WrappedDirective } from './routers/alice/directives'
+import { DirectiveFunctions, pushUpdateConfigDirective, WrappedDirective } from './routers/alice/directives'
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerMobileproxyPassportYandexNetRouter } from './routers/mobileproxy.passport.yandex.net'
 import { registerOAuthYandexRuRouter } from './routers/oauth.yandex.ru'
@@ -27,6 +28,7 @@ import { registerRpcAliceYandexNetRouter } from './routers/rpc.alice.yandex.net'
 import { registerScbhYandexNetRouter } from './routers/scbh.yandex.net'
 import { registerStartupMobileYandexNetRouter } from './routers/startup.mobile.yandex.net'
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
+import { InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { PostgresDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
@@ -390,17 +392,209 @@ apiServer.get('/devices/:duid/state', async ({ params: { duid }, status }) => {
   }
 })
 
-const functionStateServerApp = express()
-
-functionStateServerApp.use(express.json())
-
-const functionStateServerServer = functionStateServerApp.listen(environment.FUNCTION_STATE_SERVER_PORT, error => {
-  if (error) {
-    logger.error(`function-state-server failed to start on :${environment.FUNCTION_STATE_SERVER_PORT}: ${error}`)
-    return
+const functionStateServer = new Elysia({
+  adapter: node()
+}).use(openapi({
+  documentation: {
+    info: {
+      title: 'Quasar function-state-server API',
+      version: '1.4.6'
+    }
+  },
+  mapJsonSchema: {
+    zod: z.toJSONSchema
   }
-  logger.info(`Started function-state-server on :${environment.FUNCTION_STATE_SERVER_PORT}`)
+}))
+  .guard({
+    response: {
+      500: internalErrorType
+    }
+  })
+  .onError(async ({ error, status }) => {
+    status(500, {
+      code: 'INTERNAL_SERVER_ERROR',
+      text: String(error)
+    })
+  })
+
+functionStateServer.get('/state', async () => {
+  return {}
+}, {
+  detail: {
+    summary: 'Get independent state',
+    tags: ['state']
+  },
+  response: {
+    200: functionStateServerStateResponse
+  }
 })
+
+functionStateServer.put('/state', async ({ body }) => {
+  const totalState: Record<string, InputMetadataEntry> = {}
+
+  const calledDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+  for (const [deviceId, connections] of uniProxyRouter.connections) {
+    if (deviceId === calledDeviceId) {
+      continue
+    }
+
+    const connection = connections.values().next().value
+
+    if (!connection) {
+      continue
+    }
+
+    const state = await connection.fetchState()
+
+    for (const [key, info] of Object.entries(state.readyToUse)) {
+      totalState[`other_speaker_${deviceId}_${key}`] = {
+        description: `'${info.description}' for speaker with ID ${deviceId}`,
+        value: info.value
+      }
+    }
+  }
+
+  return totalState
+}, {
+  body: functionStateServerGetDependantStateRequest,
+  detail: {
+    summary: 'Get dependent state',
+    tags: ['state']
+  },
+  response: {
+    200: functionStateServerStateResponse
+  }
+})
+
+functionStateServer.get('/functions', async () => {
+  return {}
+}, {
+  detail: {
+    summary: 'Get independent functions',
+    tags: ['functions']
+  },
+  response: {
+    200: functions
+  }
+})
+
+functionStateServer.put('/functions', async ({ body }) => {
+  const totalFunctions: DirectiveFunctions = {}
+
+  const calledDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+
+  const allFunctions: Map<string, {
+    arguments: z.ZodType<unknown>,
+    description: string,
+    supportedDevices: Set<string>
+  }> = new Map()
+
+  const allDevics = new Set<string>()
+
+  for (const [deviceId, connections] of uniProxyRouter.connections) {
+    if (deviceId === calledDeviceId) {
+      continue
+    }
+
+    allDevics.add(deviceId)
+
+    const connection = connections.values().next().value
+
+    if (!connection) {
+      continue
+    }
+
+    const functions = connection.getDirectiveFunctionProvider().getSupportedFunctions()
+
+    for (const [name, info] of Object.entries(functions)) {
+      const existingEntry = allFunctions.get(name)
+      if (existingEntry) {
+        existingEntry.supportedDevices.add(deviceId)
+      } else {
+        allFunctions.set(name, {
+          arguments: info.arguments,
+          description: info.description,
+          supportedDevices: new Set([deviceId])
+        })
+      }
+    }
+  }
+
+  for (const [name, info] of allFunctions.entries()) {
+    const isSupportedOnAllDevices = allDevics.size === info.supportedDevices.size
+
+    totalFunctions[`other_${name}`] = {
+      arguments: z.object({
+        args: info.arguments.describe('separate args object for this call'),
+        deviceId: z.string().describe('device ID to execute on or "all" if on all')
+      }),
+      description: `Execute '${info.description}' on other speaker (supported ${
+        isSupportedOnAllDevices ? 'on all speakers' : `only on ${[...info.supportedDevices].join(', ')} speakers`})`
+    }
+  }
+
+  return Object.fromEntries(Object.entries(totalFunctions)
+    .map(entry => ([entry[0], {
+      arguments: entry[1].arguments.toJSONSchema(),
+      description: entry[1].description,
+      hasResponse: false
+    }])))
+}, {
+  body: functionStateServerGetDependantFunctionsRequest,
+  detail: {
+    summary: 'Get dependent functions',
+    tags: ['functions']
+  },
+  response: {
+    200: functions
+  }
+})
+
+functionStateServer.post('/functions', async ({ body }) => {
+  const fromDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+
+  const calledDeviceId = String(body.arguments['deviceId'])
+
+  logger.info(`Received function call to '${calledDeviceId}' from '${fromDeviceId}': ${body.name}`)
+
+  if (!calledDeviceId || calledDeviceId === fromDeviceId) {
+    return {}
+  }
+
+  await runForConnections(calledDeviceId, async connection => {
+    if (connection.getDeviceId() === fromDeviceId && calledDeviceId === 'all') {
+      return
+    }
+    const directive = connection.getDirectiveFunctionProvider()
+      .convertToWrappedDirective({
+        arguments: body.arguments['args'],
+        name: body.name.replace(/^other_/, '')
+      })
+    if (!directive) {
+      return
+    }
+    await connection.pushDirectives(directive)
+  })
+
+  return {}
+}, {
+  body: functionStateServerCallFunctionRequest,
+  detail: {
+    summary: 'Call function',
+    tags: ['functions']
+  },
+  response: {
+    200: functionStateServerCallFunctionResponse
+  }
+})
+
+try {
+  functionStateServer.listen(environment.FUNCTION_STATE_SERVER_PORT, () => {
+    logger.info(`Started function-state-server on :${environment.FUNCTION_STATE_SERVER_PORT}`)
+  })
+} catch (error) {
+  logger.error(`function-state-server failed to start on :${environment.FUNCTION_STATE_SERVER_PORT}: ${error}`)
+}
 
 try {
   apiServer.listen(environment.API_PORT, () => {
@@ -415,7 +609,9 @@ process.removeAllListeners('SIGINT')
 process.on('SIGINT', () => {
   logger.info('Stopping...')
   server.close()
-  functionStateServerServer.close()
+  if (functionStateServer.server) {
+    functionStateServer.stop()
+  }
   if (apiServer.server) {
     apiServer.stop()
   }
