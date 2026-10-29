@@ -523,7 +523,8 @@ export class UniProxyConnection {
             if (event.PayloadRaw) {
               const rawPayload = Buffer.from(event.PayloadRaw)
               const decoded = TTypedCallbackRequestClass.decode(rawPayload)
-              rawSerialiedTypedCallback = Buffer.from(decoded.TypedCallbackSerialized!)
+              rawSerialiedTypedCallback = Buffer.from(
+                Buffer.from(decoded.TypedCallbackSerialized!).toString('ascii'), 'base64')
             } else if (event.Payload) {
               const base64SerializedTypedCallback = getValue(
                 decodeProtobufStruct(event.Payload), 'string', 'typed_callback_serialized')
@@ -537,7 +538,7 @@ export class UniProxyConnection {
               break
             }
 
-            this.logger.info(`Received @@mm_typed_callback: ${JSON.stringify(event)} ${rawSerialiedTypedCallback.toString('base64')}`)
+            this.logger.debug(`Received @@mm_typed_callback: ${JSON.stringify(event)} ${rawSerialiedTypedCallback.toString('base64')}`)
 
             const decodedSerialized = proto.google.protobuf.Any.decode(rawSerialiedTypedCallback)
             switch (decodedSerialized.typeUrl) {
