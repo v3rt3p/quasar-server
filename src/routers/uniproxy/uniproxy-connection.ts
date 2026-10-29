@@ -10,7 +10,7 @@ import { decodeProtobufStruct, getValue } from '../../protobuf'
 import proto from '../../protos/protos'
 import { StationInfoProvider } from '../../storage/types'
 import { getDirectiveFunctionProvider } from '../alice/base-provider'
-import { audioPlayDirective, DirectiveFunctionProvider, mmSemanticFrame, RawDirective, stackRecoverNextTrackDirective, WrappedDirective } from '../alice/directives'
+import { audioPlayDirective, DirectiveFunctionProvider, mmSemanticFrame, RawDirective, setLocationDirective, setTimezoneDirective, stackRecoverNextTrackDirective, WrappedDirective } from '../alice/directives'
 import { continueSessionStage2SemanticFrame, ttsSemanticFrame } from '../alice/typed-payloads'
 import { AlarmMetadata, InputHandler, InputMetadata, InputResult, TextInput, TimerMetadata } from './input-handler'
 import { VoiceInputHandler } from './voice-input-handler'
@@ -22,6 +22,7 @@ type TClientMessage = proto.NAlice.NAliceApi.ITClientMessage
 const TClientMessageClass = proto.NAlice.NAliceApi.TClientMessage
 
 const TSemanticFrameRequestDataClass = proto.NAlice.NAliceApi.TSemanticFrameRequestData
+const TTypedCallbackRequestClass = proto.NAlice.TTypedCallbackRequest
 
 enum CloseDialogReason {
   CLIENT_CANCEL = 'clientCancel',
@@ -187,6 +188,23 @@ export class UniProxyConnection {
             if (position) {
               this.parameters.musicManager.savePosition(this.deviceId, position)
             }
+            break
+          }
+          case 'set_location': {
+            const deviceInfo = await this.parameters.storage.getInfo(this.deviceId, this.platform)
+            const location = deviceInfo.quasarConfig.deviceConfig.location ?? {
+              latitude: 59.93,
+              longitude: 30.34
+            }
+
+            rawDirectives.push(setLocationDirective(location.longitude, location.latitude).quasarDirective)
+            break
+          }
+          case 'set_timezone': {
+            const deviceInfo = await this.parameters.storage.getInfo(this.deviceId, this.platform)
+            const timezone = deviceInfo.quasarConfig.timezone
+
+            rawDirectives.push(setTimezoneDirective(timezone.name, timezone.offsetSeconds).quasarDirective)
             break
           }
         }
@@ -426,81 +444,140 @@ export class UniProxyConnection {
         clientMessage.Event!.TextInput!.Request!.EnvironmentStateRaw!)
     )
 
-    if (event.Type === proto.NAlice.EEventType.server_action && event.Payload) {
-      const payload = decodeProtobufStruct(event.Payload)
-      if (getValue(payload, 'any', 'typed_semantic_frame', 'music_play_semantic_frame')) {
-        textInput = {
-          data: {
-            kind: 'playButtonPressPlay'
-          },
-          metadata
+    switch (event.Type) {
+      case proto.NAlice.EEventType.server_action: {
+        switch (event.Name) {
+          case '@@mm_semantic_frame': {
+            if (event.PayloadRaw) {
+              const rawPayload = Buffer.from(event.PayloadRaw)
+              const decoded = TSemanticFrameRequestDataClass.decode(rawPayload)
+              if (decoded?.TypedSemanticFrame?.MusicPlaySemanticFrame) {
+                textInput = {
+                  data: {
+                    kind: 'playButtonPressPlay'
+                  },
+                  metadata
+                }
+              } else if (decoded?.TypedSemanticFrame?.PlayerContinueSemanticFrame) {
+                textInput = {
+                  data: {
+                    kind: 'playButtonPressPlay'
+                  },
+                  metadata
+                }
+              } else {
+                this.logger.info(`Received unknown TextInput semantic frame with raw payload: ${JSON.stringify(decoded)} ${JSON.stringify(event)}`)
+              }
+            } else if (event.Payload) {
+              const payload = decodeProtobufStruct(event.Payload)
+              if (getValue(payload, 'any', 'typed_semantic_frame', 'music_play_semantic_frame')) {
+                textInput = {
+                  data: {
+                    kind: 'playButtonPressPlay'
+                  },
+                  metadata
+                }
+              } else if (getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')) {
+                textInput = {
+                  data: {
+                    kind: 'tts',
+                    text: getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')!
+                  },
+                  metadata
+                }
+              } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage1_semantic_frame')) {
+                await this.pushDirectives(mmSemanticFrame(false, continueSessionStage2SemanticFrame(this.dialogId)))
+              } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame')) {
+                dialogId = getValue(payload, 'string', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame', 'dialog_id')
+                textInput = {
+                  data: {
+                    kind: 'continue'
+                  },
+                  metadata
+                }
+              } else if (getValue(payload, 'string', 'music', 'type') === 'fetchNextTrack') {
+                textInput = {
+                  data: {
+                    kind: 'musicFetchNextTrack'
+                  },
+                  metadata
+                }
+              } else if (getValue(payload, 'string', 'music', 'type') === 'recoverCommit') {
+                textInput = {
+                  data: {
+                    kind: 'musicRecoverCommit',
+                    recoverCommitToken: getValue(payload, 'string', 'music', 'recoverCommitToken')!
+                  },
+                  metadata
+                }
+              } else {
+                this.logger.info(`Received unknown TextInput semantic frame with payload: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+              }
+            } else {
+              this.logger.info(`Received unknown TextInput semantic frame: ${JSON.stringify(event)}`)
+            }
+            break
+          }
+          case '@@mm_typed_callback': {
+            let rawSerialiedTypedCallback: Buffer | null = null
+            if (event.PayloadRaw) {
+              const rawPayload = Buffer.from(event.PayloadRaw)
+              const decoded = TTypedCallbackRequestClass.decode(rawPayload)
+              rawSerialiedTypedCallback = Buffer.from(decoded.TypedCallbackSerialized!)
+            } else if (event.Payload) {
+              const base64SerializedTypedCallback = getValue(
+                decodeProtobufStruct(event.Payload), 'string', 'typed_callback_serialized')
+              if (base64SerializedTypedCallback !== undefined) {
+                rawSerialiedTypedCallback = Buffer.from(base64SerializedTypedCallback, 'base64')
+              }
+            }
+
+            if (!rawSerialiedTypedCallback) {
+              this.logger.info(`Received unknown TextInput typed callback: ${JSON.stringify(event)}`)
+              break
+            }
+
+            const decodedSerialized = proto.google.protobuf.Any.decode(rawSerialiedTypedCallback)
+            switch (decodedSerialized.typeUrl) {
+              case 'type.googleapis.com/NAlice.TDeviceControlTimesyncTypedCallback': {
+                const data = proto.NAlice.TDeviceControlTimesyncTypedCallback.decode(decodedSerialized.value!)
+                textInput = {
+                  data: {
+                    kind: 'syncTimezoneLocation',
+                    location: !!data.SyncLocation,
+                    timezone: !!data.SyncTimezone
+                  },
+                  metadata
+                }
+                break
+              }
+              default: {
+                this.logger.info(`Received unknown serialized TextInput typed callback: ${JSON.stringify(event)}`)
+              }
+            }
+            break
+          }
+          default: {
+            this.logger.info(`Received unknown TextInput server action: ${JSON.stringify(event)}`)
+            break
+          }
         }
-      } else if (getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')) {
-        textInput = {
-          data: {
-            kind: 'tts',
-            text: getValue(payload, 'string', 'typed_semantic_frame', 'tts_semantic_frame', 'text')!
-          },
-          metadata
-        }
-      } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage1_semantic_frame')) {
-        await this.pushDirectives(mmSemanticFrame(false, continueSessionStage2SemanticFrame(this.dialogId)))
-      } else if (getValue(payload, 'any', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame')) {
-        dialogId = getValue(payload, 'string', 'typed_semantic_frame', 'continue_session_stage2_semantic_frame', 'dialog_id')
-        textInput = {
-          data: {
-            kind: 'continue'
-          },
-          metadata
-        }
-      } else if (getValue(payload, 'string', 'music', 'type') === 'fetchNextTrack') {
-        textInput = {
-          data: {
-            kind: 'musicFetchNextTrack'
-          },
-          metadata
-        }
-      } else if (getValue(payload, 'string', 'music', 'type') === 'recoverCommit') {
-        textInput = {
-          data: {
-            kind: 'musicRecoverCommit',
-            recoverCommitToken: getValue(payload, 'string', 'music', 'recoverCommitToken')!
-          },
-          metadata
-        }
-      } else {
-        this.logger.info(`Received unknown TextInput server_action: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+        break
       }
-    } else if (event.Type === proto.NAlice.EEventType.server_action && event.Name === '@@mm_semantic_frame' && event.PayloadRaw) {
-      const rawPayload = Buffer.from(event.PayloadRaw)
-      const decoded = TSemanticFrameRequestDataClass.decode(rawPayload)
-      if (decoded?.TypedSemanticFrame?.MusicPlaySemanticFrame) {
+      case proto.NAlice.EEventType.text_input: {
         textInput = {
           data: {
-            kind: 'playButtonPressPlay'
+            kind: 'text',
+            text: event.Text!
           },
           metadata
         }
-      } else if (decoded?.TypedSemanticFrame?.PlayerContinueSemanticFrame) {
-        textInput = {
-          data: {
-            kind: 'playButtonPressPlay'
-          },
-          metadata
-        }
-      } else {
-        this.logger.info(`Received unknown TextInput semantic frame: ${JSON.stringify(decoded)} ${JSON.stringify(event)}`)
+        break
       }
-    } else if (event.Type === proto.NAlice.EEventType.text_input) {
-      textInput = {
-        data: {
-          kind: 'text',
-          text: event.Text!
-        },
-        metadata
+      default: {
+        this.logger.info(`Received unknown TextInput: ${JSON.stringify(event)}`)
+        break
       }
-    } else {
-      this.logger.info(`Received unknown TextInput: ${JSON.stringify(event)}`)
     }
 
     if (textInput === null) {

@@ -24,17 +24,20 @@ export type DirectiveFunctions = Record<string, {
 }>
 
 export type InternalDirective = MusicDirective<'next_track'> | MusicDirective<'play'> | MusicDirective<'previous_track'> |
-  MusicDirective<'recover_next_track'> | MusicDirective<'stop'> | MusicRecoverCommitDirective
+  MusicDirective<'recover_next_track'> | MusicDirective<'stop'> | MusicRecoverCommitDirective |
+  SimpleInternalDirective<'set_location'> | SimpleInternalDirective<'set_timezone'>
 
-export interface MusicDirective<T extends string> {
-  type: `music_${T}`
-}
+export type MusicDirective<T extends string> = SimpleInternalDirective<`music_${T}`>
 
 export interface MusicRecoverCommitDirective extends MusicDirective<'recover_commit'> {
   recoverCommitToken: string
 }
 
 export type RawDirective = proto.NAlice.NAliceApi.ITDirective
+
+export interface SimpleInternalDirective<T extends string> {
+  type: T
+}
 
 export interface WrappedDirective {
   internalDirective?: InternalDirective
@@ -166,3 +169,31 @@ export const stackRecoverNextTrackDirective = {
     Type: 'server_action'
   }
 }
+
+export const setTimezoneDirective = (name: string, offsetSeconds: number) => ({
+  quasarDirective: {
+    Name: 'set_timezone',
+    Payload: encodeProtobufStruct({
+      next_timezone: null,
+      timezone: {
+        offset_seconds: offsetSeconds,
+        timezone_name: name
+      }
+    }),
+    Type: 'client_action'
+  }
+})
+
+export const setLocationDirective = (longitude: number, latitude: number) => ({
+  quasarDirective: {
+    Name: 'set_location',
+    Payload: encodeProtobufStruct({
+      laas_real_location: null,
+      location: {
+        latitude,
+        longitude
+      }
+    }),
+    Type: 'client_action'
+  }
+})

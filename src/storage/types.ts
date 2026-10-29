@@ -790,7 +790,11 @@ const rawQuasarConfig = z.object({
       })
     })
   }),
-  tags: z.array(z.string()).default([])
+  tags: z.array(z.string()).default([]),
+  timezone: z.object({
+    name: z.string().default(Intl.DateTimeFormat().resolvedOptions().timeZone),
+    offsetSeconds: z.number().default(new Date().getTimezoneOffset() * -60)
+  })
 })
 
 function deepDefault<T extends z.ZodType> (schema: T): T {

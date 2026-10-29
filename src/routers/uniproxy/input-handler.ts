@@ -83,6 +83,10 @@ export type TextInputData = {
 } | {
   kind: 'playButtonPressPlay'
 } | {
+  kind: 'syncTimezoneLocation',
+  location: boolean
+  timezone: boolean
+} | {
   kind: 'text'
   text: string
 } | {
@@ -232,6 +236,31 @@ export class InputHandler {
               type: 'music_play'
             }
           }],
+          shouldListen: false,
+          text: null
+        }
+      }
+      case 'syncTimezoneLocation': {
+        const directives: WrappedDirective[] = []
+
+        if (input.data.timezone) {
+          directives.push({
+            internalDirective: {
+              type: 'set_timezone'
+            }
+          })
+        }
+        if (input.data.location) {
+          directives.push({
+            internalDirective: {
+              type: 'set_location'
+            }
+          })
+        }
+
+        return {
+          dialogFinished: true,
+          directives,
           shouldListen: false,
           text: null
         }
