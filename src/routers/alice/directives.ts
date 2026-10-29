@@ -25,7 +25,7 @@ export type DirectiveFunctions = Record<string, {
 
 export type InternalDirective = MusicDirective<'next_track'> | MusicDirective<'play'> | MusicDirective<'previous_track'> |
   MusicDirective<'recover_next_track'> | MusicDirective<'stop'> | MusicRecoverCommitDirective |
-  SimpleInternalDirective<'set_location'> | SimpleInternalDirective<'set_timezone'>
+  SimplePayloadRawInternalDirective<'set_location'> | SimplePayloadRawInternalDirective<'set_timezone'>
 
 export type MusicDirective<T extends string> = SimpleInternalDirective<`music_${T}`>
 
@@ -37,6 +37,10 @@ export type RawDirective = proto.NAlice.NAliceApi.ITDirective
 
 export interface SimpleInternalDirective<T extends string> {
   type: T
+}
+
+export interface SimplePayloadRawInternalDirective<T extends string> extends SimpleInternalDirective<T> {
+  isPayloadRaw: boolean
 }
 
 export interface WrappedDirective {
@@ -170,30 +174,54 @@ export const stackRecoverNextTrackDirective = {
   }
 }
 
-export const setTimezoneDirective = (name: string, offsetSeconds: number) => ({
+export const setTimezoneDirective = (name: string, offsetSeconds: number, isPayloadRaw: boolean) => ({
   quasarDirective: {
     Name: 'set_timezone',
-    Payload: encodeProtobufStruct({
-      next_timezone: null,
-      timezone: {
-        offset_seconds: offsetSeconds,
-        timezone_name: name
-      }
-    }),
+    ...(isPayloadRaw
+      ? {
+          PayloadRaw: proto.NAlice.TGeoSyncCapability.TSetTimezoneDirective.encode({
+            Name: 'set_device_timezone_directive',
+            Timezone: {
+              OffsetSeconds: offsetSeconds,
+              TimezoneName: name
+            }
+          }).finish()
+        }
+      : {
+          Payload: encodeProtobufStruct({
+            next_timezone: null,
+            timezone: {
+              offset_seconds: offsetSeconds,
+              timezone_name: name
+            }
+          }),
+        }),
     Type: 'client_action'
   }
 })
 
-export const setLocationDirective = (longitude: number, latitude: number) => ({
+export const setLocationDirective = (longitude: number, latitude: number, isPayloadRaw: boolean) => ({
   quasarDirective: {
     Name: 'set_location',
-    Payload: encodeProtobufStruct({
-      laas_real_location: null,
-      location: {
-        latitude,
-        longitude
-      }
-    }),
+    ...(isPayloadRaw
+      ? {
+          PayloadRaw: proto.NAlice.TGeoSyncCapability.TSetLocationDirective.encode({
+            Location: {
+              Latitude: latitude,
+              Longitude: longitude
+            },
+            Name: 'set_device_location_directive'
+          }).finish()
+        }
+      : {
+          Payload: encodeProtobufStruct({
+            laas_real_location: null,
+            location: {
+              latitude,
+              longitude
+            }
+          }),
+        }),
     Type: 'client_action'
   }
 })

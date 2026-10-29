@@ -197,14 +197,16 @@ export class UniProxyConnection {
               longitude: 30.34
             }
 
-            rawDirectives.push(setLocationDirective(location.longitude, location.latitude).quasarDirective)
+            rawDirectives.push(setLocationDirective(location.longitude,
+              location.latitude, directive.internalDirective.isPayloadRaw).quasarDirective)
             break
           }
           case 'set_timezone': {
             const deviceInfo = await this.parameters.storage.getInfo(this.deviceId, this.platform)
             const timezone = deviceInfo.quasarConfig.timezone
 
-            rawDirectives.push(setTimezoneDirective(timezone.name, timezone.offsetSeconds).quasarDirective)
+            rawDirectives.push(setTimezoneDirective(timezone.name,
+              timezone.offsetSeconds, directive.internalDirective.isPayloadRaw).quasarDirective)
             break
           }
         }
@@ -519,8 +521,10 @@ export class UniProxyConnection {
             break
           }
           case '@@mm_typed_callback': {
+            let isPayloadRaw = false
             let rawSerialiedTypedCallback: Buffer | null = null
             if (event.PayloadRaw) {
+              isPayloadRaw = true
               const rawPayload = Buffer.from(event.PayloadRaw)
               const decoded = TTypedCallbackRequestClass.decode(rawPayload)
               rawSerialiedTypedCallback = Buffer.from(
@@ -546,6 +550,7 @@ export class UniProxyConnection {
                 const data = proto.NAlice.TDeviceControlTimesyncTypedCallback.decode(decodedSerialized.value!)
                 textInput = {
                   data: {
+                    isPayloadRaw,
                     kind: 'syncTimezoneLocation',
                     location: !!data.SyncLocation,
                     timezone: !!data.SyncTimezone

@@ -72,6 +72,11 @@ export type TextInput = Input & {
 }
 
 export type TextInputData = {
+  isPayloadRaw: boolean
+  kind: 'syncTimezoneLocation',
+  location: boolean
+  timezone: boolean,
+} | {
   kind: 'continue'
 } | {
   kind: 'dummy'
@@ -82,10 +87,6 @@ export type TextInputData = {
   recoverCommitToken: string
 } | {
   kind: 'playButtonPressPlay'
-} | {
-  kind: 'syncTimezoneLocation',
-  location: boolean
-  timezone: boolean
 } | {
   kind: 'text'
   text: string
@@ -246,6 +247,7 @@ export class InputHandler {
         if (input.data.timezone) {
           directives.push({
             internalDirective: {
+              isPayloadRaw: input.data.isPayloadRaw,
               type: 'set_timezone'
             }
           })
@@ -253,6 +255,7 @@ export class InputHandler {
         if (input.data.location) {
           directives.push({
             internalDirective: {
+              isPayloadRaw: input.data.isPayloadRaw,
               type: 'set_location'
             }
           })
