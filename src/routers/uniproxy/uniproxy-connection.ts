@@ -537,6 +537,8 @@ export class UniProxyConnection {
               break
             }
 
+            this.logger.info(`Received @@mm_typed_callback: ${JSON.stringify(event)} ${rawSerialiedTypedCallback.toString('base64')}`)
+
             const decodedSerialized = proto.google.protobuf.Any.decode(rawSerialiedTypedCallback)
             switch (decodedSerialized.typeUrl) {
               case 'type.googleapis.com/NAlice.TDeviceControlTimesyncTypedCallback': {
