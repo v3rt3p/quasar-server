@@ -182,7 +182,7 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
           networkInfo: info.networkInfo,
           platform: info.platform,
           promocode_activated: false,
-          tags: []
+          tags: info.quasarConfig.tags
         })),
         status: 'ok'
       })
@@ -220,7 +220,7 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
         subscription: {
           mode: 'transaction'
         },
-        tags: []
+        tags: info.quasarConfig.tags
       })
     } catch (error) {
       logger.error(`Error on GET /get_sync_info: ${error}`)
@@ -285,13 +285,6 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
   const device = config.deviceConfig
   const system = config.systemConfig
 
-  const environment = {
-    quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
-    quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
-    test_buckets: system.analyticsEnvironment.testBuckets,
-    testids: system.analyticsEnvironment.testids
-  }
-
   return {
     account_config: {
       aliceAdaptiveVolume: {
@@ -326,6 +319,7 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
           navigation: account.enabledCommandSpotters.tv.navigation
         }
       },
+      intonationSpotting: account.intonationSpotting,
       jingle: account.jingle,
       saveHistoryUsage: account.saveHistoryUsage,
       smartActivation: account.smartActivation,
@@ -335,65 +329,6 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
         wifi_hash: account.userWifiConfig.wifiHash
       },
       useRichModelForPro: account.useRichModelForPro
-    },
-    audio_player_capability: {
-      enableMusicSets: system.audioPlayerCapability.enableMusicSets,
-      enableSmartCrossfade: system.audioPlayerCapability.enableSmartCrossfade
-    },
-    audioclient: {
-      gogol: {
-        keepAlive: system.audioclient.gogol.keepAlive
-      }
-    },
-    bio_capability: {
-      engine_config: {
-        context_scoring: {
-          enabled: system.bioCapability.engineConfig.contextScoring.enabled,
-          guest_threshold: system.bioCapability.engineConfig.contextScoring.guestThreshold,
-          lambda: system.bioCapability.engineConfig.contextScoring.lambda,
-          max_time_diff_seconds: system.bioCapability.engineConfig.contextScoring.maxTimeDiffSeconds,
-          min_embedding_cosine: system.bioCapability.engineConfig.contextScoring.minEmbeddingCosine,
-          use_exp_formula: system.bioCapability.engineConfig.contextScoring.useExpFormula
-        }
-      },
-      use_ondevice_classification: system.bioCapability.useOnDeviceClassification
-    },
-    calld: {
-      audio_processing_config: {
-        pre_amplifier: {
-          enabled: system.calld.audioProcessingConfig.preAmplifier.enabled,
-          fixed_gain_factor: system.calld.audioProcessingConfig.preAmplifier.fixedGainFactor
-        }
-      },
-      auto_gain_control: system.calld.autoGainControl,
-      tx_agc_digital_compression_gain: system.calld.txAgcDigitalCompressionGain
-    },
-    'com.yandex.capabilities': {
-      appLaunchCapabilityEnabled: system.comYandexCapabilities.appLaunchCapabilityEnabled,
-      detailsCapability: {
-        openPurchaseProcessDirectiveEnabled: system.comYandexCapabilities.detailsCapability
-          .openPurchaseProcessDirectiveEnabled
-      },
-      detailsCapabilityEnabled: system.comYandexCapabilities.detailsCapabilityEnabled,
-      serialNavigatorCapability: {
-        openPurchaseDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability
-          .openPurchaseDirectiveEnabled,
-        showEpisodeDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability.showEpisodeDirectiveEnabled
-      },
-      serialNavigatorCapabilityEnabled: system.comYandexCapabilities.serialNavigatorCapabilityEnabled
-    },
-    'com.yandex.tv.home': {
-      detailsProtoHttpEnabled: system.comYandexTvHome.detailsProtoHttpEnabled,
-      serialNavigatorScreen: {
-        enumerationEnabled: system.comYandexTvHome.serialNavigatorScreen.enumerationEnabled,
-        newSerialNavigatorEnabledV3: system.comYandexTvHome.serialNavigatorScreen.newSerialNavigatorEnabledV3,
-        voiceControlsEnabled: system.comYandexTvHome.serialNavigatorScreen.voiceControlsEnabled
-      }
-    },
-    'com.yandex.tv.services': {
-      notifications: {
-        whitelist: system.comYandexTvServices.notifications.whitelist
-      }
     },
     device_config: {
       beta: device.beta,
@@ -440,84 +375,31 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
         : {}),
       tv_beta: device.tvBeta
     },
-    device_control_panel: {
-      checkAliceProSubscription: system.deviceControlPanel.checkAliceProSubscription
-    },
-    env: environment,
-    experiments: system.experiments,
-    'fluent-bit': {
-      samplingRatio: system.fluentBit.samplingRatio
-    },
-    forceWifiReconfigure: system.forceWifiReconfigure,
-    hybrid_request_factory: {
-      hybrid: {
-        scenarios: {
-          fast_command_scenario: {
-            supported_frames: system.hybridRequestFactory.hybrid.scenarios.fastCommandScenario.supportedFrames
-          }
-        }
-      },
-      hybrid_text_inputs: system.hybridRequestFactory.hybridTextInputs,
-      use_protobuf_analytics_info: system.hybridRequestFactory.useProtobufAnalyticsInfo
-    },
-    iot: {
-      finishSystemDiscoveryAccumulateTimeout: system.iot.finishSystemDiscoveryAccumulateTimeout,
-      maxFinishSystemDiscoveryAccumulateTimeout: system.iot.maxFinishSystemDiscoveryAccumulateTimeout,
-      providers: system.iot.providers,
-      syncApi: system.iot.syncApi,
-      syncEndpoints: system.iot.syncEndpoints,
-      syncEndpointsRemoveEnable: system.iot.syncEndpointsRemoveEnable,
-      systemDiscovery: system.iot.systemDiscovery
-    },
-    maind: {
-      selfDestroyer: {
-        additionalMemoryLimitsKb: {
-          intonationInterruptionModel: system.maind.selfDestroyer.additionalMemoryLimitsKb.intonationInterruptionModel
-        }
-      }
-    },
-    matter: {
-      enableOnOtaSystemDiscovery: system.matter.enableOnOtaSystemDiscovery,
-      enableSystemDiscovery: system.matter.enableSystemDiscovery
-    },
-    mediad: {
-      hlsFragmentDistance: system.mediad.hlsFragmentDistance,
-      hlsRandomizePlaylists: system.mediad.hlsRandomizePlaylists
-    },
-    onlineSpotterEnabled: system.onlineSpotterEnabled,
-    phone_calls: {
-      block_updates_on_call: system.phoneCalls.blockUpdatesOnCall,
-      enabled: system.phoneCalls.enabled,
-      webrtc: {
-        enabled: system.phoneCalls.webrtc.enabled
-      }
-    },
-    qrPaymentConfig: {
-      cardDetails: {
-        playAfterLogin: system.qrPaymentConfig.cardDetails.playAfterLogin,
-        playAfterPurchase: system.qrPaymentConfig.cardDetails.playAfterPurchase,
-        pollingApiEnabled: system.qrPaymentConfig.cardDetails.pollingApiEnabled,
-        showQrAfterLogin: system.qrPaymentConfig.cardDetails.showQrAfterLogin
-      },
-      checkActiveUserIsOwnerEnabled: system.qrPaymentConfig.checkActiveUserIsOwnerEnabled,
-      qrPaymentEnabled: system.qrPaymentConfig.qrPaymentEnabled,
-      redesignEnabledV3: system.qrPaymentConfig.redesignEnabledV3
-    },
-    quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
-    quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
-    sendVinsRequestProto: system.sendVinsRequestProto,
-    shouldCheckWifi: system.shouldCheckWifi,
-    smart_volume: {
-      enabled: system.smartVolume.enabled
-    },
     system_config: {
       adbd: {
         network: system.adbd.network,
         remoteActivation: system.adbd.remoteActivation,
       },
       addAllEmbeddedEndpoints: system.addAllEmbeddedEndpoints,
-      appmetrikaReportEnvironment: environment,
+      appmetrikaReportEnvironment: {
+        quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
+        quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
+        test_buckets: system.analyticsEnvironment.testBuckets,
+        testids: system.analyticsEnvironment.testids
+      },
+      audio_player_capability: {
+        enableMusicSets: system.audioPlayerCapability.enableMusicSets,
+        enableSmartCrossfade: system.audioPlayerCapability.enableSmartCrossfade
+      },
+      audioclient: {
+        gogol: {
+          keepAlive: system.audioclient.gogol.keepAlive
+        }
+      },
       audioInput: {
+        audioDevice: {
+          addInRateRawChannels: system.audioInput.audioDevice.addInRateRawChannels
+        },
         model_storage: {
           models: Object.fromEntries(
             Object.entries(system.audioInput.modelStorage.models).map(
@@ -527,6 +409,7 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
                     crc: value.crc,
                     fallbackUrls: value.fallbackUrls,
                     format: value.format,
+                    type: value.type,
                     url: value.url,
                     word: value.word
                   }]
@@ -535,79 +418,433 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
             )
           )
         }
-      }
-    },
-    teleme3d: {
-      appmetrica: {
-        '+events': system.teleme3d.appmetrica.plusEvents
-      }
-    },
-    telemetry: {
-      rate_limiter: {
-        groups: system.telemetry.rateLimiter.groups.map(g => ({
-          count_limit: g.countLimit,
-          events: g.events,
-          interval_ms: g.intervalMs
-        }))
-      }
-    },
-    unbound: {
-      checkHosts: system.unbound.checkHosts,
-      enable: system.unbound.enable,
-      forwarders: system.unbound.forwarders,
-      serverParams: system.unbound.serverParams
-    },
-    useVinsRequestProto: system.useVinsRequestProto,
-    voice_activity_detector: {
-      events_enabled: system.voiceActivityDetector.eventsEnabled
-    },
-    voiceDialogSettings: {
-      backoffUseNew: system.voiceDialogSettings.backoffUseNew,
-      blockUpdateSettingsWhileActiveRequest: system.voiceDialogSettings.blockUpdateSettingsWhileActiveRequest,
-      commandSpotterSettings: {
-        spotterLoggingRareEventPercent: system.voiceDialogSettings.commandSpotterSettings.spotterLoggingRareEventPercent
       },
-      intonationInterruptionSpotterSettings: {
-        spotterLoggingRareEventPercent: system.voiceDialogSettings
-          .intonationInterruptionSpotterSettings.spotterLoggingRareEventPercent,
-        spotterLoggingRareEventTailMillis: system.voiceDialogSettings
-          .intonationInterruptionSpotterSettings.spotterLoggingRareEventTailMillis,
-        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
-          .intonationInterruptionSpotterSettings.spotterLoggingVeryRareEventTailMillis
+      bio_capability: {
+        engine_config: {
+          context_scoring: {
+            enabled: system.bioCapability.engineConfig.contextScoring.enabled,
+            guest_threshold: system.bioCapability.engineConfig.contextScoring.guestThreshold,
+            lambda: system.bioCapability.engineConfig.contextScoring.lambda,
+            max_time_diff_seconds: system.bioCapability.engineConfig.contextScoring.maxTimeDiffSeconds,
+            min_embedding_cosine: system.bioCapability.engineConfig.contextScoring.minEmbeddingCosine,
+            use_exp_formula: system.bioCapability.engineConfig.contextScoring.useExpFormula
+          }
+        },
+        use_ondevice_classification: system.bioCapability.useOnDeviceClassification
       },
-      intonationSpotterSettings: {
-        spotterLoggingRareEventPercent: system.voiceDialogSettings
-          .intonationSpotterSettings.spotterLoggingRareEventPercent,
-        spotterLoggingRareEventTailMillis: system.voiceDialogSettings
-          .intonationSpotterSettings.spotterLoggingRareEventTailMillis,
-        spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
-          .intonationSpotterSettings.spotterLoggingVeryRareEventTailMillis
+      calld: {
+        audio_processing_config: {
+          pre_amplifier: {
+            enabled: system.calld.audioProcessingConfig.preAmplifier.enabled,
+            fixed_gain_factor: system.calld.audioProcessingConfig.preAmplifier.fixedGainFactor
+          }
+        },
+        auto_gain_control: system.calld.autoGainControl,
+        tx_agc_digital_compression_gain: system.calld.txAgcDigitalCompressionGain
       },
-      protoAliceApi: {
-        clientEventsWhitelist: system.voiceDialogSettings.protoAliceApi.clientEventsWhitelist,
-        serverEventsWhitelist: system.voiceDialogSettings.protoAliceApi.serverEventsWhitelist
+      'com.yandex.capabilities': {
+        appLaunchCapabilityEnabled: system.comYandexCapabilities.appLaunchCapabilityEnabled,
+        detailsCapability: {
+          openPurchaseProcessDirectiveEnabled: system.comYandexCapabilities.detailsCapability
+            .openPurchaseProcessDirectiveEnabled
+        },
+        detailsCapabilityEnabled: system.comYandexCapabilities.detailsCapabilityEnabled,
+        serialNavigatorCapability: {
+          openPurchaseDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability
+            .openPurchaseDirectiveEnabled,
+          showEpisodeDirectiveEnabled: system.comYandexCapabilities.serialNavigatorCapability
+            .showEpisodeDirectiveEnabled
+        },
+        serialNavigatorCapabilityEnabled: system.comYandexCapabilities.serialNavigatorCapabilityEnabled
       },
-      recognizer: {
-        packSoundBuffer: system.voiceDialogSettings.recognizer.packSoundBuffer
+      'com.yandex.tv.home': {
+        detailsProtoHttpEnabled: system.comYandexTvHome.detailsProtoHttpEnabled,
+        serialNavigatorScreen: {
+          enumerationEnabled: system.comYandexTvHome.serialNavigatorScreen.enumerationEnabled,
+          newSerialNavigatorEnabledV3: system.comYandexTvHome.serialNavigatorScreen.newSerialNavigatorEnabledV3,
+          voiceControlsEnabled: system.comYandexTvHome.serialNavigatorScreen.voiceControlsEnabled
+        }
       },
-      spotterLoggingRareEventPercent: system.voiceDialogSettings.spotterLoggingRareEventPercent
-    },
-    wifi_capability: {
-      enabled_v2: system.wifiCapability.enabledV2
-    },
-    wifiSettings: {
-      generate204: {
-        failPeriodMs: system.wifiSettings.generate204.failPeriodMs,
-        maxFailAttempts: system.wifiSettings.generate204.maxFailAttempts,
-        periodOnLastFailAttemptMs: system.wifiSettings.generate204.periodOnLastFailAttemptMs,
-        periodSec: system.wifiSettings.generate204.periodSec,
-        timeoutMs: system.wifiSettings.generate204.timeoutMs
-      }
-    },
-    zigbee: {
-      externalTemperatureMeasurement: {
-        enabled: system.zigbee.externalTemperatureMeasurement.enabled,
-        reportingIntervalSec: system.zigbee.externalTemperatureMeasurement.reportingIntervalSec
+      'com.yandex.tv.services': {
+        notifications: {
+          whitelist: system.comYandexTvServices.notifications.whitelist
+        }
+      },
+      device_control_panel: {
+        checkAliceProSubscription: system.deviceControlPanel.checkAliceProSubscription
+      },
+      enableUpdateTtsDirectives_261: system.enableUpdateTtsDirectives261,
+      env: {
+        quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
+        quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
+        test_buckets: system.analyticsEnvironment.testBuckets,
+        testids: system.analyticsEnvironment.testids
+      },
+      experiments: system.experiments,
+      'fluent-bit': {
+        samplingRatio: system.fluentBit.samplingRatio
+      },
+      forceWifiReconfigure: system.forceWifiReconfigure,
+      geoSyncSchedulerSettings: {
+        enabled: system.geoSyncSchedulerSettings.enabled
+      },
+      glagold: {
+        useFamilyDeviceList: system.glagold.useFamilyDeviceList
+      },
+      hybrid_request_factory: {
+        hybrid: {
+          scenarios: {
+            fast_command_scenario: {
+              enable_local_tts_stop: system.hybridRequestFactory.hybrid.scenarios.fastCommandScenario
+                .enableLocalTtsStop,
+              supported_frames: system.hybridRequestFactory.hybrid.scenarios.fastCommandScenario.supportedFrames
+            }
+          }
+        },
+        hybrid_text_inputs: system.hybridRequestFactory.hybridTextInputs,
+        hybrid_voice_inputs: system.hybridRequestFactory.hybridVoiceInputs,
+        local_voice_inputs_when_disconnected: system.hybridRequestFactory.localVoiceInputsWhenDisconnected,
+        use_protobuf_analytics_info: system.hybridRequestFactory.useProtobufAnalyticsInfo,
+        use_uniproxy_eou_hint: system.hybridRequestFactory.useUniproxyEouHint,
+        wait_client_approval: system.hybridRequestFactory.waitClientApproval,
+        wait_spotter_validation_while_disconnected: system.hybridRequestFactory.waitSpotterValidationWhileDisconnected
+      },
+      intonationSpotting: {
+        defaultEnabled: system.intonationSpotting.defaultEnabled,
+        disableOnNoSpeechAfterSpotter: system.intonationSpotting.disableOnNoSpeechAfterSpotter,
+        disableOnNoSpeechContexts: system.intonationSpotting.disableOnNoSpeechContexts,
+        disableOnNoSpeechDetected: system.intonationSpotting.disableOnNoSpeechDetected,
+        doNotIncludeTTS: system.intonationSpotting.doNotIncludeTTS,
+        enableOnActivationTranscripts: system.intonationSpotting.enableOnActivationTranscripts,
+        enableTimeMs: system.intonationSpotting.enableTimeMs,
+        ledVisualization: system.intonationSpotting.ledVisualization
+      },
+      iot: {
+        finishSystemDiscoveryAccumulateTimeout: system.iot.finishSystemDiscoveryAccumulateTimeout,
+        maxFinishSystemDiscoveryAccumulateTimeout: system.iot.maxFinishSystemDiscoveryAccumulateTimeout,
+        providers: system.iot.providers,
+        syncApi: system.iot.syncApi,
+        syncEndpoints: system.iot.syncEndpoints,
+        syncEndpointsRemoveEnable: system.iot.syncEndpointsRemoveEnable,
+        systemDiscovery: system.iot.systemDiscovery
+      },
+      maind: {
+        selfDestroyer: {
+          additionalMemoryLimitsKb: {
+            intonationInterruptionModel: system.maind.selfDestroyer.additionalMemoryLimitsKb.intonationInterruptionModel
+          }
+        }
+      },
+      matter: {
+        capability: {
+          pumpkin: {
+            useColorAnimationCapability: system.matter.capability.pumpkin.useColorAnimationCapability
+          }
+        },
+        diagnosticsServiceEnabled: system.matter.diagnosticsServiceEnabled,
+        enableOnOtaSystemDiscovery: system.matter.enableOnOtaSystemDiscovery,
+        enableSystemDiscovery: system.matter.enableSystemDiscovery,
+        node_wifi_network_diagnostics_capability: {
+          enabled: system.matter.nodeWifiNetworkDiagnosticsCapability.enabled
+        }
+      },
+      mediad: {
+        hlsFragmentDistance: system.mediad.hlsFragmentDistance,
+        hlsRandomizePlaylists: system.mediad.hlsRandomizePlaylists
+      },
+      noise_detector: {
+        enabled: system.noiseDetector.enabled,
+        spotterLogging: system.noiseDetector.spotterLogging,
+        throttles: {
+          alarm: system.noiseDetector.throttles.alarm,
+          break_glass: system.noiseDetector.throttles.breakGlass,
+          child_cry: system.noiseDetector.throttles.childCry,
+          clap: system.noiseDetector.throttles.clap,
+          dog_bark: system.noiseDetector.throttles.dogBark,
+          meow: system.noiseDetector.throttles.meow,
+          snap: system.noiseDetector.throttles.snap,
+          water_sound: system.noiseDetector.throttles.waterSound
+        }
+      },
+      onlineSpotterEnabled: system.onlineSpotterEnabled,
+      phone_calls: {
+        block_updates_on_call: system.phoneCalls.blockUpdatesOnCall,
+        enabled: system.phoneCalls.enabled,
+        webrtc: {
+          enabled: system.phoneCalls.webrtc.enabled
+        }
+      },
+      qrPaymentConfig: {
+        cardDetails: {
+          playAfterLogin: system.qrPaymentConfig.cardDetails.playAfterLogin,
+          playAfterPurchase: system.qrPaymentConfig.cardDetails.playAfterPurchase,
+          pollingApiEnabled: system.qrPaymentConfig.cardDetails.pollingApiEnabled,
+          showQrAfterLogin: system.qrPaymentConfig.cardDetails.showQrAfterLogin
+        },
+        checkActiveUserIsOwnerEnabled: system.qrPaymentConfig.checkActiveUserIsOwnerEnabled,
+        qrPaymentEnabled: system.qrPaymentConfig.qrPaymentEnabled,
+        redesignEnabledV3: system.qrPaymentConfig.redesignEnabledV3
+      },
+      quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
+      quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
+      sendVinsRequestProto: system.sendVinsRequestProto,
+      shouldCheckWifi: system.shouldCheckWifi,
+      smart_volume: {
+        enabled: system.smartVolume.enabled
+      },
+      spectrogramAnimation: {
+        presets: Object.fromEntries(
+          Object.entries(system.spectrogramAnimation.presets).map(([key, preset]) => [key, {
+            alwaysOnLeds: preset.alwaysOnLeds,
+            angleSpeed: preset.angleSpeed,
+            bandCount: preset.bandCount,
+            blockMove: preset.blockMove,
+            blockOnShifting: preset.blockOnShifting,
+            c0: {
+              h: preset.c0.h,
+              s: preset.c0.s,
+              v: preset.c0.v
+            },
+            c1: {
+              h: preset.c1.h,
+              s: preset.c1.s,
+              v: preset.c1.v
+            },
+            c2: {
+              h: preset.c2.h,
+              s: preset.c2.s,
+              v: preset.c2.v
+            },
+            c3: {
+              h: preset.c3.h,
+              s: preset.c3.s,
+              v: preset.c3.v
+            },
+            center: preset.center,
+            colors: {
+              baseColor: {
+                b: preset.colors.baseColor.b,
+                g: preset.colors.baseColor.g,
+                r: preset.colors.baseColor.r
+              },
+              defaultColor: {
+                b: preset.colors.defaultColor.b,
+                g: preset.colors.defaultColor.g,
+                r: preset.colors.defaultColor.r
+              },
+              gradientCenterColor: {
+                h: preset.colors.gradientCenterColor.h,
+                s: preset.colors.gradientCenterColor.s,
+                v: preset.colors.gradientCenterColor.v
+              },
+              gradientMiddleColor: {
+                h: preset.colors.gradientMiddleColor.h,
+                s: preset.colors.gradientMiddleColor.s,
+                v: preset.colors.gradientMiddleColor.v
+              },
+              gradientSideColor: {
+                h: preset.colors.gradientSideColor.h,
+                s: preset.colors.gradientSideColor.s,
+                v: preset.colors.gradientSideColor.v
+              }
+            },
+            derivation: preset.derivation,
+            distanceBetweenPoints: preset.distanceBetweenPoints,
+            enableMiddleColor: preset.enableMiddleColor,
+            filters: {
+              twitchFilter: {
+                decreasingDelta: preset.filters.twitchFilter.decreasingDelta,
+                enabled: preset.filters.twitchFilter.enabled,
+                increasingDelta: preset.filters.twitchFilter.increasingDelta,
+                maxValue: preset.filters.twitchFilter.maxValue,
+                minDecreasingDelta: preset.filters.twitchFilter.minDecreasingDelta,
+                minDecreasingStateChange: preset.filters.twitchFilter.minDecreasingStateChange,
+                minDecreasingSwitchDistance: preset.filters.twitchFilter.minDecreasingSwitchDistance,
+                minIncreasingDelta: preset.filters.twitchFilter.minIncreasingDelta,
+                minIncreasingStateChange: preset.filters.twitchFilter.minIncreasingStateChange,
+                minIncreasingSwitchDistance: preset.filters.twitchFilter.minIncreasingSwitchDistance,
+                minState: preset.filters.twitchFilter.minState,
+                returnToZero: preset.filters.twitchFilter.returnToZero
+              }
+            },
+            gradientColors: preset.gradientColors.map(color => ({
+              h: color.h,
+              s: color.s,
+              v: color.v
+            })),
+            gradientDistribution: preset.gradientDistribution,
+            gradientShifts: preset.gradientShifts,
+            l0: preset.l0,
+            l1: preset.l1,
+            l2: preset.l2,
+            l3: preset.l3,
+            ledLength: preset.ledLength,
+            lengthWhenMoving: preset.lengthWhenMoving,
+            maxBand: preset.maxBand,
+            maxFrequency: preset.maxFrequency,
+            maxShift: preset.maxShift,
+            minBrightness: preset.minBrightness,
+            minFrequency: preset.minFrequency,
+            minHeight: preset.minHeight,
+            pointsToCheckCount: preset.pointsToCheckCount,
+            shiftFromMean: preset.shiftFromMean,
+            updateLedFrequency: preset.updateLedFrequency,
+            useAllSides: preset.useAllSides,
+            useNewProAnimation: preset.useNewProAnimation,
+            usePureColors: preset.usePureColors
+          }])
+        ),
+        voice_preset: system.spectrogramAnimation.voicePreset
+      },
+      spotterRecognizer: {
+        maxRecognitionTime: system.spotterRecognizer.maxRecognitionTime
+      },
+      streamingAnimations: {
+        ignore_repeated_animations_when_playing: system.streamingAnimations.ignoreRepeatedAnimationsWhenPlaying,
+        repeated_animations_whitelist: system.streamingAnimations.repeatedAnimationsWhitelist
+      },
+      syncd: {
+        pollPeriodSec: system.syncd.pollPeriodSec
+      },
+      teleme3d: {
+        appmetrica: {
+          '+events': system.teleme3d.appmetrica.plusEvents,
+          persistentBatcher: {
+            enabled: system.teleme3d.appmetrica.persistentBatcher.enabled,
+            lookForNetworkConnection: system.teleme3d.appmetrica.persistentBatcher.lookForNetworkConnection,
+            maxBatchCollectingWhenNoInternetTimeSec: system.teleme3d.appmetrica.persistentBatcher
+              .maxBatchCollectingWhenNoInternetTimeSec,
+            maxStorageSizeMb: system.teleme3d.appmetrica.persistentBatcher.maxStorageSizeMb,
+            storagePath: system.teleme3d.appmetrica.persistentBatcher.storagePath,
+            syncPeriodSec: system.teleme3d.appmetrica.persistentBatcher.syncPeriodSec
+          }
+        },
+        persistentAppmetrica: {
+          '+events': system.teleme3d.persistentAppmetrica.plusEvents
+        }
+      },
+      telemetry: {
+        rate_limiter: {
+          groups: system.telemetry.rateLimiter.groups.map(g => ({
+            count_limit: g.countLimit,
+            events: g.events,
+            interval_ms: g.intervalMs
+          }))
+        }
+      },
+      ultrasound: {
+        detector: {
+          meta: {
+            bandWidth: system.ultrasound.detector.meta.bandWidth,
+            channelAggregation: system.ultrasound.detector.meta.channelAggregation,
+            cooldownPeriod: system.ultrasound.detector.meta.cooldownPeriod,
+            frameWidth: system.ultrasound.detector.meta.frameWidth,
+            freq: system.ultrasound.detector.meta.freq,
+            groupingWindowWidth: system.ultrasound.detector.meta.groupingWindowWidth,
+            hopLength: system.ultrasound.detector.meta.hopLength,
+            numChannels: system.ultrasound.detector.meta.numChannels,
+            numTriggers: system.ultrasound.detector.meta.numTriggers,
+            pickChannelIdx: system.ultrasound.detector.meta.pickChannelIdx,
+            postclassifier: {
+              channelAggregation: system.ultrasound.detector.meta.postclassifier.channelAggregation,
+              cooldownPeriod: system.ultrasound.detector.meta.postclassifier.cooldownPeriod,
+              groupingWindowWidth: system.ultrasound.detector.meta.postclassifier.groupingWindowWidth,
+              numTriggers: system.ultrasound.detector.meta.postclassifier.numTriggers,
+              pickChannelIdx: system.ultrasound.detector.meta.postclassifier.pickChannelIdx,
+              slidingAvgWidth: system.ultrasound.detector.meta.postclassifier.slidingAvgWidth,
+              threshold: system.ultrasound.detector.meta.postclassifier.threshold
+            },
+            sampleRate: system.ultrasound.detector.meta.sampleRate,
+            slidingAvgWidth: system.ultrasound.detector.meta.slidingAvgWidth,
+            thresholdDb: system.ultrasound.detector.meta.thresholdDb
+          },
+          type: system.ultrasound.detector.type
+        },
+        enabled: system.ultrasound.enabled,
+        generator: {
+          amplitude: system.ultrasound.generator.amplitude,
+          blockSize: system.ultrasound.generator.blockSize,
+          fadeLength: system.ultrasound.generator.fadeLength,
+          nChannels: system.ultrasound.generator.nChannels,
+          sampleRate: system.ultrasound.generator.sampleRate,
+          waveFreqHz: system.ultrasound.generator.waveFreqHz,
+          zeroChannels: system.ultrasound.generator.zeroChannels
+        },
+        sendMetricaEvents: system.ultrasound.sendMetricaEvents
+      },
+      unbound: {
+        checkHosts: system.unbound.checkHosts,
+        enable: system.unbound.enable,
+        forwarders: system.unbound.forwarders,
+        serverParams: system.unbound.serverParams
+      },
+      useVinsRequestProto: system.useVinsRequestProto,
+      voice_activity_detector: {
+        events_enabled: system.voiceActivityDetector.eventsEnabled
+      },
+      voiceDialogSettings: {
+        backoffUseNew: system.voiceDialogSettings.backoffUseNew,
+        blockUpdateSettingsWhileActiveRequest: system.voiceDialogSettings.blockUpdateSettingsWhileActiveRequest,
+        commandSpotterSettings: {
+          spotterLoggingRareEventPercent: system.voiceDialogSettings.commandSpotterSettings
+            .spotterLoggingRareEventPercent
+        },
+        intonationInterruptionSpotterSettings: {
+          spotterLoggingRareEventPercent: system.voiceDialogSettings
+            .intonationInterruptionSpotterSettings.spotterLoggingRareEventPercent,
+          spotterLoggingRareEventTailMillis: system.voiceDialogSettings
+            .intonationInterruptionSpotterSettings.spotterLoggingRareEventTailMillis,
+          spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
+            .intonationInterruptionSpotterSettings.spotterLoggingVeryRareEventTailMillis
+        },
+        intonationSpotterSettings: {
+          spotterLoggingRareEventPercent: system.voiceDialogSettings
+            .intonationSpotterSettings.spotterLoggingRareEventPercent,
+          spotterLoggingRareEventTailMillis: system.voiceDialogSettings
+            .intonationSpotterSettings.spotterLoggingRareEventTailMillis,
+          spotterLoggingVeryRareEventTailMillis: system.voiceDialogSettings
+            .intonationSpotterSettings.spotterLoggingVeryRareEventTailMillis
+        },
+        protoAliceApi: {
+          clientEventsWhitelist: system.voiceDialogSettings.protoAliceApi.clientEventsWhitelist,
+          serverEventsWhitelist: system.voiceDialogSettings.protoAliceApi.serverEventsWhitelist
+        },
+        recognizer: {
+          encodingApplication: system.voiceDialogSettings.recognizer.encodingApplication,
+          encodingBitrate: system.voiceDialogSettings.recognizer.encodingBitrate,
+          encodingComplexity: system.voiceDialogSettings.recognizer.encodingComplexity,
+          packSoundBuffer: system.voiceDialogSettings.recognizer.packSoundBuffer,
+          spotterSubscribePointShiftMs: system.voiceDialogSettings.recognizer.spotterSubscribePointShiftMs
+        },
+        spotterLoggingHeadMillis: system.voiceDialogSettings.spotterLoggingHeadMillis,
+        spotterLoggingRareEventPercent: system.voiceDialogSettings.spotterLoggingRareEventPercent,
+        spotterLoggingTailMillis: system.voiceDialogSettings.spotterLoggingTailMillis,
+        spotterLoggingVeryRareEventPercent: system.voiceDialogSettings.spotterLoggingVeryRareEventPercent,
+        spotterLoggingVeryRareStreamingLengthMillis: system.voiceDialogSettings
+          .spotterLoggingVeryRareStreamingLengthMillis
+      },
+      wifi_capability: {
+        enabled_v2: system.wifiCapability.enabledV2,
+        reassociateWhenNoInternet: system.wifiCapability.reassociateWhenNoInternet
+      },
+      wifiReseter: system.wifiReseter,
+      wifiSettings: {
+        disableWlan0Monitor: system.wifiSettings.disableWlan0Monitor,
+        enableInternetRecovery: system.wifiSettings.enableInternetRecovery,
+        generate204: {
+          failPeriodMs: system.wifiSettings.generate204.failPeriodMs,
+          maxFailAttempts: system.wifiSettings.generate204.maxFailAttempts,
+          periodOnLastFailAttemptMs: system.wifiSettings.generate204.periodOnLastFailAttemptMs,
+          periodSec: system.wifiSettings.generate204.periodSec,
+          timeoutMs: system.wifiSettings.generate204.timeoutMs
+        },
+        wifiReportWindowSec: system.wifiSettings.wifiReportWindowSec
+      },
+      zigbee: {
+        externalTemperatureMeasurement: {
+          enabled: system.zigbee.externalTemperatureMeasurement.enabled,
+          reportingIntervalSec: system.zigbee.externalTemperatureMeasurement.reportingIntervalSec
+        }
       }
     }
   }

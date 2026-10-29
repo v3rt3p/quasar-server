@@ -1,5 +1,8 @@
 import z from 'zod'
 
+const NO_DEFAULT = Symbol('NO_DEFAULT')
+type NoDefault = typeof NO_DEFAULT
+
 const rawQuasarConfig = z.object({
   accountConfig: z.object({
     aliceAdaptiveVolume: z.object({
@@ -25,24 +28,25 @@ const rawQuasarConfig = z.object({
     enableChildVad: z.boolean().default(false),
     enabledCommandSpotters: z.object({
       call: z.object({
-        answer: z.boolean().default(false)
+        answer: z.boolean().default(true)
       }),
       music: z.object({
-        bluetooth: z.boolean().default(false),
-        feedback: z.boolean().default(false),
-        navigation: z.boolean().default(false),
-        playAndPause: z.boolean().default(false),
-        volume: z.boolean().default(false)
+        bluetooth: z.boolean().default(true),
+        feedback: z.boolean().default(true),
+        navigation: z.boolean().default(true),
+        playAndPause: z.boolean().default(true),
+        volume: z.boolean().default(true)
       }),
       smartHome: z.object({
-        light: z.boolean().default(false),
-        tv: z.boolean().default(false)
+        light: z.boolean().default(true),
+        tv: z.boolean().default(true)
       }),
       tv: z.object({
-        backToHome: z.boolean().default(false),
-        navigation: z.boolean().default(false)
+        backToHome: z.boolean().default(true),
+        navigation: z.boolean().default(true)
       })
     }),
+    intonationSpotting: z.object().default({}),
     jingle: z.boolean().default(false).describe('Enables "blimp" sound on activation and cancellation'),
     saveHistoryUsage: z.boolean().default(true),
     smartActivation: z.boolean().default(true),
@@ -73,7 +77,7 @@ const rawQuasarConfig = z.object({
     led: z.object({
       brightness: z.object({
         auto: z.boolean().default(true),
-        value: z.number().default(0.5)
+        value: z.number().default(0.7)
       }),
       idleAnimation: z.boolean().default(false).describe('Enables idle animation after 20 seconds of idling'),
       musicEqualizerVisualization: z.object({
@@ -106,7 +110,7 @@ const rawQuasarConfig = z.object({
       network: z.boolean().default(true),
       remoteActivation: z.boolean().default(true)
     }),
-    addAllEmbeddedEndpoints: z.boolean().default(false),
+    addAllEmbeddedEndpoints: z.boolean().default(true),
     analyticsEnvironment: z.object({
       quasmodromGroup: z.string().default('production'),
       quasmodromSubgroup: z.string().default('production'),
@@ -119,6 +123,9 @@ const rawQuasarConfig = z.object({
       })
     }),
     audioInput: z.object({
+      audioDevice: z.object({
+        addInRateRawChannels: z.boolean().default(true)
+      }),
       modelStorage: z.object({
         models: z.record(z.string(), z.record(z.string(), z.object({
           crc: z.number(),
@@ -179,21 +186,38 @@ const rawQuasarConfig = z.object({
     }),
     comYandexTvServices: z.object({
       notifications: z.object({
-        whitelist: z.array(z.string()).default([])
+        whitelist: z.array(z.string()).default(['purchasedSuccessfulNotification'])
       })
     }),
     deviceControlPanel: z.object({
       checkAliceProSubscription: z.boolean().default(true)
     }),
-    experiments: z.array(z.string()).default([]),
+    enableUpdateTtsDirectives261: z.boolean().default(true),
+    experiments: z.array(z.string()).default([
+      'bg_enable_say_with_emotion',
+      'enrollment_x_token_enabled',
+      'hw_enable_audio_speed_scenario',
+      'hw_enable_intonation_stop_word',
+      'hw_enable_say_with_emotion',
+      'hw_music_enable_smart_crossfade',
+      'hw_music_fm_radio_add_safe_timeline_cgi_to_stream_url',
+      'hw_voiceprint_enable_enrollment_sharing'
+    ]),
     fluentBit: z.object({
       samplingRatio: z.number().default(0.5)
     }),
     forceWifiReconfigure: z.boolean().default(false),
+    geoSyncSchedulerSettings: z.object({
+      enabled: z.boolean().default(true)
+    }),
+    glagold: z.object({
+      useFamilyDeviceList: z.boolean().default(false)
+    }),
     hybridRequestFactory: z.object({
       hybrid: z.object({
         scenarios: z.object({
           fastCommandScenario: z.object({
+            enableLocalTtsStop: z.boolean().default(true),
             supportedFrames: z.array(z.string()).default([
               'personal_assistant.scenarios.bluetooth_off',
               'personal_assistant.scenarios.bluetooth_on',
@@ -208,7 +232,22 @@ const rawQuasarConfig = z.object({
         })
       }),
       hybridTextInputs: z.boolean().default(true),
-      useProtobufAnalyticsInfo: z.boolean().default(true)
+      hybridVoiceInputs: z.boolean().default(true),
+      localVoiceInputsWhenDisconnected: z.boolean().default(false),
+      useProtobufAnalyticsInfo: z.boolean().default(true),
+      useUniproxyEouHint: z.boolean().default(true),
+      waitClientApproval: z.boolean().default(true),
+      waitSpotterValidationWhileDisconnected: z.boolean().default(false)
+    }),
+    intonationSpotting: z.object({
+      defaultEnabled: z.boolean().default(false),
+      disableOnNoSpeechAfterSpotter: z.boolean().default(true),
+      disableOnNoSpeechContexts: z.array(z.string()).default([]),
+      disableOnNoSpeechDetected: z.boolean().default(true),
+      doNotIncludeTTS: z.boolean().default(true),
+      enableOnActivationTranscripts: z.array(z.string()).default(['алиса', 'яндекс', '<intonation>']),
+      enableTimeMs: z.number().default(20_000),
+      ledVisualization: z.boolean().default(true)
     }),
     iot: z.object({
       finishSystemDiscoveryAccumulateTimeout: z.number().default(120),
@@ -230,12 +269,35 @@ const rawQuasarConfig = z.object({
       })
     }),
     matter: z.object({
+      capability: z.object({
+        pumpkin: z.object({
+          useColorAnimationCapability: z.boolean().default(true)
+        })
+      }),
+      diagnosticsServiceEnabled: z.boolean().default(true),
       enableOnOtaSystemDiscovery: z.boolean().default(true),
-      enableSystemDiscovery: z.boolean().default(true)
+      enableSystemDiscovery: z.boolean().default(true),
+      nodeWifiNetworkDiagnosticsCapability: z.object({
+        enabled: z.boolean().default(true)
+      })
     }),
     mediad: z.object({
       hlsFragmentDistance: z.number().default(6),
       hlsRandomizePlaylists: z.boolean().default(true)
+    }),
+    noiseDetector: z.object({
+      enabled: z.boolean().default(true),
+      spotterLogging: z.boolean().default(true),
+      throttles: z.object({
+        alarm: z.number().default(300_000),
+        breakGlass: z.number().default(20_000),
+        childCry: z.number().default(20_000),
+        clap: z.number().default(1000),
+        dogBark: z.number().default(20_000),
+        meow: z.number().default(20_000),
+        snap: z.number().default(1000),
+        waterSound: z.number().default(300_000)
+      })
     }),
     onlineSpotterEnabled: z.boolean().default(true),
     phoneCalls: z.object({
@@ -261,12 +323,332 @@ const rawQuasarConfig = z.object({
     smartVolume: z.object({
       enabled: z.boolean().default(true)
     }),
+    spectrogramAnimation: z.object({
+      presets: z.record(z.string(), z.object({
+        alwaysOnLeds: z.number(),
+        angleSpeed: z.number(),
+        bandCount: z.number(),
+        blockMove: z.boolean(),
+        blockOnShifting: z.boolean(),
+        c0: z.object({
+          h: z.number(),
+          s: z.number(),
+          v: z.number()
+        }),
+        c1: z.object({
+          h: z.number(),
+          s: z.number(),
+          v: z.number()
+        }),
+        c2: z.object({
+          h: z.number(),
+          s: z.number(),
+          v: z.number()
+        }),
+        c3: z.object({
+          h: z.number(),
+          s: z.number(),
+          v: z.number()
+        }),
+        center: z.number(),
+        colors: z.object({
+          baseColor: z.object({
+            b: z.number(),
+            g: z.number(),
+            r: z.number()
+          }),
+          defaultColor: z.object({
+            b: z.number(),
+            g: z.number(),
+            r: z.number()
+          }),
+          gradientCenterColor: z.object({
+            h: z.number(),
+            s: z.number(),
+            v: z.number()
+          }),
+          gradientMiddleColor: z.object({
+            h: z.number(),
+            s: z.number(),
+            v: z.number()
+          }),
+          gradientSideColor: z.object({
+            h: z.number(),
+            s: z.number(),
+            v: z.number()
+          }).default({ h: 159, s: 0.968, v: 0.867 })
+        }),
+        derivation: z.number(),
+        distanceBetweenPoints: z.number(),
+        enableMiddleColor: z.boolean(),
+        filters: z.object({
+          twitchFilter: z.object({
+            decreasingDelta: z.number(),
+            enabled: z.boolean(),
+            increasingDelta: z.number(),
+            maxValue: z.number(),
+            minDecreasingDelta: z.number(),
+            minDecreasingStateChange: z.number(),
+            minDecreasingSwitchDistance: z.number(),
+            minIncreasingDelta: z.number(),
+            minIncreasingStateChange: z.number(),
+            minIncreasingSwitchDistance: z.number(),
+            minState: z.number(),
+            returnToZero: z.boolean().default(true)
+          })
+        }),
+        gradientColors: z.array(z.object({
+          h: z.number(),
+          s: z.number(),
+          v: z.number()
+        })).default([
+          { h: 250, s: 0.94, v: 1 },
+          { h: 250, s: 0.94, v: 1 },
+          { h: 195, s: 0.78, v: 0.91 },
+          { h: 150, s: 1, v: 1 }
+        ]),
+        gradientDistribution: z.array(z.number()),
+        gradientShifts: z.array(z.number()),
+        l0: z.number(),
+        l1: z.number(),
+        l2: z.number(),
+        l3: z.number(),
+        ledLength: z.number(),
+        lengthWhenMoving: z.number(),
+        maxBand: z.number(),
+        maxFrequency: z.number(),
+        maxShift: z.number(),
+        minBrightness: z.array(z.number()),
+        minFrequency: z.number(),
+        minHeight: z.number(),
+        pointsToCheckCount: z.number(),
+        shiftFromMean: z.number(),
+        updateLedFrequency: z.number(),
+        useAllSides: z.boolean(),
+        useNewProAnimation: z.boolean(),
+        usePureColors: z.boolean().default(false)
+      })).default({
+        voice: {
+          alwaysOnLeds: 1,
+          angleSpeed: 120,
+          bandCount: 1,
+          blockMove: true,
+          blockOnShifting: true,
+          c0: {
+            h: 250,
+            s: 0.94,
+            v: 1
+          },
+          c1: {
+            h: 250,
+            s: 0.94,
+            v: 1
+          },
+          c2: {
+            h: 195,
+            s: 0.78,
+            v: 0.91
+          },
+          c3: {
+            h: 150,
+            s: 1,
+            v: 1
+          },
+          center: 0,
+          colors: {
+            baseColor: {
+              b: 255,
+              g: 15,
+              r: 55
+            },
+            defaultColor: {
+              b: 0,
+              g: 0,
+              r: 0
+            },
+            gradientCenterColor: {
+              h: 250,
+              s: 0.94,
+              v: 1
+            },
+            gradientMiddleColor: {
+              h: 195,
+              s: 0.784,
+              v: 0.91
+            },
+            gradientSideColor: {
+              h: 159,
+              s: 0.968,
+              v: 0.867
+            }
+          },
+          derivation: 0.4,
+          distanceBetweenPoints: 0.3,
+          enableMiddleColor: true,
+          filters: {
+            twitchFilter: {
+              decreasingDelta: 20,
+              enabled: true,
+              increasingDelta: 30,
+              maxValue: 400,
+              minDecreasingDelta: 4,
+              minDecreasingStateChange: 0,
+              minDecreasingSwitchDistance: 130,
+              minIncreasingDelta: 4,
+              minIncreasingStateChange: 0,
+              minIncreasingSwitchDistance: 80,
+              minState: 30,
+              returnToZero: true
+            }
+          },
+          gradientColors: [
+            {
+              h: 250,
+              s: 0.94,
+              v: 1
+            },
+            {
+              h: 250,
+              s: 0.94,
+              v: 1
+            },
+            {
+              h: 195,
+              s: 0.78,
+              v: 0.91
+            },
+            {
+              h: 150,
+              s: 1,
+              v: 1
+            }
+          ],
+          gradientDistribution: [
+            1,
+            0.8,
+            0.6,
+            0.6,
+            0.5,
+            0
+          ],
+          gradientShifts: [
+            0.1,
+            0.2,
+            0.35,
+            0.5
+          ],
+          l0: 0.1,
+          l1: 0.2,
+          l2: 0.35,
+          l3: 0.5,
+          ledLength: 400,
+          lengthWhenMoving: 1.5,
+          maxBand: 0.001,
+          maxFrequency: 400,
+          maxShift: 6,
+          minBrightness: [
+            0,
+            0,
+            0,
+            0,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256
+          ],
+          minFrequency: 200,
+          minHeight: 400,
+          pointsToCheckCount: 50,
+          shiftFromMean: 0,
+          updateLedFrequency: 20,
+          useAllSides: true,
+          useNewProAnimation: true,
+          usePureColors: false
+        }
+      }),
+      voicePreset: z.string().default('voice')
+    }),
+    spotterRecognizer: z.object({
+      maxRecognitionTime: z.number().default(3000)
+    }),
+    streamingAnimations: z.object({
+      ignoreRepeatedAnimationsWhenPlaying: z.boolean().default(true),
+      repeatedAnimationsWhitelist: z.array(z.string()).default(['neutral'])
+    }),
+    syncd: z.object({
+      pollPeriodSec: z.number().default(1800)
+    }),
     teleme3d: z.object({
       appmetrica: z.object({
+        persistentBatcher: z.object({
+          enabled: z.boolean().default(true),
+          lookForNetworkConnection: z.boolean().default(true),
+          maxBatchCollectingWhenNoInternetTimeSec: z.number().default(360),
+          maxStorageSizeMb: z.number().default(1),
+          // eslint-disable-next-line no-template-curly-in-string
+          storagePath: z.string().default('${DATA}/appmetrica/persistedBatch'),
+          syncPeriodSec: z.number().default(360)
+        }),
         plusEvents: z.array(z.string()).default([
           'directiveHandled',
           'directiveStarted',
-          'directiveCompleted'
+          'directiveCompleted',
+          'NetInterfaceGotAddress',
+          'NetInterfaceUp',
+          'associationFailed',
+          'connectionStats',
+          'emptyIp',
+          'emptyIpFixed',
+          'emptyNetworks',
+          'emptyNetworksFixed',
+          'emptyScan',
+          'emptyScanFixed',
+          'internetRecovery',
+          'internetRecoveryFail',
+          'internetRecoveryStart',
+          'internetRecoverySuccess',
+          'phraseSpottedWithoutInternet',
+          'processStart',
+          'setupConfigurationError',
+          'wifiConnect',
+          'wifiDisconnect',
+          'wifiReport',
+          'wifiReset',
+          'wrongIp',
+          'wrongIpFixed',
+          'ysk_error_network',
+          'ysk_error_timeout'
+        ])
+      }),
+      persistentAppmetrica: z.object({
+        plusEvents: z.array(z.string()).default([
+          'wifiReset',
+          'phraseSpottedWithoutInternet',
+          'setupConfigurationError',
+          'internetRecovery',
+          'internetRecoveryStart',
+          'internetRecoverySuccess',
+          'internetRecoveryFail',
+          'associationFailed',
+          'emptyScan',
+          'emptyScanFixed',
+          'emptyIp',
+          'emptyIpFixed',
+          'wrongIp',
+          'wrongIpFixed',
+          'emptyNetworks',
+          'emptyNetworksFixed',
+          'wifiConnect',
+          'wifiDisconnect',
+          'NetInterfaceUp',
+          'NetInterfaceGotAddress',
+          'wifiReport',
+          'connectionStats',
+          'processStart',
+          'ysk_error_network',
+          'ysk_error_timeout'
         ])
       })
     }),
@@ -276,8 +658,52 @@ const rawQuasarConfig = z.object({
           countLimit: z.number(),
           events: z.array(z.string()),
           intervalMs: z.number()
-        })).default([])
+        })).default([{
+          countLimit: 1,
+          events: ['ysk_spotter_queue_overflow'],
+          intervalMs: 120_000
+        }])
       })
+    }),
+    ultrasound: z.object({
+      detector: z.object({
+        meta: z.object({
+          bandWidth: z.number().default(600),
+          channelAggregation: z.string().default('pick_in_sorted_desc'),
+          cooldownPeriod: z.number().default(5000),
+          frameWidth: z.number().default(16_384),
+          freq: z.number().default(35_000),
+          groupingWindowWidth: z.number().default(3000),
+          hopLength: z.number().default(8192),
+          numChannels: z.number().default(4),
+          numTriggers: z.number().default(5),
+          pickChannelIdx: z.number().default(3),
+          postclassifier: z.object({
+            channelAggregation: z.string().default('pick_in_original'),
+            cooldownPeriod: z.number().default(0),
+            groupingWindowWidth: z.number().default(2700),
+            numTriggers: z.number().default(2),
+            pickChannelIdx: z.number().default(0),
+            slidingAvgWidth: z.number().default(0),
+            threshold: z.number().default(0.7)
+          }),
+          sampleRate: z.number().default(96_000),
+          slidingAvgWidth: z.number().default(0),
+          thresholdDb: z.number().default(55.28)
+        }),
+        type: z.string().default('pcagmm_doppler')
+      }),
+      enabled: z.boolean().default(true),
+      generator: z.object({
+        amplitude: z.number().default(0.025),
+        blockSize: z.number().default(65_536),
+        fadeLength: z.number().default(200),
+        nChannels: z.number().default(4),
+        sampleRate: z.number().default(96_000),
+        waveFreqHz: z.number().default(35_000),
+        zeroChannels: z.array(z.number()).default([0, 1])
+      }),
+      sendMetricaEvents: z.boolean().default(true)
     }),
     unbound: z.object({
       checkHosts: z.array(z.string()).default([
@@ -328,21 +754,34 @@ const rawQuasarConfig = z.object({
         ])
       }),
       recognizer: z.object({
-        packSoundBuffer: z.boolean().default(true)
+        encodingApplication: z.string().default('audio'),
+        encodingBitrate: z.number().default(24_000),
+        encodingComplexity: z.number().default(0),
+        packSoundBuffer: z.boolean().default(true),
+        spotterSubscribePointShiftMs: z.number().default(-80)
       }),
-      spotterLoggingRareEventPercent: z.number().default(1)
+      spotterLoggingHeadMillis: z.number().default(0),
+      spotterLoggingRareEventPercent: z.number().default(0),
+      spotterLoggingTailMillis: z.number().default(0),
+      spotterLoggingVeryRareEventPercent: z.number().default(1),
+      spotterLoggingVeryRareStreamingLengthMillis: z.number().default(5000)
     }),
     wifiCapability: z.object({
-      enabledV2: z.boolean().default(true)
+      enabledV2: z.boolean().default(true),
+      reassociateWhenNoInternet: z.boolean().default(false)
     }),
+    wifiReseter: z.object({}).default({}),
     wifiSettings: z.object({
+      disableWlan0Monitor: z.boolean().default(true),
+      enableInternetRecovery: z.boolean().default(true),
       generate204: z.object({
         failPeriodMs: z.number().default(10_000),
         maxFailAttempts: z.number().default(3),
         periodOnLastFailAttemptMs: z.number().default(30_000),
-        periodSec: z.number().default(30),
+        periodSec: z.number().default(300),
         timeoutMs: z.number().default(8000)
-      })
+      }),
+      wifiReportWindowSec: z.number().default(0)
     }),
     zigbee: z.object({
       externalTemperatureMeasurement: z.object({
@@ -350,11 +789,9 @@ const rawQuasarConfig = z.object({
         reportingIntervalSec: z.number().default(60)
       })
     })
-  })
+  }),
+  tags: z.array(z.string()).default([])
 })
-
-const NO_DEFAULT = Symbol('NO_DEFAULT')
-type NoDefault = typeof NO_DEFAULT
 
 function deepDefault<T extends z.ZodType> (schema: T): T {
   return transform(schema).schema as unknown as T
@@ -405,6 +842,11 @@ function rebuild (schema: z.ZodType): {
   if (schema instanceof z.ZodArray) {
     const element = transform(schema.element as z.ZodType)
     return { default: NO_DEFAULT, schema: z.array(element.schema) }
+  }
+
+  if (schema instanceof z.ZodRecord) {
+    const value = transform(schema.valueType as z.ZodType)
+    return { default: NO_DEFAULT, schema: z.record(schema.keyType, value.schema) }
   }
 
   return { default: NO_DEFAULT, schema }

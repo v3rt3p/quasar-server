@@ -1,7 +1,8 @@
 import { Column, DataSource, Entity, PrimaryColumn, Repository } from 'typeorm'
 
+import { mergeQuasarConfig, QuasarConfigPatch } from './config-patch'
 import { generateGlagolSecurity, getDefaultQuasarConfig } from './defaults'
-import { glagolSecurity, QuasarConfig, quasarConfig, StationInfo, StationInfoProvider } from './types'
+import { glagolSecurity, quasarConfig, StationInfo, StationInfoProvider } from './types'
 
 @Entity('stations')
 class Station {
@@ -65,11 +66,12 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
   }
 
   async updateNameAndQuasarConfig (duid: string, name: string | undefined,
-    config: QuasarConfig | undefined): Promise<StationInfo> {
+    config: QuasarConfigPatch | undefined): Promise<StationInfo> {
     return toInfo(await this.dataSource.transaction(async manager => {
       const repository = manager.getRepository<Station>(Station)
 
       const existing = await repository.findOne({
+        lock: { mode: 'pessimistic_write' },
         where: {
           id: duid
         }
@@ -83,7 +85,7 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
         existing.name = name
       }
       if (config !== undefined) {
-        existing.quasarConfig = config
+        existing.quasarConfig = mergeQuasarConfig(existing.quasarConfig, config)
       }
 
       await repository.save(existing)

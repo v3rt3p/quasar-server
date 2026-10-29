@@ -30,6 +30,7 @@ import { registerStartupMobileYandexNetRouter } from './routers/startup.mobile.y
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
 import { InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
+import { quasarConfigPatch } from './storage/config-patch'
 import { PostgresDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
 import { loadUpdatesConfig } from './updates'
@@ -247,7 +248,7 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
 }, {
   body: z.object({
     name: z.string().optional().describe('Name'),
-    quasarConfig: quasarConfig.optional().describe('Quasar\'s maind config')
+    quasarConfig: quasarConfigPatch.optional().describe('Sparse update to Quasar\'s maind config')
   }),
   detail: {
     summary: 'Update device config',

@@ -185,7 +185,7 @@ export class InputHandler {
     }
   }
 
-  async processTextInput (input: TextInput, parentSpan?: Span, dialogSpan?: Span): Promise<InputResult> {
+  async processTextInput (input: TextInput, parentSpan?: Span, _dialogSpan?: Span): Promise<InputResult> {
     this.logger.debug(`Received TextInput with kind: ${input.data.kind}`)
     switch (input.data.kind) {
       case 'continue': {
