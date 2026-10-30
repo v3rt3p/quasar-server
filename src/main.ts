@@ -75,7 +75,9 @@ app.use('/quasar.yandex.net/glagol/v2.0/check_token', (request, _response, next)
 })
 // unfuck Yandex
 
-app.use(bodyParser.json())
+app.use(bodyParser.json({
+  limit: '20mb'
+}))
 app.use(bodyParser.raw({
   inflate: true,
   type: 'text/yandex-token'

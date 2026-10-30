@@ -9,7 +9,9 @@ const logger = getLogger()
 export function registerOAuthYandexRuRouter (app: Application): void {
   const router = Router()
 
-  router.use(bodyParser.urlencoded())
+  router.use(bodyParser.urlencoded({
+    limit: '10mb'
+  }))
 
   router.post('/token', (request, response) => {
     logger.debug(`OAuth /token: ${JSON.stringify(request.body)}`)

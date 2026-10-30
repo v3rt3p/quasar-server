@@ -9,7 +9,9 @@ const logger = getLogger()
 export function registerMobileproxyPassportYandexNetRouter (app: Application): void {
   const router = Router()
 
-  router.use(bodyParser.urlencoded())
+  router.use(bodyParser.urlencoded({
+    limit: '10mb'
+  }))
 
   router.post('/1/token', (request, response) => {
     logger.debug(`OAuth /token: ${JSON.stringify(request.body)}`)
