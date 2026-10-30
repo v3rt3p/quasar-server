@@ -154,6 +154,7 @@ const apiServer = new Elysia({
     }
   })
   .onError(async ({ error, status }) => {
+    logger.error('Quasar API error', error)
     status(500, {
       code: 'INTERNAL_SERVER_ERROR',
       text: String(error)

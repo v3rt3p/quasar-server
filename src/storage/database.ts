@@ -24,7 +24,7 @@ class Station {
 export class TypeORMDatabaseStationInfoStorage implements StationInfoProvider {
   private readonly dataSource: DataSource
 
-  constructor (config: TypeORMDatabaseStationInfoStorageConfig) {
+  constructor (private readonly config: TypeORMDatabaseStationInfoStorageConfig) {
     this.dataSource = new DataSource({
       entities: [createStationEntitySchema(config.type)],
       synchronize: true,
@@ -72,7 +72,7 @@ export class TypeORMDatabaseStationInfoStorage implements StationInfoProvider {
       const repository = manager.getRepository<Station>(Station)
 
       const existing = await repository.findOne({
-        lock: { mode: 'pessimistic_write' },
+        ...(this.config.type === 'sqlite' ? {} : { lock: { mode: 'pessimistic_write' } }),
         where: {
           id: duid
         }
