@@ -1,41 +1,42 @@
-import { Column, DataSource, Entity, PrimaryColumn, Repository } from 'typeorm'
+import { DataSource, EntitySchema, Repository } from 'typeorm'
 
 import { mergeQuasarConfig, QuasarConfigPatch } from './config-patch'
 import { generateGlagolSecurity, getDefaultQuasarConfig } from './defaults'
 import { glagolSecurity, quasarConfig, StationInfo, StationInfoProvider } from './types'
 
-@Entity('stations')
+export type TypeORMDatabaseStationInfoStorageConfig = {
+  path: string
+  type: 'sqlite'
+} | {
+  type: 'postgres',
+  url: string
+}
+
 class Station {
-  @Column('jsonb')
   glagolSecurity: unknown
-
-  @PrimaryColumn('text')
   id!: string
-
-  @Column('text')
   name!: string
-
-  @Column('jsonb', {
-    nullable: true
-  })
   networkInfo: unknown
-
-  @Column('text')
   platform!: string
-
-  @Column('jsonb')
   quasarConfig: unknown
 }
 
-export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
+export class TypeORMDatabaseStationInfoStorage implements StationInfoProvider {
   private readonly dataSource: DataSource
 
-  constructor (url: string) {
+  constructor (config: TypeORMDatabaseStationInfoStorageConfig) {
     this.dataSource = new DataSource({
-      entities: [Station],
+      entities: [createStationEntitySchema(config.type)],
       synchronize: true,
-      type: 'postgres',
-      url
+      ...(config.type === 'postgres'
+        ? {
+            type: 'postgres',
+            url: config.url
+          }
+        : {
+            database: config.path,
+            type: 'better-sqlite3'
+          })
     })
   }
 
@@ -137,6 +138,36 @@ export class PostgresDatabaseStationInfoStorage implements StationInfoProvider {
       return newInfo
     })
   }
+}
+
+function createStationEntitySchema (type: 'postgres' | 'sqlite'): EntitySchema<Station> {
+  return new EntitySchema<Station>({
+    columns: {
+      glagolSecurity: {
+        type: type === 'postgres' ? 'jsonb' : 'simple-json'
+      },
+      id: {
+        primary: true,
+        type: 'text'
+      },
+      name: {
+        type: 'text'
+      },
+      networkInfo: {
+        nullable: true,
+        type: type === 'postgres' ? 'jsonb' : 'simple-json'
+      },
+      platform: {
+        type: 'text'
+      },
+      quasarConfig: {
+        type: type === 'postgres' ? 'jsonb' : 'simple-json'
+      }
+    },
+    name: 'Station',
+    tableName: 'stations',
+    target: Station
+  })
 }
 
 function toInfo (station: Station): StationInfo {

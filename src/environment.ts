@@ -8,7 +8,7 @@ config({
 
 config()
 
-const environmentType = z.object({
+const environmentType = z.intersection(z.object({
   ALLOW_UPDATES: z.string().transform(value => value.toLowerCase().trim() === 'true'),
 
   API_PORT: z.string().default('31116').transform(value => Number.parseInt(value)),
@@ -23,8 +23,6 @@ const environmentType = z.object({
 
   PORT: z.string().default('31115').transform(value => Number.parseInt(value)),
 
-  POSTGRES_URL: z.url().default('postgres://quasar:quasar@localhost/quasar'),
-
   PROCESSOR_BASIC_URL: z.url().default('http://localhost:8080'),
 
   SENTRY_DSN: z.url().default('https://test@o0.ingest.sentry.io/0'),
@@ -38,7 +36,11 @@ const environmentType = z.object({
   TTS_OPENAI_VOICE: z.string().default('IVONA 2 Tatyana OEM'),
 
   UPDATES_CONFIG_PATH: z.string().optional()
-})
+}), z.union([z.object({
+  POSTGRES_URL: z.url()
+}), z.object({
+  SQLITE_PATH: z.string()
+})]))
 
 export type Environment = z.infer<typeof environmentType>
 

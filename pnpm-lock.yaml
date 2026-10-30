@@ -50,6 +50,9 @@ importers:
       async-sema:
         specifier: ^3.1.1
         version: 3.1.1
+      better-sqlite3:
+        specifier: ^13.0.3
+        version: 13.0.3
       body-parser:
         specifier: ^2.2.2
         version: 2.2.2
@@ -97,7 +100,7 @@ importers:
         version: 4.21.0
       typeorm:
         specifier: ^0.3.29
-        version: 0.3.29(pg@8.20.0)
+        version: 0.3.29(better-sqlite3@13.0.3)(pg@8.20.0)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1004,6 +1007,10 @@ packages:
     resolution: {integrity: sha512-Asa2krT+XTPZINCS+2QcyS8WTkObE77RwkydwF7h6DmnKqbvlalz93m/dnphUyCa6SWSP51VgtEUf2FN+gelFQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  better-sqlite3@13.0.3:
+    resolution: {integrity: sha512-RbOBxmLBG8uvFUc15X9+9SFemKcQ0WBuISBVkpuiaUB2qblC8UWlHEjdWVoZ8AdhSwmoEgsiXKfopX0CQxaACQ==}
+    engines: {node: '>=22'}
 
   bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
@@ -3796,6 +3803,10 @@ snapshots:
 
   baseline-browser-mapping@2.10.29: {}
 
+  better-sqlite3@13.0.3:
+    dependencies:
+      node-addon-api: 8.7.0
+
   bluebird@3.7.2: {}
 
   body-parser@2.2.2:
@@ -5623,7 +5634,7 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typeorm@0.3.29(pg@8.20.0):
+  typeorm@0.3.29(better-sqlite3@13.0.3)(pg@8.20.0):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 4.2.0
@@ -5641,6 +5652,7 @@ snapshots:
       uuid: 11.1.1
       yargs: 17.7.2
     optionalDependencies:
+      better-sqlite3: 13.0.3
       pg: 8.20.0
     transitivePeerDependencies:
       - babel-plugin-macros

@@ -18,7 +18,7 @@ import { getEnvironment } from './environment'
 import { getLogger } from './logger'
 import { MusicManager } from './music/manager'
 import proto from './protos/protos'
-import { DirectiveFunctions, pushUpdateConfigDirective, WrappedDirective } from './routers/alice/directives'
+import { DirectiveFunctions, pushUpdateConfigDirective, setTimezoneDirective, WrappedDirective } from './routers/alice/directives'
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerMobileproxyPassportYandexNetRouter } from './routers/mobileproxy.passport.yandex.net'
 import { registerOAuthYandexRuRouter } from './routers/oauth.yandex.ru'
@@ -31,7 +31,7 @@ import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.y
 import { InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { quasarConfigPatch } from './storage/config-patch'
-import { PostgresDatabaseStationInfoStorage } from './storage/database'
+import { TypeORMDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
 import { loadUpdatesConfig } from './updates'
 
@@ -49,7 +49,15 @@ Sentry.init({
   tracesSampleRate: 1
 })
 
-const storage = new PostgresDatabaseStationInfoStorage(environment.POSTGRES_URL)
+const storage = new TypeORMDatabaseStationInfoStorage('POSTGRES_URL' in environment
+  ? {
+      type: 'postgres',
+      url: environment.POSTGRES_URL
+    }
+  : {
+      path: environment.SQLITE_PATH,
+      type: 'sqlite'
+    })
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 storage.initialize().catch(error => logger.fatal(error))
@@ -237,7 +245,10 @@ apiServer.patch('/devices/:duid', async ({ body, params: { duid } }) => {
   const info = await storage.updateNameAndQuasarConfig(duid, body.name, body.quasarConfig)
 
   await runForConnections(duid, async connection => {
-    await connection.pushDirectives(pushUpdateConfigDirective)
+    await connection.pushDirectives(
+      pushUpdateConfigDirective,
+      setTimezoneDirective(info.quasarConfig.timezone.name, info.quasarConfig.timezone.offsetSeconds, true)
+    )
   })
 
   return {
