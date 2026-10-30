@@ -34,11 +34,11 @@ updates:
     fallbackUrl: https://quasar.s3.yandex.net/yandexmicro/ota/user/770338e8-a517-4642-a442-d26be2632873/0.369.1.46.4778262442.20261013.297.zip
     updateId: '150484'
   yandexmidi:
-    downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmidi/ota/user/c0e1b863-7db9-46af-9c0f-41b30e0a63f1/0.372.1.8.4790676133.20261019.298.zip
-    crc32: 150213430
-    version: 0.372.1.8.4790676133.20261019.298
-    fallbackUrl: https://quasar.s3.yandex.net/yandexmidi/ota/user/c0e1b863-7db9-46af-9c0f-41b30e0a63f1/0.372.1.8.4790676133.20261019.298.zip
-    updateId: '154282'
+    downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmidi/ota/user/d3f8e1d1-6490-421c-8f39-6e99263caf27/0.369.1.46.4778263334.20261013.295.zip
+    crc32: 2216326730
+    version: 0.369.1.46.4778263334.20261013.295
+    fallbackUrl: https://quasar.s3.yandex.net/yandexmidi/ota/user/d3f8e1d1-6490-421c-8f39-6e99263caf27/0.369.1.46.4778263334.20261013.295.zip
+    updateId: '150452'
   yandexmini:
     downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/yandexmini/ota/release/30cc9b87-109a-4a18-84fc-d2e7ab8f8e8f/1.372.4.8.4790753534.20261019.zip
     crc32: 2832295028
