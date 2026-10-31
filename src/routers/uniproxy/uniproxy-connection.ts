@@ -423,9 +423,10 @@ export class UniProxyConnection {
     const metadata = await this.parseQuasarMetadata(syncPushResponse.GetDeviceStateResponse!.DeviceState!,
       syncPushResponse.GetDeviceStateResponse!.EnvironmentState!)
 
-    const resolver = this.fetchStateRequestsResolvers.get(requestId)
+    const resolvers = [...this.fetchStateRequestsResolvers.values()]
+    this.fetchStateRequestsResolvers.clear()
 
-    if (resolver) {
+    for (const resolver of resolvers) {
       resolver(metadata)
     }
 
@@ -694,47 +695,49 @@ export class UniProxyConnection {
     })
   }
 
-  private async parseQuasarMetadata (deviceState: proto.NAlice.NAliceApi.ITDeviceState,
-    environmentState: proto.NAlice.NAliceApi.ITEnvironmentState): Promise<InputMetadata> {
+  private async parseQuasarMetadata (deviceState?: proto.NAlice.NAliceApi.ITDeviceState,
+    environmentState?: proto.NAlice.NAliceApi.ITEnvironmentState): Promise<InputMetadata> {
     const timers: TimerMetadata[] = []
     const alarms: AlarmMetadata[] = []
 
-    const alarmCapability = findCapabilityInEnvironmentState(environmentState,
-      proto.NAlice.TCapability.ECapabilityType.AlarmCapabilityType, proto.NAlice.TAlarmCapability.decode)
+    if (environmentState) {
+      const alarmCapability = findCapabilityInEnvironmentState(environmentState,
+        proto.NAlice.TCapability.ECapabilityType.AlarmCapabilityType, proto.NAlice.TAlarmCapability.decode)
 
-    if (alarmCapability) {
-      const rawAlarms = alarmCapability.State?.Alarms
-      if (rawAlarms) {
-        for (const alarm of rawAlarms) {
-          if (!alarm.Disabled) {
-            alarms.push({
-              currentlyPlaying: !!alarm.CurrentlyPlaying,
-              days: alarm.ActivationDays?.map(day => day.Weekday ?? {
-                day: day.Date?.Day ?? undefined,
-                month: day.Date?.Month ?? undefined,
-                year: day.Date?.Year ?? undefined,
-              }) ?? [],
-              id: alarm.AlarmId!,
-              time: {
-                hours: alarm.LocalTime?.Hours ?? undefined,
-                minutes: alarm.LocalTime?.Minutes ?? undefined,
-                seconds: alarm.LocalTime?.Seconds ?? undefined
-              }
-            })
+      if (alarmCapability) {
+        const rawAlarms = alarmCapability.State?.Alarms
+        if (rawAlarms) {
+          for (const alarm of rawAlarms) {
+            if (!alarm.Disabled) {
+              alarms.push({
+                currentlyPlaying: !!alarm.CurrentlyPlaying,
+                days: alarm.ActivationDays?.map(day => day.Weekday ?? {
+                  day: day.Date?.Day ?? undefined,
+                  month: day.Date?.Month ?? undefined,
+                  year: day.Date?.Year ?? undefined,
+                }) ?? [],
+                id: alarm.AlarmId!,
+                time: {
+                  hours: alarm.LocalTime?.Hours ?? undefined,
+                  minutes: alarm.LocalTime?.Minutes ?? undefined,
+                  seconds: alarm.LocalTime?.Seconds ?? undefined
+                }
+              })
+            }
           }
         }
-      }
 
-      const rawTimers = alarmCapability.State?.Timers
-      if (rawTimers) {
-        for (const timer of rawTimers) {
-          if (!timer.Disabled) {
-            timers.push({
-              currentlyPlaying: !!timer.CurrentlyPlaying,
-              duration: timer.Duration!,
-              id: timer.TimerId!,
-              remaining: timer.Remaining!
-            })
+        const rawTimers = alarmCapability.State?.Timers
+        if (rawTimers) {
+          for (const timer of rawTimers) {
+            if (!timer.Disabled) {
+              timers.push({
+                currentlyPlaying: !!timer.CurrentlyPlaying,
+                duration: timer.Duration!,
+                id: timer.TimerId!,
+                remaining: timer.Remaining!
+              })
+            }
           }
         }
       }
@@ -745,9 +748,9 @@ export class UniProxyConnection {
     return {
       internal: {
         alarms,
-        deviceId: this.deviceId,
         deviceState,
         environmentState,
+        info: deviceInfo,
         timers
       },
       readyToUse: {

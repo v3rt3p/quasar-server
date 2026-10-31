@@ -1,10 +1,10 @@
 import { Span, startInactiveSpan } from '@sentry/node'
-import { ProcessorProcessWebSocketMessage } from '@v3rt3p/types/processor'
 
 import { ProcessorBackend, ProcessorPartialResponse, ProcessorSession } from '../../backend/backend'
 import { getLogger } from '../../logger'
 import { Notifier } from '../../notifier'
 import proto from '../../protos/protos'
+import { StationInfo } from '../../storage/types'
 import { textToDirectiveMap } from '../alice/base-provider'
 import { DirectiveFunctionProvider, mmSemanticFrame, ttsPlayPlaceholderDirective, WrappedDirective } from '../alice/directives'
 import { continueSessionStage1SemanticFrame } from '../alice/typed-payloads'
@@ -42,6 +42,7 @@ export type InputMetadata = {
     deviceState: proto.NAlice.NAliceApi.ITDeviceState
     environmentState: proto.NAlice.NAliceApi.ITEnvironmentState
     gender: string
+    info: StationInfo
     timers: TimerMetadata[]
   }>,
   readyToUse: Partial<{
@@ -194,7 +195,7 @@ export class InputHandler {
     this.logger.debug(`Received TextInput with kind: ${input.data.kind}`)
     switch (input.data.kind) {
       case 'continue': {
-        return await this.getPartialResponseResult(parentSpan)
+        return await this.getPartialResponseResult(input.metadata, parentSpan)
       }
       case 'dummy': {
         return {
@@ -314,17 +315,14 @@ export class InputHandler {
     }
 
     await this.session.process({
-      metadata: {
-        ...input.metadata,
-        _raw: undefined
-      } as unknown as ProcessorProcessWebSocketMessage['data']['metadata'],
+      metadata: input.metadata,
       text: input.text
     })
     this.requestSent = true
-    return await this.getPartialResponseResult(parentSpan)
+    return await this.getPartialResponseResult(input.metadata, parentSpan)
   }
 
-  private async getPartialResponseResult (parentSpan?: Span): Promise<InputResult> {
+  private async getPartialResponseResult (metadata: InputMetadata, parentSpan?: Span): Promise<InputResult> {
     if ((!this.session || !this.requestSent) && this.partialResponses.length === 0) {
       return {
         dialogFinished: true,
@@ -377,7 +375,7 @@ export class InputHandler {
         directives: [
           ...(partialResponse.directives.map(directive =>
             this.properties.directiveFunctionProvider
-              .convertToWrappedDirective(directive)).filter(Boolean) as WrappedDirective[]),
+              .convertToWrappedDirective(directive, metadata)).filter(Boolean) as WrappedDirective[]),
           ttsPlayPlaceholderDirective()
         ],
         shouldListen: partialResponse.shouldListen,
@@ -394,7 +392,7 @@ export class InputHandler {
       dialogFinished: false,
       directives: [
         ...(partialResponse.directives.map(directive =>
-          this.properties.directiveFunctionProvider.convertToWrappedDirective(directive))
+          this.properties.directiveFunctionProvider.convertToWrappedDirective(directive, metadata))
           .filter(Boolean) as WrappedDirective[]),
         ttsPlayPlaceholderDirective({
           TypedCallbackRequest: continueSessionStage1SemanticFrame

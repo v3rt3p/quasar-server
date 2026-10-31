@@ -5,16 +5,17 @@ import z from 'zod'
 import { getLogger } from '../../logger'
 import { encodeProtobufStruct } from '../../protobuf'
 import proto from '../../protos/protos'
+import { InputMetadata } from '../uniproxy/input-handler'
 
 export interface DirectiveCallData {
   arguments: unknown,
-  name: string
+  name: string,
 }
 
-export type DirectiveFunctionHandler<T> = (argument: T) => WrappedDirective
+export type DirectiveFunctionHandler<T> = (argument: T, metadata: InputMetadata) => WrappedDirective
 
 export interface DirectiveFunctionProvider {
-  convertToWrappedDirective(call: DirectiveCallData): null | WrappedDirective
+  convertToWrappedDirective(call: DirectiveCallData, metadata: InputMetadata): null | WrappedDirective
   getSupportedFunctions(): DirectiveFunctions
 }
 
@@ -57,7 +58,7 @@ export class AbstractDirectiveFunctionProvider implements DirectiveFunctionProvi
 
   private readonly logger = getLogger<AbstractDirectiveFunctionProvider>()
 
-  convertToWrappedDirective (call: DirectiveCallData): null | WrappedDirective {
+  convertToWrappedDirective (call: DirectiveCallData, metadata: InputMetadata): null | WrappedDirective {
     this.logger.info(`Converting directive '${call.name}' from '${JSON.stringify(call.arguments)}'`)
     const name = call.name.replace(/^smart_speaker_/, '')
 
@@ -68,7 +69,7 @@ export class AbstractDirectiveFunctionProvider implements DirectiveFunctionProvi
     }
 
     try {
-      return handler.handler(handler.schema.parse(call.arguments))
+      return handler.handler(handler.schema.parse(call.arguments), metadata)
     } catch (error) {
       this.logger.warn('failed to convert to directive', error)
     }

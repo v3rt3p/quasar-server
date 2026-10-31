@@ -120,7 +120,8 @@ const alarmAddProperties = z.object({
 
 type AlarmAddProperties = z.infer<typeof alarmAddProperties>
 
-const alarmAddDirective = (properties: AlarmAddProperties): WrappedDirective => ({
+const alarmAddDirective = (properties: AlarmAddProperties,
+  timezone: { name: string; offset: number, }): WrappedDirective => ({
   quasarDirective: {
     IsLedSilent: true,
     Name: 'alarm_add_directive',
@@ -142,6 +143,10 @@ const alarmAddDirective = (properties: AlarmAddProperties): WrappedDirective => 
           Hours: properties.time.hours,
           Minutes: properties.time.minutes,
           Seconds: properties.time.seconds
+        },
+        Timezone: {
+          OffsetSeconds: timezone.offset,
+          TimezoneName: timezone.name
         }
       },
       Name: 'alarm_add_directive'
@@ -250,7 +255,10 @@ export class BaseDirectiveFunctionProvider extends AbstractDirectiveFunctionProv
   constructor () {
     super()
 
-    this.addFunction('alarm_add', 'Adds alarm to speaker', alarmAddProperties, (properties) => alarmAddDirective(properties))
+    this.addFunction('alarm_add', 'Adds alarm to speaker', alarmAddProperties, (properties, metadata) => alarmAddDirective(properties, {
+      name: metadata.internal.info?.quasarConfig?.timezone?.name ?? 'UTC',
+      offset: metadata.internal.info?.quasarConfig?.timezone?.offsetSeconds ?? 0
+    }))
     this.addFunction('alarm_cancel', 'Removes specific alarm from speaker', z.object({ id: z.string() }), (data) => alarmCancelDirective(data.id))
     this.addFunction('alarm_stop', 'Stops running active alarm on speaker', z.unknown(), () => alarmStopDirective)
 

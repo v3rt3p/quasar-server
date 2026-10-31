@@ -30,7 +30,7 @@ import { registerRpcAliceYandexNetRouter } from './routers/rpc.alice.yandex.net'
 import { registerScbhYandexNetRouter } from './routers/scbh.yandex.net'
 import { registerStartupMobileYandexNetRouter } from './routers/startup.mobile.yandex.net'
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
-import { InputMetadataEntry } from './routers/uniproxy/input-handler'
+import { InputMetadata, InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { registerWwwGoogleComRouter } from './routers/www.google.com'
 import { quasarConfigPatch } from './storage/config-patch'
@@ -341,8 +341,10 @@ apiServer.post('/devices/:duid/push', async ({ body, params: { duid }, status })
 
   const directives: WrappedDirective[] = []
 
+  const state = await connection.fetchState()
+
   for (const directive of body) {
-    const wrappedDirective = connection.getDirectiveFunctionProvider().convertToWrappedDirective(directive)
+    const wrappedDirective = connection.getDirectiveFunctionProvider().convertToWrappedDirective(directive, state)
     if (wrappedDirective) {
       directives.push(wrappedDirective)
     }
@@ -453,7 +455,8 @@ functionStateServer.get('/state', async () => {
 functionStateServer.put('/state', async ({ body }) => {
   const totalState: Record<string, InputMetadataEntry> = {}
 
-  const calledDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+  const calledDeviceId = body.metadata?.info?.duid ? String(body.metadata?.info?.duid) : undefined
+
   for (const [deviceId, connections] of uniProxyRouter.connections) {
     if (deviceId === calledDeviceId) {
       continue
@@ -502,7 +505,7 @@ functionStateServer.get('/functions', async () => {
 functionStateServer.put('/functions', async ({ body }) => {
   const totalFunctions: DirectiveFunctions = {}
 
-  const calledDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+  const calledDeviceId = body.metadata?.info?.duid ? String(body.metadata?.info?.duid) : undefined
 
   const allFunctions: Map<string, {
     arguments: z.ZodType<unknown>,
@@ -580,7 +583,7 @@ functionStateServer.put('/functions', async ({ body }) => {
 })
 
 functionStateServer.post('/functions', async ({ body }) => {
-  const fromDeviceId = body.metadata['deviceId'] ? String(body.metadata['deviceId']) : undefined
+  const fromDeviceId = body.metadata?.info?.duid ? String(body.metadata?.info?.duid) : undefined
 
   const calledDeviceId = String(body.arguments['deviceId'])
 
@@ -589,6 +592,8 @@ functionStateServer.post('/functions', async ({ body }) => {
   if (!calledDeviceId || calledDeviceId === fromDeviceId) {
     return {}
   }
+
+  const stateCache = new Map<string, InputMetadata>()
 
   await runForConnections(calledDeviceId, async connection => {
     if (connection.getDeviceId() === fromDeviceId && calledDeviceId === 'all') {
@@ -600,11 +605,13 @@ functionStateServer.post('/functions', async ({ body }) => {
       return
     }
 
+    const state = stateCache.getOrInsert(connection.getDeviceId(), await connection.fetchState())
+
     const directive = connection.getDirectiveFunctionProvider()
       .convertToWrappedDirective({
         arguments: body.arguments['args'],
         name: body.name.replace(/^other_/, '')
-      })
+      }, state)
     if (!directive) {
       return
     }
