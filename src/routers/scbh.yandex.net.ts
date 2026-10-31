@@ -5,7 +5,7 @@ export function registerScbhYandexNetRouter (app: Application): void {
 
   router.get('/generate_204', (_, response) => {
     response.status(204).header({
-      'x-start-time': Math.round(Date.now() * 1000).toFixed(0)
+      'X-Start-Time': Math.round(Date.now() * 1000).toFixed(0)
     }).end()
   })
 
