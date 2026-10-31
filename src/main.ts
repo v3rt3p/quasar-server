@@ -20,8 +20,10 @@ import { MusicManager } from './music/manager'
 import proto from './protos/protos'
 import { DirectiveFunctions, pushUpdateConfigDirective, setTimezoneDirective, WrappedDirective } from './routers/alice/directives'
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
+import { registerConnectivitycheckGstaticComRouter } from './routers/connectivitycheck.gstatic.com'
 import { registerMobileproxyPassportYandexNetRouter } from './routers/mobileproxy.passport.yandex.net'
 import { registerOAuthYandexRuRouter } from './routers/oauth.yandex.ru'
+import { registerPlayGoogleapisComRouter } from './routers/play.googleapis.com'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
 import { registerReportAppMetricaYandexNetRouter } from './routers/report.appmetrica.yandex.net'
 import { registerRpcAliceYandexNetRouter } from './routers/rpc.alice.yandex.net'
@@ -30,6 +32,7 @@ import { registerStartupMobileYandexNetRouter } from './routers/startup.mobile.y
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
 import { InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
+import { registerWwwGoogleComRouter } from './routers/www.google.com'
 import { quasarConfigPatch } from './storage/config-patch'
 import { TypeORMDatabaseStationInfoStorage } from './storage/database'
 import { quasarConfig } from './storage/types'
@@ -95,6 +98,9 @@ registerMobileproxyPassportYandexNetRouter(app)
 registerStartupMobileYandexNetRouter(app)
 registerScbhYandexNetRouter(app)
 registerRpcAliceYandexNetRouter(app)
+registerWwwGoogleComRouter(app)
+registerConnectivitycheckGstaticComRouter(app)
+registerPlayGoogleapisComRouter(app)
 
 const server = app.listen(environment.PORT, error => {
   if (error) {

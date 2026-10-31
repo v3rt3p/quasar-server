@@ -11,6 +11,15 @@ export function registerClckYandexNetRouter (app: Application): void {
     response.status(500).end()
   })
 
+  router.post('/smart_display_errors/write/json/batch', (request, response) => {
+    const body = request.body
+    if (Array.isArray(body)) {
+      response.status(200).json(Array.from({ length: body.length }).map(() => ({ ResponseStatus: 'OK' })))
+      return
+    }
+    response.status(500).end()
+  })
+
   router.post('/quasar/write/json/batch', (request, response) => {
     const body = request.body
     if (Array.isArray(body)) {

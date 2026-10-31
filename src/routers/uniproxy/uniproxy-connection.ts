@@ -796,7 +796,13 @@ export class UniProxyConnection {
                 TimeLimitSec: 9999
               }
             },
-            Cards: [],
+            Cards: text
+              ? [{
+                  CardId: randomUUID(),
+                  Text: text,
+                  Type: 'simple_text'
+                }]
+              : [],
             Directives: directives,
             IsStreaming: false,
             Suggest: {

@@ -20,25 +20,22 @@ interface Types {
 
 type TypeString = keyof Types
 
-export function decodeProtobufStruct (value: proto.google.protobuf.IStruct): ProtobufStruct {
+export function decodeProtobufStruct (struct: proto.google.protobuf.IStruct): ProtobufStruct {
   const result: Record<string, any> = {}
-  for (const field of (value.fields ?? [])) {
-    const parsedValue = decodeProtobufFieldValue(field.value!)
-    result[field.key!] = parsedValue
+  for (const [key, value] of Object.entries(struct.fields ?? {})) {
+    const parsedValue = decodeProtobufFieldValue(value!)
+    result[key!] = parsedValue
   }
   return result
 }
 
 export function encodeProtobufStruct (value: ProtobufStruct): proto.google.protobuf.IStruct {
   const result: proto.google.protobuf.IStruct = {
-    fields: []
+    fields: {}
   }
   for (const [key, fieldValue] of Object.entries(value)) {
     const encodedValue = encodeProtobufFieldValue(fieldValue)
-    result.fields!.push({
-      key,
-      value: encodedValue
-    })
+    result.fields![key] = encodedValue
   }
   return result
 }

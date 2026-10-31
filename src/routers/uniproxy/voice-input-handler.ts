@@ -185,8 +185,14 @@ export class VoiceInputHandler extends EventEmitter<VoiceInputHandlerEvents> {
   async handleVoiceInputSpeakerMetadataEvent (request: VoiceInputSpeakerMetadataEvent): Promise<void> {
     this.logger.debug('VoiceInputHandler received Metadata')
     this.metadata = {
-      ...this.metadata,
-      ...request.metadata
+      internal: {
+        ...this.metadata.internal,
+        ...request.metadata.internal
+      },
+      readyToUse: {
+        ...this.metadata.readyToUse,
+        ...request.metadata.readyToUse
+      }
     }
   }
 
