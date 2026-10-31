@@ -7,6 +7,9 @@ const updatesConfigType = z.object({
     crc32: z.number(),
     downloadUrl: z.string(),
     fallbackUrl: z.string().optional(),
+    md5Hash: z.string().optional(),
+    size: z.number().optional(),
+    tvVersion: z.string().optional(),
     updateId: z.string(),
     version: z.string()
   }))

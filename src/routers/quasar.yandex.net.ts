@@ -43,6 +43,64 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
     })
   })
 
+  router.post('/tv/api/v4/updates', (request, response) => {
+    const platform = String(request.headers['x-yaquasarplatform'] ?? 'unknown')
+
+    logger.debug(`Requested TV updates v4: ${JSON.stringify(request.headers)}`)
+
+    const update = properties.updatesConfig.updates[platform]
+
+    if (!update) {
+      response.json({
+        updates: []
+      })
+      return
+    }
+
+    return response.json({
+      updates: [{
+        extra: {},
+        md5_hash: update.md5Hash,
+        priority: 'FORCED',
+        size: update.size,
+        type: 'ota',
+        update_id: update.updateId,
+        url: update.downloadUrl,
+        version_code: Number.parseInt(update.version),
+        version_name: update.tvVersion ?? update.version
+      }]
+    })
+  })
+
+  router.post('/tv/api/v3/updates', (_request, response) => {
+    response.json({
+      bundles: [],
+      updates: []
+    })
+  })
+
+  router.get('/tv/api/v3/ota', (request, response) => {
+    const platform = String(request.headers['x-yaquasarplatform'] ?? 'unknown')
+
+    logger.debug(`Requested TV updates v3: ${JSON.stringify(request.headers)}`)
+
+    const update = properties.updatesConfig.updates[platform]
+
+    if (!update) {
+      response.json({})
+      return
+    }
+
+    return response.json({
+      md5_hash: update.md5Hash,
+      priority: 'FORCED',
+      size: update.size,
+      update_id: update.updateId,
+      url: update.downloadUrl,
+      version: Number.parseInt(update.version)
+    })
+  })
+
   router.post('/push_subscribe', (_request, response) => {
     response.status(500).end()
   })

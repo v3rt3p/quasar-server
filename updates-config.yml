@@ -6,6 +6,9 @@ updates:
     version: '5000001289'
     crc32: 3994367539
     updateId: '154158'
+    md5Hash: 59fff268a655a61160b86579b65a049c
+    size: 1376201097
+    tvVersion: 0.368.0.53.5000001289.20261017.165
   cucumber:
     downloadUrl: https://cdnriqbxswemmatxzibl.svc.cdn.yandex.net/cucumber/ota/user/8e1e25f9-1ff0-45cc-b30f-f920200539a5/0.369.1.46.4778262955.20261013.160.zip
     crc32: 3103154577
