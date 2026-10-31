@@ -271,7 +271,7 @@ export class UniProxyConnection {
     if (message.subarray(0, 4).equals(new Uint8Array([0x41, 0x41, 0x50, 0x49]))) {
       const rawClientMessage = message.subarray(4)
       const clientMessage = TClientMessageClass.decode(rawClientMessage)
-      this.logger.debug(JSON.stringify(clientMessage, undefined, 4))
+      this.logger.debug(JSON.stringify(clientMessage.toJSON(), undefined, 4))
       await this.handleClientMessage(clientMessage)
     } else {
       const streamId = new DataView(message.buffer, message.byteOffset, message.length).getUint32(0, false)
