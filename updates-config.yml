@@ -16,10 +16,13 @@ updates:
     fallbackUrl: https://quasar.s3.yandex.net/cucumber/ota/user/8e1e25f9-1ff0-45cc-b30f-f920200539a5/0.369.1.46.4778262955.20261013.160.zip
     updateId: '150426'
   magritte:
-    downloadUrl: https://quasar.s3.yandex.net/magritte/ota/user/e8587e49-87f4-4c11-b526-4a92e52af229/5000001589.zip
-    version: '5000001589'
-    crc32: 3409490000
-    updateId: '154151'
+    downloadUrl: https://quasar.s3.yandex.net/magritte/ota/user/c34b4a6b-cceb-475d-8f0c-e0e517e86f75/5000001416.zip
+    version: '5000001416'
+    crc32: 747817988
+    updateId: '149621'
+    md5Hash: 6b3ba9df16ab3d89f8d1ed5601aee7e4
+    size: 1785400015
+    tvVersion: 0.364.0.14.5000001416.20260928.194
   malevich:
     downloadUrl: https://quasar.s3.yandex.net/malevich/ota/user/063d22a8-1864-4330-ac85-f200c8f27aa8/5000001072.zip
     crc32: 2649215308
