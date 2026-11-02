@@ -576,7 +576,7 @@ const rawQuasarConfig = z.object({
         })
       }),
       debug: z.object({
-        adbEnabled: z.boolean().default(false)
+        adbEnabled: z.boolean().default(true)
       }),
       div: z.object({
         disableAssertions: z.boolean().default(true),
