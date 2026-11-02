@@ -1,0 +1,68 @@
+{
+  "allowed_sso_apps": [
+    {
+      "app_id": "com.edadeal.android",
+      "fingerprint": "Ucyt+WfG7scFrG9ix/DZjXnG3IJ9xqlHqcHBWZfJRC0="
+    },
+    {
+      "app_id": "ru.kinopoisk",
+      "fingerprint": "bmQ8wpHeuihpnDrkPvnJoa7NZi0UUtd473a2MH7txIU="
+    },
+    {
+      "app_id": "ru.foodfox.client",
+      "fingerprint": "3bydYEVOdzTJomTdNLyOSwskCDmcBgzr7HX+DHBhgMc="
+    },
+    {
+      "app_id": "com.deliveryclub",
+      "fingerprint": "Oey4SFV8MM29BUDKKHPppyHtJtcaWDsj9NPTnzUekLk="
+    },
+    {
+      "app_id": "com.scb.android",
+      "fingerprint": "q/6Eilpo3MC4DTSH01kxzZATSxRkzz29iymP5o1K3Lc="
+    },
+    {
+      "app_id": "com.zebrainy.skazbuka",
+      "fingerprint": "QjM\\\\/yweNUDwGqMuNleLUWlqiyFov71hRR2Mcxoz9NYk="
+    },
+    {
+      "app_id": "ru.vseapteki",
+      "fingerprint": "nmVYHwla4iKhErfvVWYhuh7vCDZLb3vYAHfdfes6DbY="
+    },
+    {
+      "app_id": "uz.allplay.app",
+      "fingerprint": "UbaGU2rO43WTeRiGncAbrDbwCfiMjG3xN1NfwXCz64E="
+    },
+    {
+      "app_id": "jamhome.ru.lktsj",
+      "fingerprint": "+zAtZrdNtZYevaXkDN7rvyCOgV8UfSGB3afDdHfipZU="
+    },
+    {
+      "app_id": "ru.berizaryad",
+      "fingerprint": "ejaKxCA91wCo1mYxoBY9Um\\/Gx7HbjgCWiX3kebaXheE="
+    },
+    {
+      "app_id": "auto.umo.vehicle",
+      "fingerprint": "f4qoJdGPglr9yckkODn70xYaIRUEozjNG1g05Ea80Oo="
+    },
+    {
+      "app_id": "com.yandex.aira",
+      "fingerprint": "azk24U/LjCzj/tL5RuoG6kOMu+vfAEVjX9wYOwJX0zE="
+    },
+    {
+      "app_id": "ru.dikidi",
+      "fingerprint": "II2PWOiK0FNp6lsJlAgNiltOkkQzutu9a5yYryZb8h4="
+    },
+    {
+      "app_id": "net.dikidi.huawei",
+      "fingerprint": "II2PWOiK0FNp6lsJlAgNiltOkkQzutu9a5yYryZb8h4="
+    },
+    {
+      "app_id": "ru.dikidi.beauty.business",
+      "fingerprint": "II2PWOiK0FNp6lsJlAgNiltOkkQzutu9a5yYryZb8h4="
+    },
+    {
+      "app_id": "ru.dikidi.business.huawei",
+      "fingerprint": "II2PWOiK0FNp6lsJlAgNiltOkkQzutu9a5yYryZb8h4="
+    }
+  ]
+}

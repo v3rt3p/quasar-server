@@ -1,0 +1,1078 @@
+{
+  "badges_specification": [
+    {
+      "name": "pro_card",
+      "strings": {
+        "ru": "Карта Про",
+        "en": "Pro Card"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/procard-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/procard-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/procard-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/procard-dark.png"
+        }
+      }
+    },
+    {
+      "name": "plus_card",
+      "strings": {
+        "ru": "Карта Пэй",
+        "en": "Pay Card"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/pluscard-light-ru.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/pluscard-dark-ru.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/pluscard-light-en.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/pluscard-dark-en.png"
+        }
+      }
+    },
+    {
+      "name": "is_taxi_company_bound",
+      "strings": {
+        "ru": "Профиль Про",
+        "en": "Pro Profile"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/yandex-pro.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/yandex-pro.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/yandex-pro.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/yandex-pro.png"
+        }
+      }
+    },
+    {
+      "name": "drive_user",
+      "strings": {
+        "ru": "Драйв",
+        "en": "Drive"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/drive-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/drive-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/drive-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/drive-dark.png"
+        }
+      }
+    },
+    {
+      "name": "has_family",
+      "strings": {
+        "ru": "Семья",
+        "en": "Family"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/family-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/family-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/family-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/family-dark.png"
+        }
+      }
+    },
+    {
+      "name": "has_plus",
+      "strings": {
+        "ru": "Плюс",
+        "en": "Plus"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/plus-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/plus-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/plus-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/plus-dark.png"
+        }
+      }
+    },
+    {
+      "name": "bookmate_subscription",
+      "strings": {
+        "ru": "Букмейт",
+        "en": "Bookmate"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/bookmate-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/bookmate-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/bookmate-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/bookmate-dark.png"
+        }
+      }
+    },
+    {
+      "name": "has_cards",
+      "strings": {
+        "ru": "Карты",
+        "en": "Cards"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/card-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/card-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/card-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/card-dark.png"
+        }
+      }
+    },
+    {
+      "name": "is_yateam_domain",
+      "strings": {
+        "ru": "Я Team",
+        "en": "Я Team"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/yteam.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/yteam.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/yteam.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/yteam.png"
+        }
+      }
+    },
+    {
+      "name": "is_browser_account",
+      "strings": {
+        "ru": "Браузер",
+        "en": "Browser"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/icon-browser.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/icon-browser.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/icon-browser.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/icon-browser.png"
+        }
+      }
+    },
+    {
+      "name": "split_subscription",
+      "strings": {
+        "ru": "Сплит",
+        "en": "Split"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/split-small.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/split-small.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/split-small.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/split-small.png"
+        }
+      }
+    },
+    {
+      "name": "is_restricted",
+      "strings": {
+        "ru": "НЕ НАЖИМАТЬ",
+        "en": "DO NOT TOUCH"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/alert-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/alert-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/alert-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/alert-dark.png"
+        }
+      }
+    },
+    {
+      "name": "is_neocommunal",
+      "strings": {
+        "ru": "Общий аккаунт",
+        "en": "Shared account"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/shared-account.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/shared-account.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/shared-account.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/shared-account.png"
+        }
+      }
+    },
+    {
+      "name": "has_telemost",
+      "strings": {
+        "ru": "Телемост",
+        "en": "Telemost"
+      },
+      "localized_icon_urls": {
+        "ru": {
+          "light": "https://id-mail.s3.yandex.net/badges/telemost-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/telemost-dark.png"
+        },
+        "en": {
+          "light": "https://id-mail.s3.yandex.net/badges/telemost-light.png",
+          "dark": "https://id-mail.s3.yandex.net/badges/telemost-dark.png"
+        }
+      }
+    }
+  ],
+  "apps_configuration": [
+    {
+      "package": "ru.yandex.mobile.auth.sample.debug",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "pro_card",
+        "plus_card",
+        "is_taxi_company_bound",
+        "drive_user",
+        "has_family",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.auth.sample.adhoc",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "pro_card",
+        "plus_card",
+        "is_taxi_company_bound",
+        "drive_user",
+        "has_family",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search.ipad",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search.ipad.inhouse",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search.ipad.develop",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search.inhouse",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.search.develop",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.appkode.foodfox",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.gasstations",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.traffic",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.kinopoisk",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.keyboard",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.blue.market",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.music",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.navigator",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.realty",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.translate",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.weather-v2",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.ytaxi",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.rasp",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.s-g-i.Edadeal",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.yamb",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.drive",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "drive_user",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.drive.inhouse",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "drive_user",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.lavka",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.disk",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.taximeter.flutter.ios",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_taxi_company_bound",
+        "plus_card",
+        "pro_card",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yango.driver.flutter.ios",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "is_taxi_company_bound"
+      ]
+    },
+    {
+      "package": "com.yango.driver.flutter.ios.develop",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "is_taxi_company_bound"
+      ]
+    },
+    {
+      "package": "com.yango.joy",
+      "platform": "ios",
+      "badges": [
+        "has_plus"
+      ]
+    },
+    {
+      "package": "ru.plus.bookmate",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "bookmate_subscription",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.fintech.bank-app",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.telemost",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.calendar.app",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mail",
+      "platform": "ios",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.auth.client",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "pro_card",
+        "plus_card",
+        "is_taxi_company_bound",
+        "drive_user",
+        "has_family",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.browser",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.browser.beta",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.browser.alpha",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.browser.canary",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.browser.broteam",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.disk",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.foodfox.client",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mobile.gasstations",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.yandexmaps",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.kinopoisk",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.beru.android",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.music",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.yandexnavi",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.mobile.realty",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.translate",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.weatherplugin",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.taxi",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.searchapp",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.edadeal.android",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.yamb",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.mobile.drive",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "drive_user",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.mobile.drive.inhouse",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "drive_user",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.lavka",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.searchplugin",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "split_subscription",
+        "has_cards",
+        "is_browser_account",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.taximeter",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "is_taxi_company_bound",
+        "plus_card",
+        "pro_card",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yango.driver",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "is_taxi_company_bound"
+      ]
+    },
+    {
+      "package": "com.yango.saft",
+      "platform": "android",
+      "badges": [
+        "has_plus"
+      ]
+    },
+    {
+      "package": "ru.plus.bookmate",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "bookmate_subscription",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.bank",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "plus_card",
+        "pro_card",
+        "has_cards",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.telemost",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "com.yandex.calendar.app",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    },
+    {
+      "package": "ru.yandex.mail",
+      "platform": "android",
+      "badges": [
+        "is_yateam_domain",
+        "is_restricted",
+        "has_plus",
+        "has_telemost",
+        "is_neocommunal"
+      ]
+    }
+  ]
+}

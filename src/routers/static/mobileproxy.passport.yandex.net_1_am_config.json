@@ -1,0 +1,629 @@
+{
+  "backends": [],
+  "default_locations": [
+    {
+      "location_id": 0,
+      "mobileproxy": "mobileproxy.passport.yandex.net",
+      "webam": "passport.yandex.ru",
+      "webam_id_yandex": "id.yandex.ru",
+      "webam_yandex": "yandex.ru"
+    },
+    {
+      "location_id": 1,
+      "mobileproxy": "mobileproxy.passport.yandex.fi",
+      "webam": "passport.yandex.fi",
+      "webam_id_yandex": "id.yandex.fi",
+      "webam_yandex": "yandex.fi"
+    },
+    {
+      "location_id": 2,
+      "mobileproxy": "mobileproxy.passport.yandex.kz",
+      "webam": "passport.yandex.kz",
+      "webam_id_yandex": "id.yandex.kz",
+      "webam_yandex": "yandex.kz"
+    },
+    {
+      "location_id": 4,
+      "mobileproxy": "mobileproxy.infrayango.systems",
+      "webam": "passport.infrayango.systems",
+      "webam_id_yandex": "",
+      "webam_yandex": ""
+    },
+    {
+      "location_id": 6,
+      "mobileproxy": "mobileproxy.yango.com",
+      "webam": "passport.yango.com",
+      "webam_id_yandex": "",
+      "webam_yandex": ""
+    }
+  ],
+  "am_config": [
+    {
+      "filter_rules": {
+        "surface_category": {
+          "ne": [
+            "yandex_team_domain"
+          ]
+        },
+        "is_onpremise": {
+          "ne": [
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "app_id": [
+        "ru.yandex.mobile.yamb",
+        "ru.yandex.yamb",
+        "com.yandex.yamb",
+        "com.yandex.yamb.canary"
+      ],
+      "filter_rules": {
+        "is_onpremise": {
+          "ne": [
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "app_id": [
+        "ru.yandex.mobile.auth.sample",
+        "ru.yandex.mobile.auth.sample.debug",
+        "ru.yandex.mobile.auth.sample.adhoc",
+        "com.yandex.passport.testapp1",
+        "com.yandex.passport.testapp2",
+        "ru.yandex.auth.client",
+        "ru.yandex.auth.client.am_release_sl",
+        "net.yandex.alien1.testapp5",
+        "net.yandex.alien2.testapp6",
+        "net.yandex.alien3.testapp7",
+        "net.yandex.alien4.testapp8"
+      ],
+      "filter_rules": {
+        "surface_category": {
+          "ne": [
+            "yandex_team_domain"
+          ]
+        }
+      }
+    },
+    {
+      "app_id": [
+        "ru.yandex.disk",
+        "ru.yandex.disk.beta",
+        "ru.yandex.disk.debug",
+        "ru.yandex.disk.test.purchases",
+        "ru.yandex.telemost",
+        "ru.yandex.telemost.debug",
+        "ru.yandex.telemost.inhouse",
+        "ru.yandex.mobile.telemost.debug",
+        "ru.yandex.mobile.telemost.adhoc"
+      ],
+      "filter_rules": {
+        "is_onpremise": {
+          "ne": [
+            "1"
+          ]
+        }
+      }
+    }
+  ],
+  "android_white_list_regex": "plus.yandex.ru",
+  "ios_ebs_config": {
+    "bio_collection_type": "face_only_with_webinterface_age",
+    "tib_uri": "https://ngate-proxy-tg.passport.yandex.net/servlets/api/v2",
+    "backend_uri_template": "https://ngate-proxy-tg.passport.yandex.net/1/bundle/biometrics/ebs/%@",
+    "ebs_uri_template": "https://gost.ebs.ru/api/v3/verifications/%@/upload"
+  },
+  "android_block_vpn_next_wave": [
+    {
+      "app_id": "com.yandex.calendar.app",
+      "version": 1220
+    },
+    {
+      "app_id": "com.yandex.yamb",
+      "version": 258261174
+    },
+    {
+      "app_id": "com.deliveryclub",
+      "version": 5000211
+    },
+    {
+      "app_id": "ru.yandex.yandexmaps",
+      "version": 739149520
+    },
+    {
+      "app_id": "ru.yandex.yandexmaps.pr",
+      "version": 739149520
+    },
+    {
+      "app_id": "ru.yandex.yandexmaps.debug",
+      "version": 40000
+    },
+    {
+      "app_id": "ru.yandex.yandexnavi",
+      "version": 739149630
+    },
+    {
+      "app_id": "ru.yandex.yandexnavi.pr",
+      "version": 739149630
+    },
+    {
+      "app_id": "ru.yandex.yandexnavi.debug",
+      "version": 40000
+    }
+  ],
+  "android_block_vpn": [
+    {
+      "app_id": "com.yandex.passport.testapp2",
+      "version": 123
+    },
+    {
+      "app_id": "com.ridetech.client.develop",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.telemost",
+      "version": 25657493
+    },
+    {
+      "app_id": "ru.kinopoisk",
+      "version": 0
+    },
+    {
+      "app_id": "ru.foodfox.client",
+      "version": 0
+    },
+    {
+      "app_id": "ru.beru.android",
+      "version": 362170
+    },
+    {
+      "app_id": "ru.yandex.weatherplugin",
+      "version": 260040010
+    },
+    {
+      "app_id": "ru.yandex.mail",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.mail.beta",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.music",
+      "version": 24026212
+    },
+    {
+      "app_id": "com.yandex.lavka",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.lavka.debug",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.lavka.develop",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.lavka.rc",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.bank",
+      "version": 10595
+    },
+    {
+      "app_id": "ru.yandex.disk",
+      "version": 662000
+    },
+    {
+      "app_id": "ru.yandex.travel",
+      "version": 0
+    },
+    {
+      "app_id": "ru.auto.ara",
+      "version": 97946
+    },
+    {
+      "app_id": "ru.yandex.mobile.afisha",
+      "version": 3035
+    },
+    {
+      "app_id": "ru.yandex.mobile.afisha.inhouse",
+      "version": 0
+    },
+    {
+      "app_id": "ru.kinopoisk.dev",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.weatherplugin.dev",
+      "version": 260040010
+    },
+    {
+      "app_id": "com.yandex.messenger.alpha",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.travel.dev",
+      "version": 0
+    },
+    {
+      "app_id": "ru.foodfox.client.debug",
+      "version": 0
+    },
+    {
+      "app_id": "ru.beru.android.qa",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.searchapp.canary",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.iot",
+      "version": 260603031
+    },
+    {
+      "app_id": "com.yandex.iot.beta",
+      "version": 260603031
+    },
+    {
+      "app_id": "com.deliveryclub.debug",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.disk.beta",
+      "version": 662000
+    },
+    {
+      "app_id": "ru.auto.ara.debug",
+      "version": 0
+    },
+    {
+      "app_id": "com.yandex.bank.dev",
+      "version": 97946
+    },
+    {
+      "app_id": "ru.yandex.metro",
+      "version": 20018
+    },
+    {
+      "app_id": "ru.yandex.metro.inhouse.debug",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.metro.inhouse.pr",
+      "version": 0
+    },
+    {
+      "app_id": "ru.plus.bookmate.debug",
+      "version": 0
+    },
+    {
+      "app_id": "ru.plus.bookmate.qa",
+      "version": 0
+    },
+    {
+      "app_id": "ru.plus.bookmate",
+      "version": 6660000
+    },
+    {
+      "app_id": "ru.superapp.plus.inhouse",
+      "version": 76
+    },
+    {
+      "app_id": "ru.yandex.taxi",
+      "version": 0
+    },
+    {
+      "app_id": "ru.yandex.taxi.develop",
+      "version": 0
+    }
+  ],
+  "ios_block_vpn_next_wave": [
+    {
+      "app_id": "com.yandex.calendar.app",
+      "version": "1.19.0"
+    },
+    {
+      "app_id": "com.yandex.alice-app",
+      "version": "26.11.0"
+    },
+    {
+      "app_id": "am.helix.Delivery-Club",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.mobile.yamb",
+      "version": "24115.6"
+    },
+    {
+      "app_id": "ru.yandex.mobile.yamb-dev",
+      "version": "24115.6"
+    }
+  ],
+  "ios_block_vpn": [
+    {
+      "app_id": "ru.yandex.mobile.auth.sample.debug",
+      "version": "6.35.0"
+    },
+    {
+      "app_id": "ru.yandex.telemost",
+      "version": "3150.1"
+    },
+    {
+      "app_id": "com.ridetech.client.inhouse",
+      "version": "0.0.0"
+    },
+    {
+      "app_id": "ru.superapp.plus",
+      "version": "0.1.99"
+    },
+    {
+      "app_id": "ru.superapp.plus.debug",
+      "version": "0.1.99"
+    },
+    {
+      "app_id": "ru.superapp.plus.inhouse",
+      "version": "0.1.99"
+    },
+    {
+      "app_id": "ru.kinopoisk",
+      "version": "8.41.3"
+    },
+    {
+      "app_id": "ru.yandex.mobile.navigator",
+      "version": "28.60"
+    },
+    {
+      "app_id": "ru.yandex.traffic",
+      "version": "28.60"
+    },
+    {
+      "app_id": "com.yandex.iot",
+      "version": "12606.2"
+    },
+    {
+      "app_id": "com.yandex.iot.dev",
+      "version": "12606.2"
+    },
+    {
+      "app_id": "com.appkode.foodfox",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.blue.market",
+      "version": "2026.11.2"
+    },
+    {
+      "app_id": "ru.yandex.mobile.weather-v2",
+      "version": "2604.10"
+    },
+    {
+      "app_id": "ru.yandex.mobile.afisha",
+      "version": "3.58.0"
+    },
+    {
+      "app_id": "ru.yandex.mobile.afisha.dev",
+      "version": "3.58.0"
+    },
+    {
+      "app_id": "ru.yandex.mobile.metro",
+      "version": "3.89"
+    },
+    {
+      "app_id": "ru.yandex.mobile.metro.inhouse",
+      "version": "0.0"
+    },
+    {
+      "app_id": "ru.yandex.mail",
+      "version": "500.01"
+    },
+    {
+      "app_id": "ru.yandex.mobile.music",
+      "version": "7.78"
+    },
+    {
+      "app_id": "ru.yandex.lavka",
+      "version": "2.36.2"
+    },
+    {
+      "app_id": "com.yandex.fintech.bank-app",
+      "version": "0.217.0"
+    },
+    {
+      "app_id": "ru.yandex.disk",
+      "version": "5.91.0"
+    },
+    {
+      "app_id": "ru.yandex.ytaxi",
+      "version": "700.136.1"
+    },
+    {
+      "app_id": "ru.yandex.travel",
+      "version": "1.150.1"
+    },
+    {
+      "app_id": "ru.plus.bookmate",
+      "version": "2.66.0"
+    },
+    {
+      "app_id": "ru.AutoRu",
+      "version": "26.11.1"
+    },
+    {
+      "app_id": "ru.yandex.mail.debug",
+      "version": "500.01"
+    },
+    {
+      "app_id": "com.yandex.alice-app.dev",
+      "version": "26.11.0"
+    },
+    {
+      "app_id": "ru.yandex.mobile.auth.sample",
+      "version": "6.35.0"
+    },
+    {
+      "app_id": "ru.yandex.mobile.auth.sample.adhoc",
+      "version": "6.35.0"
+    },
+    {
+      "app_id": "ru.yandex.lavka.develop",
+      "version": "2.36.2"
+    },
+    {
+      "app_id": "ru.yandex.travel.dev",
+      "version": "1.150.1"
+    },
+    {
+      "app_id": "ru.yandex.mobile.travel.adhoc",
+      "version": "1.150.1"
+    },
+    {
+      "app_id": "ru.yandex.maple.dev",
+      "version": "7.78"
+    },
+    {
+      "app_id": "ru.yandex.taxi.develop",
+      "version": "700.136.1"
+    },
+    {
+      "app_id": "ru.yandex.taxi.inhouse",
+      "version": "700.136.1"
+    },
+    {
+      "app_id": "ru.yandex.traffic.inhouse",
+      "version": "28.60"
+    },
+    {
+      "app_id": "ru.yandex.traffic.sandbox",
+      "version": "28.60"
+    },
+    {
+      "app_id": "ru.yandex.mobile.navigator.inhouse",
+      "version": "28.60"
+    },
+    {
+      "app_id": "ru.yandex.mobile.navigator.sandbox",
+      "version": "28.60"
+    },
+    {
+      "app_id": "ru.yandex.blue.market.inhouse",
+      "version": "1.1.1"
+    },
+    {
+      "app_id": "ru.yandex.blue.market.development",
+      "version": "1.1.1"
+    },
+    {
+      "app_id": "ru.yandex.eats.inhouse",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.eats.dev",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.delivery.inhouse",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.delivery.dev",
+      "version": "8.102.1"
+    },
+    {
+      "app_id": "ru.yandex.mobile.telemost.adhoc",
+      "version": "3150.1"
+    },
+    {
+      "app_id": "ru.yandex.mobile.telemost.debug",
+      "version": "3150.1"
+    },
+    {
+      "app_id": "com.yandex.bank.idev",
+      "version": "0.217.0"
+    },
+    {
+      "app_id": "ru.yandex.disk.debug",
+      "version": "5.91.0"
+    },
+    {
+      "app_id": "ru.yandex.disk.test.purchases",
+      "version": "5.91.0"
+    },
+    {
+      "app_id": "com.yandex.alice-app.dev",
+      "version": "26.11.0"
+    }
+  ],
+  "android_vpn_manual_mode": [
+    "ru.yandex.auth.client",
+    "ru.yandex.telemost",
+    "ru.yandex.telemost.debug",
+    "ru.yandex.music"
+  ],
+  "ios_vpn_manual_mode": [
+    "ru.yandex.mobile.auth.sample.debug",
+    "ru.yandex.mobile.auth.sample",
+    "ru.yandex.mobile.auth.sample.adhoc",
+    "ru.yandex.mobile.music",
+    "ru.yandex.maple.dev",
+    "ru.yandex.telemost",
+    "ru.yandex.mobile.telemost.adhoc",
+    "ru.yandex.mobile.telemost.debug"
+  ],
+  "android_autologin_app_parameters": [
+    {
+      "app_id": "ru.yandex.taxi",
+      "extra_params": {
+        "plus_card": 1
+      }
+    }
+  ],
+  "ios_autologin_app_parameters": [
+    {
+      "app_id": "ru.yandex.mobile.auth.sample",
+      "extra_params": {
+        "is_sms_2fa_enabled": 1
+      }
+    },
+    {
+      "app_id": "ru.yandex.mobile.auth.sample.debug",
+      "extra_params": {
+        "is_sms_2fa_enabled": 1
+      }
+    },
+    {
+      "app_id": "ru.yandex.mobile.auth.sample.adhoc",
+      "extra_params": {
+        "is_sms_2fa_enabled": 1
+      }
+    },
+    {
+      "app_id": "ru.yandex.ytaxi",
+      "extra_params": {
+        "plus_card": 1
+      }
+    }
+  ],
+  "ios_autologin_client_id_parameters": [
+    {
+      "client_id": "0c83f5fb8f3049d5aa7f6ad694a60b17",
+      "extra_params": {
+        "has_family": 1,
+        "is_sms_2fa_enabled": 1
+      }
+    },
+    {
+      "client_id": "3e33d909459441cebbc9faff4472388c",
+      "extra_params": {
+        "is_completion_available": 1
+      }
+    }
+  ]
+}

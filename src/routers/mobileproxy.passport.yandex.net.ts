@@ -1,8 +1,11 @@
 import bodyParser from 'body-parser'
 import { Application, Router } from 'express'
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 
 import { getLogger } from '../logger'
+import amConfig from './static/mobileproxy.passport.yandex.net_1_am_config.json'
+import amSsoConfig from './static/mobileproxy.passport.yandex.net_1_am_sso_config.json'
+import badgesSpeficication from './static/mobileproxy.passport.yandex.net_1_badges-specification.json'
 
 const logger = getLogger()
 
@@ -39,6 +42,15 @@ export function registerMobileproxyPassportYandexNetRouter (app: Application): v
       return
     }
     response.status(500).end()
+  })
+
+  router.post('/1/bundle/oauth/token_by_sessionid', (_request, response) => {
+    response.status(200).json({
+      access_token: `VAT.${randomBytes(32).toString('hex')}`,
+      expires_in: 365 * 10 * 24 * 60 * 60,
+      status: 'ok',
+      token_type: 'bearer'
+    })
   })
 
   router.get('/1/bundle/account/short_info', (_request, response) => {
@@ -92,6 +104,18 @@ export function registerMobileproxyPassportYandexNetRouter (app: Application): v
       x_token_issued_at: Math.round(Date.now() / 1000),
       xtoken_has_muid: true
     })
+  })
+
+  router.get('/1/am/sso/config.json', (_, response) => {
+    response.json(amSsoConfig)
+  })
+
+  router.get('/1/am/config.json', (_, response) => {
+    response.json(amConfig)
+  })
+
+  router.get('/1/badges-specification.json', (_, response) => {
+    response.json(badgesSpeficication)
   })
 
   app.use('/mobileproxy.passport.yandex.net', router)
