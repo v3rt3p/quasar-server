@@ -24,6 +24,10 @@ export class BasicMusicBackend extends MusicBackend {
       method: 'GET'
     })
 
+    if (response.status === 404) {
+      return null
+    }
+
     const body = await response.json()
 
     return musicTrack.parse(body)
@@ -33,6 +37,10 @@ export class BasicMusicBackend extends MusicBackend {
     const response = await fetch(`${this.baseUrl}/queue/${deviceId}/next`, {
       method: 'GET'
     })
+
+    if (response.status === 404) {
+      return null
+    }
 
     const body = await response.json()
 

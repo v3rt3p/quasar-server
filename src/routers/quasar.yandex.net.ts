@@ -1,5 +1,6 @@
 import { Application, Router } from 'express'
 import { jwtVerify, SignJWT } from 'jose'
+import { randomBytes } from 'node:crypto'
 
 import { getLogger } from '../logger'
 import { StationInfo, StationInfoProvider } from '../storage/types'
@@ -102,7 +103,11 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
   })
 
   router.post('/push_subscribe', (_request, response) => {
-    response.status(500).end()
+    response.status(200).json({
+      sign: randomBytes(16).toString('hex'),
+      status: 'ok',
+      ts: Math.round(Date.now() / 1000)
+    })
   })
 
   router.post('/register', (request, response) => {
