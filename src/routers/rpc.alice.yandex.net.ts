@@ -3,15 +3,22 @@ import { Application, RequestHandler, Router } from 'express'
 import { randomUUID } from 'node:crypto'
 import { Writer } from 'protobufjs'
 
+import { toStringOrUndefined } from '../helpers'
 import { getLogger } from '../logger'
 import proto from '../protos/protos'
+import { StationInfoProvider } from '../storage/types'
 
 interface ProtoEncoderDecoder<T> {
   decode(data: Uint8Array): T
   encode(data: T): Writer
 }
 
-export function registerRpcAliceYandexNetRouter (app: Application): void {
+interface RpcAliceYandexNetRouterProperties {
+  infoProvider: StationInfoProvider
+}
+
+export function registerRpcAliceYandexNetRouter (app: Application,
+  properties: RpcAliceYandexNetRouterProperties): void {
   const router = Router()
 
   router.use(bodyParser.raw({
@@ -141,6 +148,43 @@ export function registerRpcAliceYandexNetRouter (app: Application): void {
     )
   )
 
+  router.post('/gproxy/get_screensaver_themes',
+    wrapProto(proto.NAlice.NTv.TGetScreensaverThemesRequest, proto.NAlice.NTv.TGetScreensaverThemesResponse,
+      async (deviceId, platform) => {
+        if (!deviceId || !platform) {
+          return {}
+        }
+
+        const info = await properties.infoProvider.getInfo(deviceId, platform)
+
+        return {
+          CurrentTheme: info.quasarConfig.gproxyRpcConfig.screensaver,
+          Themes: []
+        }
+      }
+    )
+  )
+
+  router.post('/gproxy/save_screensaver_theme',
+    wrapProto(proto.NAlice.NTv.TSaveScreensaverThemeRequest, proto.NAlice.NTv.TSaveScreensaverThemeResponse,
+      async (deviceId, platform, request) => {
+        if (!deviceId || !platform || !request.Id) {
+          return {}
+        }
+
+        await properties.infoProvider.updateNameAndQuasarConfig(deviceId, undefined, {
+          gproxyRpcConfig: {
+            screensaver: request.Id
+          }
+        })
+
+        return {
+          Success: {}
+        }
+      }
+    )
+  )
+
   app.use('/rpc.alice.yandex.net', router)
 }
 
@@ -148,7 +192,8 @@ const logger = getLogger()
 
 function wrapProto<TRequest, TResponse> (
   requestProto: ProtoEncoderDecoder<TRequest>, responseProto: ProtoEncoderDecoder<TResponse>,
-  handler: (deviceId: string, request: TRequest) => Promise<TResponse>): RequestHandler {
+  handler: (deviceId: string | undefined, platform: string | undefined,
+    request: TRequest) => Promise<TResponse>): RequestHandler {
   return (request, response) => {
     logger.debug(`Handling RPC request to ${request.path}`)
 
@@ -158,8 +203,9 @@ function wrapProto<TRequest, TResponse> (
       return
     }
 
-    const deviceId = String(request.headers['x-ya-device-id'] ?? 'unknown')
-    handler(deviceId, requestProto.decode(raw))
+    const deviceId = toStringOrUndefined(request.headers['x-ya-device-id'])
+    const platform = toStringOrUndefined(request.headers['x-ya-platform'])
+    handler(deviceId, platform, requestProto.decode(raw))
       .then(responseBody => {
         response.status(200).header({
           'content-type': 'application/x-protobuf'

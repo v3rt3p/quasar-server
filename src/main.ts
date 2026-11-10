@@ -95,7 +95,9 @@ registerOAuthYandexRuRouter(app)
 registerMobileproxyPassportYandexNetRouter(app)
 registerStartupMobileYandexNetRouter(app)
 registerScbhYandexNetRouter(app)
-registerRpcAliceYandexNetRouter(app)
+registerRpcAliceYandexNetRouter(app, {
+  infoProvider: storage
+})
 registerQuasarV3rt3pRouter(app)
 
 const server = app.listen(environment.PORT, error => {

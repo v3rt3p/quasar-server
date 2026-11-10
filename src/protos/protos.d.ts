@@ -55106,6 +55106,113 @@ export namespace NAlice {
             FMRADIOBLOCKOPTIONS = 9
         }
 
+        /** Namespace NScreensaver. */
+        namespace NScreensaver {
+
+            /** Properties of a TWidget. */
+            interface ITWidget {
+
+                /** TWidget Id */
+                Id?: (string|null);
+
+                /** Unknown fields preserved while decoding */
+                $unknowns?: Uint8Array[];
+            }
+
+            /** Represents a TWidget. */
+            class TWidget implements ITWidget {
+
+                /**
+                 * Constructs a new TWidget.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: NAlice.NData.NScreensaver.ITWidget);
+
+                /** Unknown fields preserved while decoding */
+                public $unknowns?: Uint8Array[];
+
+                /** TWidget Id. */
+                public Id: string;
+
+                /**
+                 * Creates a new TWidget instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns TWidget instance
+                 */
+                public static create(properties?: NAlice.NData.NScreensaver.ITWidget): NAlice.NData.NScreensaver.TWidget;
+
+                /**
+                 * Encodes the specified TWidget message. Does not implicitly {@link NAlice.NData.NScreensaver.TWidget.verify|verify} messages.
+                 * @param message TWidget message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: NAlice.NData.NScreensaver.ITWidget, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified TWidget message, length delimited. Does not implicitly {@link NAlice.NData.NScreensaver.TWidget.verify|verify} messages.
+                 * @param message TWidget message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: NAlice.NData.NScreensaver.ITWidget, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a TWidget message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns TWidget
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): NAlice.NData.NScreensaver.TWidget;
+
+                /**
+                 * Decodes a TWidget message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns TWidget
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): NAlice.NData.NScreensaver.TWidget;
+
+                /**
+                 * Verifies a TWidget message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a TWidget message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns TWidget
+                 */
+                public static fromObject(object: { [k: string]: any }): NAlice.NData.NScreensaver.TWidget;
+
+                /**
+                 * Creates a plain object from a TWidget message. Also converts values to other types if specified.
+                 * @param message TWidget
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: NAlice.NData.NScreensaver.TWidget, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this TWidget to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the type url for TWidget
+                 * @param [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                 * @returns The type url
+                 */
+                public static getTypeUrl(prefix?: string): string;
+            }
+        }
+
         /** Properties of a TMementoConfig. */
         interface ITMementoConfig {
 
@@ -207638,7 +207745,7 @@ export namespace NAlice {
             NewHighlights?: (NAlice.NTv.TGetScreensaverThemesResponse.ITNewHighlight[]|null);
 
             /** TGetScreensaverThemesResponse Widgets */
-            Widgets?: (NAlice.TWidgetStackCapability.ITWidget[]|null);
+            Widgets?: (NAlice.NData.NScreensaver.ITWidget[]|null);
 
             /** Unknown fields preserved while decoding */
             $unknowns?: Uint8Array[];
@@ -207666,7 +207773,7 @@ export namespace NAlice {
             public NewHighlights: NAlice.NTv.TGetScreensaverThemesResponse.ITNewHighlight[];
 
             /** TGetScreensaverThemesResponse Widgets. */
-            public Widgets: NAlice.TWidgetStackCapability.ITWidget[];
+            public Widgets: NAlice.NData.NScreensaver.ITWidget[];
 
             /**
              * Creates a new TGetScreensaverThemesResponse instance using the specified properties.
@@ -207821,6 +207928,9 @@ export namespace NAlice {
                 /** TThemeWrapper SelectedImagePreview. */
                 public SelectedImagePreview?: (NAlice.NTv.TGetScreensaverThemesResponse.TThemeWrapper.ITSingleImage|null);
 
+                /** TThemeWrapper PreviewType. */
+                public PreviewType?: "SingleImagePreview";
+
                 /**
                  * Creates a new TThemeWrapper instance using the specified properties.
                  * @param [properties] Properties to set
@@ -207905,7 +208015,7 @@ export namespace NAlice {
                 interface ITSingleImage {
 
                     /** TSingleImage Image */
-                    Image?: (NAlice.NData.TSingleImage.ITImageRef|null);
+                    Image?: (NAlice.ITAvatarMdsImage|null);
 
                     /** Unknown fields preserved while decoding */
                     $unknowns?: Uint8Array[];
@@ -207924,7 +208034,7 @@ export namespace NAlice {
                     public $unknowns?: Uint8Array[];
 
                     /** TSingleImage Image. */
-                    public Image?: (NAlice.NData.TSingleImage.ITImageRef|null);
+                    public Image?: (NAlice.ITAvatarMdsImage|null);
 
                     /**
                      * Creates a new TSingleImage instance using the specified properties.
@@ -208009,7 +208119,7 @@ export namespace NAlice {
             interface ITNewHighlight {
 
                 /** TNewHighlight Theme */
-                Theme?: (NAlice.NAliceApi.TTextWithButtonsCard.TButton.ITTheme|null);
+                Theme?: (NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme|null);
 
                 /** Unknown fields preserved while decoding */
                 $unknowns?: Uint8Array[];
@@ -208028,7 +208138,10 @@ export namespace NAlice {
                 public $unknowns?: Uint8Array[];
 
                 /** TNewHighlight Theme. */
-                public Theme?: (NAlice.NAliceApi.TTextWithButtonsCard.TButton.ITTheme|null);
+                public Theme?: (NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme|null);
+
+                /** TNewHighlight TNewHighlightType. */
+                public TNewHighlightType?: "Theme";
 
                 /**
                  * Creates a new TNewHighlight instance using the specified properties.
@@ -208106,6 +208219,118 @@ export namespace NAlice {
                  * @returns The type url
                  */
                 public static getTypeUrl(prefix?: string): string;
+            }
+
+            namespace TNewHighlight {
+
+                /** Properties of a TTheme. */
+                interface ITTheme {
+
+                    /** TTheme Id */
+                    Id?: (string|null);
+
+                    /** TTheme HighlightDescription */
+                    HighlightDescription?: (string|null);
+
+                    /** Unknown fields preserved while decoding */
+                    $unknowns?: Uint8Array[];
+                }
+
+                /** Represents a TTheme. */
+                class TTheme implements ITTheme {
+
+                    /**
+                     * Constructs a new TTheme.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme);
+
+                    /** Unknown fields preserved while decoding */
+                    public $unknowns?: Uint8Array[];
+
+                    /** TTheme Id. */
+                    public Id: string;
+
+                    /** TTheme HighlightDescription. */
+                    public HighlightDescription: string;
+
+                    /**
+                     * Creates a new TTheme instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns TTheme instance
+                     */
+                    public static create(properties?: NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme): NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme;
+
+                    /**
+                     * Encodes the specified TTheme message. Does not implicitly {@link NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme.verify|verify} messages.
+                     * @param message TTheme message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(message: NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Encodes the specified TTheme message, length delimited. Does not implicitly {@link NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme.verify|verify} messages.
+                     * @param message TTheme message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encodeDelimited(message: NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.ITTheme, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a TTheme message from the specified reader or buffer.
+                     * @param reader Reader or buffer to decode from
+                     * @param [length] Message length if known beforehand
+                     * @returns TTheme
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme;
+
+                    /**
+                     * Decodes a TTheme message from the specified reader or buffer, length delimited.
+                     * @param reader Reader or buffer to decode from
+                     * @returns TTheme
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme;
+
+                    /**
+                     * Verifies a TTheme message.
+                     * @param message Plain object to verify
+                     * @returns `null` if valid, otherwise the reason why it is not
+                     */
+                    public static verify(message: { [k: string]: any }): (string|null);
+
+                    /**
+                     * Creates a TTheme message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns TTheme
+                     */
+                    public static fromObject(object: { [k: string]: any }): NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme;
+
+                    /**
+                     * Creates a plain object from a TTheme message. Also converts values to other types if specified.
+                     * @param message TTheme
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: NAlice.NTv.TGetScreensaverThemesResponse.TNewHighlight.TTheme, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this TTheme to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the type url for TTheme
+                     * @param [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                     * @returns The type url
+                     */
+                    public static getTypeUrl(prefix?: string): string;
+                }
             }
         }
 

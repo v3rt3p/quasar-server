@@ -1,5 +1,7 @@
 import z from 'zod'
 
+import { QuasarConfigPatch } from './config-patch'
+
 const NO_DEFAULT = Symbol('NO_DEFAULT')
 type NoDefault = typeof NO_DEFAULT
 
@@ -104,6 +106,9 @@ const rawQuasarConfig = z.object({
       role: z.union([z.literal('follower'), z.literal('leader')]).describe('Role for this speaker: follower only plays music, leader listens to user requests')
     }).optional().describe('Config for stereopair'),
     tvBeta: z.boolean().default(false)
+  }),
+  gproxyRpcConfig: z.object({
+    screensaver: z.string().optional()
   }),
   systemConfig: z.object({
     adbd: z.object({
@@ -5043,5 +5048,7 @@ export interface StationInfoProvider {
   getInfo(duid: string, platform: string): Promise<StationInfo>
   getStationInfos(): Promise<StationInfo[]>
 
+  updateNameAndQuasarConfig (duid: string, name: string | undefined,
+    config: QuasarConfigPatch | undefined): Promise<StationInfo>
   updateNetworkInfo(duid: string, platform: string, networkInfo: unknown): Promise<StationInfo>
 }
