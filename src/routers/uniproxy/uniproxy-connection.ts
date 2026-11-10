@@ -63,6 +63,8 @@ export class UniProxyConnection {
   private readonly logger = getLogger<UniProxyConnection>()
   private readonly sendLock = new Sema(1)
 
+  private readonly sessionId = randomUUID()
+
   private voiceInputHandler: VoiceInputHandler
 
   private voiceInputReferenceMessageId: string = ''
@@ -310,6 +312,12 @@ export class UniProxyConnection {
       if (clientMessage.Event.SyncPushResponse) {
         await this.handleSyncPushResponseEvent(clientMessage)
       }
+      if (clientMessage.Event.SynchronizeStateRequest) {
+        await this.handleSynchronizeStateRequestEvent(clientMessage)
+      }
+      if (clientMessage.Event.RequestStat) {
+        await this.handleRequestStatEvent(clientMessage)
+      }
     }
   }
 
@@ -377,6 +385,21 @@ export class UniProxyConnection {
     await (isBinary ? this.handleBinaryMessage(simplifiedMessage) : this.handleTextMessage(simplifiedMessage.toString('utf8')))
   }
 
+  private async handleRequestStatEvent (clientMessage: TClientMessage): Promise<void> {
+    const referenceMessageId = clientMessage.Event?.Header?.MessageId ?? randomUUID()
+
+    await this.sendServerMessage({
+      Event: {
+        Header: {
+          MessageId: randomUUID(),
+          RefMessageId: referenceMessageId
+        },
+        RequestStatAck: {}
+      },
+      Timings: this.getTimings()
+    })
+  }
+
   private handleServerCancel (): void {
     this.inputHandler.closeSession()
     this.voiceInputHandler.handleVoiceInputCancelEvent({})
@@ -414,6 +437,23 @@ export class UniProxyConnection {
         break
       }
     }
+  }
+
+  private async handleSynchronizeStateRequestEvent (clientMessage: TClientMessage): Promise<void> {
+    const referenceMessageId = clientMessage.Event?.Header?.MessageId ?? randomUUID()
+
+    await this.sendServerMessage({
+      Event: {
+        Header: {
+          MessageId: randomUUID(),
+          RefMessageId: referenceMessageId
+        },
+        SynchronizeStateResponse: {
+          SessionId: this.sessionId
+        }
+      },
+      Timings: this.getTimings()
+    })
   }
 
   private async handleSyncPushResponseEvent (clientMessage: TClientMessage): Promise<void> {

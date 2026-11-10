@@ -1,3 +1,6 @@
 [submodule "protos"]
 	path = protos
 	url = https://github.com/v3rt3p/quasar-protos.git
+[submodule "brand-kit"]
+	path = brand-kit
+	url = git@github.com:v3rt3p/brand-kit

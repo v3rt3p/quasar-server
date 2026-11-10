@@ -22,6 +22,7 @@ import { DirectiveFunctions, pushUpdateConfigDirective, setTimezoneDirective, Wr
 import { registerClckYandexNetRouter } from './routers/clck.yandex.net'
 import { registerMobileproxyPassportYandexNetRouter } from './routers/mobileproxy.passport.yandex.net'
 import { registerOAuthYandexRuRouter } from './routers/oauth.yandex.ru'
+import { registerQuasarV3rt3pRouter } from './routers/quasar.v3rt3p'
 import { registerQuasarYandexNetRouter } from './routers/quasar.yandex.net'
 import { registerReportAppMetricaYandexNetRouter } from './routers/report.appmetrica.yandex.net'
 import { registerRpcAliceYandexNetRouter } from './routers/rpc.alice.yandex.net'
@@ -95,6 +96,7 @@ registerMobileproxyPassportYandexNetRouter(app)
 registerStartupMobileYandexNetRouter(app)
 registerScbhYandexNetRouter(app)
 registerRpcAliceYandexNetRouter(app)
+registerQuasarV3rt3pRouter(app)
 
 const server = app.listen(environment.PORT, error => {
   if (error) {

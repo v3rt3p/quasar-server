@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser'
 import { Application, RequestHandler, Router } from 'express'
+import { randomUUID } from 'node:crypto'
 import { Writer } from 'protobufjs'
 
 import { getLogger } from '../logger'
@@ -35,18 +36,57 @@ export function registerRpcAliceYandexNetRouter (app: Application): void {
     )
   )
 
+  const cardJson = {
+    card: {
+      log_id: 'v3rt3p_promoblock_' + randomUUID(),
+      states: [{
+        div: {
+          alignment_horizontal: 'center',
+          alignment_vertical: 'center',
+          background: [{ color: '#000000', type: 'solid' }],
+          height: { type: 'match_parent' },
+          items: [{
+            alignment_horizontal: 'center',
+            alignment_vertical: 'center',
+            height: { type: 'fixed', value: 1000 },
+            image_url: 'https://quasar.v3rt3p/logo.png',
+            scale: 'fit',
+            type: 'image',
+            width: { type: 'fixed', value: 250 }
+          }],
+          orientation: 'overlap',
+          type: 'container',
+          width: { type: 'match_parent' }
+        },
+        state_id: 0
+      }]
+    },
+    templates: {}
+  }
+
+  router.post('/gproxy/get_gallery',
+    wrapProto(proto.NAlice.NTv.TGetGalleryRequest, proto.NAlice.NTv.TTvCarouselResultData,
+      async () => ({})
+    )
+  )
+
   router.post('/gproxy/get_galleries',
     wrapProto(proto.NAlice.NTv.TGetGalleriesRequest, proto.NAlice.NTv.TTvFeedResultData,
       async () => ({
-        Carousels: [
-          {
-            HomeCarousel: {
-              Id: 'promoblock',
-              Items: [],
-              Title: 'v3rt3p'
-            }
+        Carousels: [{
+          DivCarousel: {
+            DivCardJson: {
+              StringBody: JSON.stringify(cardJson)
+            },
+            ElementsCount: 1,
+            Id: 'promoblock',
+            Title: 'v3rt3p'
           }
-        ]
+        }],
+        TtlInfo: {
+          HasTtl: true,
+          TtlMillis: 5000
+        }
       })
     )
   )
@@ -98,6 +138,8 @@ function wrapProto<TRequest, TResponse> (
   requestProto: ProtoEncoderDecoder<TRequest>, responseProto: ProtoEncoderDecoder<TResponse>,
   handler: (deviceId: string, request: TRequest) => Promise<TResponse>): RequestHandler {
   return (request, response) => {
+    logger.debug(`Handling RPC request to ${request.path}`)
+
     const raw = request.body
     if (!raw) {
       response.status(400).end()
