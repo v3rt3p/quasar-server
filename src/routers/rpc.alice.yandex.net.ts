@@ -129,6 +129,18 @@ export function registerRpcAliceYandexNetRouter (app: Application): void {
     )
   )
 
+  router.post('/gproxy/get_auth_suggests',
+    wrapProto(proto.NAlice.TGetAuthSuggestsRequest, proto.NAlice.TGetAuthSuggestsResponse,
+      async () => ({})
+    )
+  )
+
+  router.post('/gproxy/get_screen_hints_v2',
+    wrapProto(proto.NAlice.NTv.TGetScreenHintsV2Request, proto.NAlice.NTv.TGetScreenHintsV2Response,
+      async () => ({})
+    )
+  )
+
   app.use('/rpc.alice.yandex.net', router)
 }
 
