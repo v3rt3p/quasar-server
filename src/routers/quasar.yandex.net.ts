@@ -124,6 +124,25 @@ export function registerQuasarYandexNetRouter (app: Application, properties: Qua
     })
   })
 
+  router.get('/tv/api/v4/settings', async (request, response) => {
+    logger.debug(`Requested TV settings v4: ${JSON.stringify(request.query)}`)
+
+    try {
+      const duid = String(request.query['device_id'])
+      if (!duid) {
+        throw new Error('No device_id present in query')
+      }
+      const platform = String(request.query['platform']) ?? 'unknown'
+
+      const info = await properties.infoProvider.getInfo(duid, platform)
+
+      response.status(200).json(mapStationInfoToTvSettingsResponseConfig(info))
+    } catch (error) {
+      logger.error(`Error on GET /tv/api/v4/settings: ${error}`)
+      response.status(500).end()
+    }
+  })
+
   router.post('/update_device_state', async (request, response) => {
     try {
       const duid = String(request.query['device_id'])
@@ -3155,5 +3174,64 @@ function mapStationInfoToStationSyncInfoResponseConfig (info: StationInfo): unkn
         }
       }
     }
+  }
+}
+
+function mapStationInfoToTvSettingsResponseConfig (info: StationInfo): unknown {
+  const tv = info.quasarConfig.tvConfig
+  const system = info.quasarConfig.systemConfig
+
+  return {
+    allowFirmwareUpdate: {
+      ota: tv.allowFirmwareUpdate.ota
+    },
+    allowFirmwareUpdateV2: {
+      ota: tv.allowFirmwareUpdateV2.ota
+    },
+    apkSilentInstallV2: {
+      enabled: tv.apkSilentInstallV2.enabled,
+      strategy: tv.apkSilentInstallV2.strategy
+    },
+    appmetrikaReportEnvironment: {
+      quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
+      quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
+      test_buckets: system.analyticsEnvironment.testBuckets,
+      testids: system.analyticsEnvironment.testids
+    },
+    appsToDeleteEnabled: tv.appsToDeleteEnabled,
+    autoCheckEnabled: tv.autoCheckEnabled,
+    clearCachePartitionOnOtaUpdate: tv.clearCachePartitionOnOtaUpdate,
+    commitFirmwarePreferencesEnabled: tv.commitFirmwarePreferencesEnabled,
+    confirmFirmwareUpdate: {
+      ota: tv.confirmFirmwareUpdate.ota
+    },
+    confirmFirmwareUpdateV2: {
+      ota: tv.confirmFirmwareUpdateV2.ota,
+      retryPeriodSeconds: tv.confirmFirmwareUpdateV2.retryPeriodSeconds,
+      triggerFromBoot: tv.confirmFirmwareUpdateV2.triggerFromBoot,
+      useService: tv.confirmFirmwareUpdateV2.useService
+    },
+    createOtaSessionIdWithRetriesEnabled: tv.createOtaSessionIdWithRetriesEnabled,
+    fakeStandbySilentOtaPropertyActionV2: tv.fakeStandbySilentOtaPropertyActionV2,
+    forceUiAfterDownload: tv.forceUiAfterDownload,
+    otaSilentInstallV2: {
+      enabled: tv.otaSilentInstallV2.enabled,
+      strategy: tv.otaSilentInstallV2.strategy
+    },
+    quasmodrom_group: system.analyticsEnvironment.quasmodromGroup,
+    quasmodrom_subgroup: system.analyticsEnvironment.quasmodromSubgroup,
+    resumeDownloadAfterHide: tv.resumeDownloadAfterHide,
+    scheduleForcedSilentIfAllowedEnabled: tv.scheduleForcedSilentIfAllowedEnabled,
+    suwUpdateStrategy: tv.suwUpdateStrategy,
+    sysRecoverySilentInstallV2: {
+      enabled: tv.sysRecoverySilentInstallV2.enabled,
+      strategy: tv.sysRecoverySilentInstallV2.strategy
+    },
+    sysRecoveryUpdatesEnabled: tv.sysRecoveryUpdatesEnabled,
+    updateFrequencyMin: tv.updateFrequencyMin,
+    updateHomeInterruptFsbOffThrottleHours: tv.updateHomeInterruptFsbOffThrottleHours,
+    updateInterruptStrategy: tv.updateInterruptStrategy,
+    updatesV4Api: tv.updatesV4Api,
+    voiceButtonsEnabled: tv.voiceButtonsEnabled
   }
 }

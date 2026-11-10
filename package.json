@@ -50,6 +50,7 @@
   "devDependencies": {
     "@bufbuild/buf": "^1.69.0",
     "protobufjs-cli": "^2.2.0",
-    "protoc": "^25.9.0"
+    "protoc": "^25.9.0",
+    "terser": "^5.51.2"
   }
 }

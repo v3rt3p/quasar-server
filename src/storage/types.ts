@@ -4902,6 +4902,51 @@ const rawQuasarConfig = z.object({
   timezone: z.object({
     name: z.string().default(Intl.DateTimeFormat().resolvedOptions().timeZone),
     offsetSeconds: z.number().default(new Date().getTimezoneOffset() * -60)
+  }),
+  tvConfig: z.object({
+    allowFirmwareUpdate: z.object({
+      ota: z.boolean().default(true)
+    }),
+    allowFirmwareUpdateV2: z.object({
+      ota: z.boolean().default(true)
+    }),
+    apkSilentInstallV2: z.object({
+      enabled: z.boolean().default(true),
+      strategy: z.string().default('night_fake_standby')
+    }),
+    appsToDeleteEnabled: z.boolean().default(true),
+    autoCheckEnabled: z.boolean().default(true),
+    clearCachePartitionOnOtaUpdate: z.boolean().default(true),
+    commitFirmwarePreferencesEnabled: z.boolean().default(true),
+    confirmFirmwareUpdate: z.object({
+      ota: z.boolean().default(true)
+    }),
+    confirmFirmwareUpdateV2: z.object({
+      ota: z.boolean().default(true),
+      retryPeriodSeconds: z.number().default(180),
+      triggerFromBoot: z.boolean().default(true),
+      useService: z.boolean().default(true)
+    }),
+    createOtaSessionIdWithRetriesEnabled: z.boolean().default(true),
+    fakeStandbySilentOtaPropertyActionV2: z.string().default('force_true'),
+    forceUiAfterDownload: z.boolean().default(true),
+    otaSilentInstallV2: z.object({
+      enabled: z.boolean().default(true),
+      strategy: z.string().default('night_fake_standby')
+    }),
+    resumeDownloadAfterHide: z.boolean().default(true),
+    scheduleForcedSilentIfAllowedEnabled: z.boolean().default(false),
+    suwUpdateStrategy: z.string().default('only_rom'),
+    sysRecoverySilentInstallV2: z.object({
+      enabled: z.boolean().default(true),
+      strategy: z.string().default('night_fake_standby')
+    }),
+    sysRecoveryUpdatesEnabled: z.boolean().default(true),
+    updateFrequencyMin: z.number().default(180),
+    updateHomeInterruptFsbOffThrottleHours: z.number().default(1),
+    updateInterruptStrategy: z.string().default('only_home_non_fsb'),
+    updatesV4Api: z.boolean().default(true),
+    voiceButtonsEnabled: z.boolean().default(true)
   })
 })
 
