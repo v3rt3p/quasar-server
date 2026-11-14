@@ -1,6 +1,7 @@
 import { MusicTrack } from '@v3rt3p/types/music'
 import z from 'zod'
 
+import { getBlurredUrl } from '../../helpers'
 import { getLogger } from '../../logger'
 import { encodeProtobufStruct } from '../../protobuf'
 import proto from '../../protos/protos'
@@ -149,6 +150,7 @@ export const setAudioPlayerSequenceStateDirective = (track: MusicTrack) => ({
           ProviderAlbumMeta: {
             MUSIC_PROVIDER_YANDEX_MUSIC: {
               AlbumMeta: Object.fromEntries(track.albums.map(album => ([album.id, {
+                backgroundImageUrl: getBlurredUrl(album.imageUrl),
                 id: album.id,
                 imageUrl: album.imageUrl,
                 title: album.name,
@@ -174,6 +176,7 @@ export const setAudioPlayerSequenceStateDirective = (track: MusicTrack) => ({
                   artistRelations: track.artists.map(artist => ({
                     id: artist.id
                   })),
+                  backgroundImageUrl: getBlurredUrl(track.imageUrl),
                   id: track.id,
                   imageUrl: track.imageUrl,
                   title: track.title

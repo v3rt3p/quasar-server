@@ -41,6 +41,7 @@
     "pg": "^8.20.0",
     "protobufjs": "^8.2.0",
     "quasar-server": "link:",
+    "sharp": "^0.35.5",
     "tslog": "^4.10.2",
     "tsx": "^4.21.0",
     "typeorm": "^0.3.29",

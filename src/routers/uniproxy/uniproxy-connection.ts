@@ -679,6 +679,13 @@ export class UniProxyConnection {
                     },
                     metadata
                   }
+                } else if (data.Command?.MusicPlay) {
+                  textInput = {
+                    data: {
+                      kind: 'playButtonPressPlay'
+                    },
+                    metadata
+                  }
                 } else {
                   this.logger.info(`Received unknown TMusicTouchTypedCallback TextInput typed callback: ${JSON.stringify(data)} ${JSON.stringify(event)}`)
                 }
