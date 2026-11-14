@@ -118,8 +118,8 @@ const rawQuasarConfig = z.object({
     addAllEmbeddedEndpoints: z.boolean().default(true),
     alarmd: z.object({
       disableTimerAfterFire: z.boolean().default(true),
-      separatedDefaultSound: z.boolean().default(true),
-      timerSoundFilename: z.string().default('newTimer')
+      separatedDefaultSound: z.boolean().optional(),
+      timerSoundFilename: z.string().optional()
     }),
     aliced: z.object({
       aliceStreamingV2: z.object({
