@@ -10,7 +10,7 @@ import { decodeProtobufStruct, getValue } from '../../protobuf'
 import proto from '../../protos/protos'
 import { StationInfoProvider } from '../../storage/types'
 import { getDirectiveFunctionProvider } from '../alice/base-provider'
-import { audioPlayDirective, DirectiveFunctionProvider, mmSemanticFrame, RawDirective, setLocationDirective, setTimezoneDirective, stackRecoverNextTrackDirective, WrappedDirective } from '../alice/directives'
+import { applyPlayerPlaybackQueueDirective, audioPlayDirective, DirectiveFunctionProvider, mmSemanticFrame, RawDirective, setAudioPlayerSequenceStateDirective, setLocationDirective, setTimezoneDirective, stackRecoverNextTrackDirective, WrappedDirective } from '../alice/directives'
 import { continueSessionStage2SemanticFrame, ttsSemanticFrame } from '../alice/typed-payloads'
 import { AlarmMetadata, InputHandler, InputMetadata, InputResult, TextInput, TimerMetadata } from './input-handler'
 import { VoiceInputHandler } from './voice-input-handler'
@@ -159,17 +159,27 @@ export class UniProxyConnection {
             await this.parameters.musicManager.advanceQueueForward(this.deviceId)
             const track = await this.parameters.musicManager.getCurrentTrack(this.deviceId)
             if (track) {
-              rawDirectives.push(audioPlayDirective(track).quasarDirective,
-                stackRecoverNextTrackDirective.quasarDirective)
+              rawDirectives.push(
+                applyPlayerPlaybackQueueDirective.quasarDirective,
+                setAudioPlayerSequenceStateDirective(track).quasarDirective,
+                audioPlayDirective(track).quasarDirective,
+                stackRecoverNextTrackDirective.quasarDirective
+              )
             }
             break
           }
           case 'music_play': {
             const track = await this.parameters.musicManager.getCurrentTrack(this.deviceId)
             if (track) {
-              rawDirectives.push(audioPlayDirective(track,
-                this.parameters.musicManager.getLastSavedPosition(this.deviceId)).quasarDirective,
-              stackRecoverNextTrackDirective.quasarDirective)
+              const lastSavedPosition =
+                  this.parameters.musicManager.getLastSavedPosition(this.deviceId)
+              const position = lastSavedPosition?.trackId === track.id ? lastSavedPosition.position : undefined
+              rawDirectives.push(
+                applyPlayerPlaybackQueueDirective.quasarDirective,
+                setAudioPlayerSequenceStateDirective(track).quasarDirective,
+                audioPlayDirective(track, position).quasarDirective,
+                stackRecoverNextTrackDirective.quasarDirective
+              )
             }
             break
           }
@@ -177,8 +187,12 @@ export class UniProxyConnection {
             await this.parameters.musicManager.advanceQueueBackward(this.deviceId)
             const track = await this.parameters.musicManager.getCurrentTrack(this.deviceId)
             if (track) {
-              rawDirectives.push(audioPlayDirective(track).quasarDirective,
-                stackRecoverNextTrackDirective.quasarDirective)
+              rawDirectives.push(
+                applyPlayerPlaybackQueueDirective.quasarDirective,
+                setAudioPlayerSequenceStateDirective(track).quasarDirective,
+                audioPlayDirective(track).quasarDirective,
+                stackRecoverNextTrackDirective.quasarDirective
+              )
             }
             break
           }
@@ -190,15 +204,23 @@ export class UniProxyConnection {
           case 'music_recover_next_track': {
             const recover = await this.parameters.musicManager.getNextTrack(this.deviceId)
             if (recover) {
-              rawDirectives.push(audioPlayDirective(recover.track, 0, recover.recoverCommitToken).quasarDirective,
-                stackRecoverNextTrackDirective.quasarDirective)
+              rawDirectives.push(
+                applyPlayerPlaybackQueueDirective.quasarDirective,
+                setAudioPlayerSequenceStateDirective(recover.track).quasarDirective,
+                audioPlayDirective(recover.track, 0, recover.recoverCommitToken).quasarDirective,
+                stackRecoverNextTrackDirective.quasarDirective
+              )
             }
             break
           }
           case 'music_stop': {
             const position = metadata?.internal.deviceState?.AudioPlayer?.OffsetMs
-            if (position) {
-              this.parameters.musicManager.savePosition(this.deviceId, position)
+            const trackId = metadata?.internal.deviceState?.AudioPlayer?.CurrentlyPlaying?.StreamId
+            if (position && trackId) {
+              this.parameters.musicManager.savePosition(this.deviceId, {
+                position,
+                trackId
+              })
             }
             break
           }
@@ -648,6 +670,20 @@ export class UniProxyConnection {
                 }
                 break
               }
+              case 'type.googleapis.com/NAlice.TMusicTouchTypedCallback': {
+                const data = proto.NAlice.TMusicTouchTypedCallback.decode(decodedSerialized.value!)
+                if (data.Command?.Continue) {
+                  textInput = {
+                    data: {
+                      kind: 'playButtonPressPlay'
+                    },
+                    metadata
+                  }
+                } else {
+                  this.logger.info(`Received unknown TMusicTouchTypedCallback TextInput typed callback: ${JSON.stringify(data)} ${JSON.stringify(event)}`)
+                }
+                break
+              }
               default: {
                 this.logger.info(`Received unknown serialized TextInput typed callback: ${JSON.stringify(event)}`)
               }
@@ -672,6 +708,26 @@ export class UniProxyConnection {
               }
             } else {
               this.logger.info(`Received unknown TextInput music thin client on started: ${JSON.stringify(event)}`)
+            }
+            break
+          }
+          case 'music_thin_client_on_stopped': {
+            if (event.PayloadRaw) {
+              this.logger.info(`Received unknown TextInput music thin client on stopped with raw payload: ${JSON.stringify(event)}`)
+            } else if (event.Payload) {
+              const payload = decodeProtobufStruct(event.Payload)
+              if (getValue(payload, 'string', 'music', 'type') === 'stopped') {
+                textInput = {
+                  data: {
+                    kind: 'musicStopped'
+                  },
+                  metadata
+                }
+              } else {
+                this.logger.info(`Received unknown TextInput music thin client on stopped with payload: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+              }
+            } else {
+              this.logger.info(`Received unknown TextInput music thin client on stopped: ${JSON.stringify(event)}`)
             }
             break
           }

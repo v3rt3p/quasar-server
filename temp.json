@@ -1,0 +1,1377 @@
+{
+    "SequenceState": {
+        "CurrentItem": {
+            "Recommendations": {
+                "Id": "genre:hardrock",
+                "Uuid": "genre:hardrock",
+                "Queue": {
+                    "CurrentTrack": {
+                        "Id": "40464",
+                        "Uuid": "40464",
+                        "LikeStatus": "LIKE_STATUS_NONE",
+                        "RepeatType": "REPEAT_TYPE_NONE",
+                        "HasAvailableLyrics": true,
+                        "TrackParameters": {
+                            "Bpm": 149,
+                            "Hue": 3,
+                            "Energy": 0.989452064037323,
+                            "UserCollectionHue": 73
+                        },
+                        "DerivedColors": {
+                            "Accent": "#5682db",
+                            "Average": "#244993",
+                            "MiniPlayer": "#89a8e6",
+                            "WaveText": "#c1d6ff"
+                        }
+                    },
+                    "TracksBefore": [
+                        {}
+                    ]
+                }
+            }
+        },
+        "MetaStorage": {
+            "ProviderAlbumMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {
+                    "AlbumMeta": {
+                        "2386408": {
+                            "id": "2386408",
+                            "title": "Velvet Mustache",
+                            "artistIds": [
+                                "3290099"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/49707/e44ffc4b.a.2386408-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/49707/e44ffc4b.a.2386408-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3290099"
+                                }
+                            ]
+                        },
+                        "2849406": {
+                            "id": "2849406",
+                            "title": "Ностальгия",
+                            "artistIds": [
+                                "41134"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/17655650/39dc32dc.a.2849406-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/17655650/39dc32dc.a.2849406-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "41134"
+                                }
+                            ],
+                            "disclaimers": [
+                                {
+                                    "type": "descriptionText",
+                                    "title": "Возрастное ограничение 18+"
+                                }
+                            ]
+                        },
+                        "4965251": {
+                            "id": "4965251",
+                            "title": "Hysteria",
+                            "artistIds": [
+                                "30104"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/139444/e82b50e6.a.4965251-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/139444/e82b50e6.a.4965251-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "30104"
+                                }
+                            ],
+                            "disclaimers": [
+                                {
+                                    "type": "descriptionText",
+                                    "title": "Возрастное ограничение 18+"
+                                }
+                            ]
+                        },
+                        "4965537": {
+                            "id": "4965537",
+                            "title": "Twisted Love",
+                            "artistIds": [
+                                "3449542"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/97284/7fb36c2c.a.4965537-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/97284/7fb36c2c.a.4965537-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3449542"
+                                }
+                            ],
+                            "disclaimers": [
+                                {
+                                    "type": "descriptionText",
+                                    "title": "Возрастное ограничение 18+"
+                                }
+                            ]
+                        },
+                        "5803152": {
+                            "id": "5803152",
+                            "title": "In the Army Now",
+                            "artistIds": [
+                                "9"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/149669/1c06a6dd.a.5803152-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/149669/1c06a6dd.a.5803152-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "9"
+                                }
+                            ]
+                        },
+                        "5847385": {
+                            "id": "5847385",
+                            "title": "I Was Laid-Back A Sinner Of Sorts EP",
+                            "artistIds": [
+                                "3352966"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/108289/b5a3022f.a.5847385-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/108289/b5a3022f.a.5847385-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3352966"
+                                }
+                            ]
+                        },
+                        "12570454": {
+                            "id": "12570454",
+                            "title": "Новый мир",
+                            "artistIds": [
+                                "8796692"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/3226792/0b79f066.a.12570454-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/3226792/0b79f066.a.12570454-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "8796692"
+                                }
+                            ]
+                        },
+                        "16550083": {
+                            "id": "16550083",
+                            "title": "Guilt Denied EP",
+                            "artistIds": [
+                                "8065432",
+                                "12368042"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "8065432"
+                                },
+                                {
+                                    "id": "12368042"
+                                }
+                            ]
+                        },
+                        "42932761": {
+                            "id": "42932761",
+                            "title": "Dcore",
+                            "artistIds": [
+                                "20595524"
+                            ],
+                            "imageUrl": "avatars.yandex.net/get-music-content/18172800/e52773ba.a.42932761-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/18172800/e52773ba.a.42932761-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "20595524"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "ProviderArtistMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {
+                    "ArtistMeta": {
+                        "9": {
+                            "id": "9",
+                            "name": "Status Quo",
+                            "imageUrl": "avatars.yandex.net/get-music-content/149669/759c95db.p.9/%%"
+                        },
+                        "30104": {
+                            "id": "30104",
+                            "name": "Def Leppard",
+                            "imageUrl": "avatars.yandex.net/get-music-content/192707/16a94efb.p.30104/%%"
+                        },
+                        "41134": {
+                            "id": "41134",
+                            "name": "Агата Кристи",
+                            "imageUrl": "avatars.yandex.net/get-music-content/14662984/d09f80f9.p.41134/%%"
+                        },
+                        "3290099": {
+                            "id": "3290099",
+                            "name": "White Apple Tree",
+                            "imageUrl": "avatars.yandex.net/get-music-content/49707/e44ffc4b.a.2386408-1/%%"
+                        },
+                        "3352966": {
+                            "id": "3352966",
+                            "name": "Under Black Helmet",
+                            "imageUrl": "avatars.yandex.net/get-music-content/108289/b5a3022f.a.5847385-1/%%"
+                        },
+                        "3449542": {
+                            "id": "3449542",
+                            "name": "Hallway Swimmers",
+                            "imageUrl": "avatars.yandex.net/get-music-content/97284/7fb36c2c.a.4965537-1/%%"
+                        },
+                        "8065432": {
+                            "id": "8065432",
+                            "name": "Blame The Mono",
+                            "imageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/%%"
+                        },
+                        "8796692": {
+                            "id": "8796692",
+                            "name": "TAPENIGHT",
+                            "imageUrl": "avatars.yandex.net/get-music-content/16154377/694a9b70.p.8796692/%%"
+                        },
+                        "12368042": {
+                            "id": "12368042",
+                            "name": "Seeklone",
+                            "imageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/%%"
+                        },
+                        "20595524": {
+                            "id": "20595524",
+                            "name": "Vione",
+                            "imageUrl": "avatars.yandex.net/get-music-content/14304155/568f28c5.p.20595524/%%"
+                        }
+                    }
+                }
+            },
+            "ProviderPlaylistMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {}
+            },
+            "ProviderTrackMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {
+                    "TrackMeta": {
+                        "40464": {
+                            "id": "40464",
+                            "albumId": "5803152",
+                            "artistIds": [
+                                "9"
+                            ],
+                            "title": "Red Sky",
+                            "imageUrl": "avatars.yandex.net/get-music-content/149669/1c06a6dd.a.5803152-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/149669/1c06a6dd.a.5803152-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "9"
+                                }
+                            ],
+                            "durationMs": 254220,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "20898481": {
+                            "id": "20898481",
+                            "albumId": "2386408",
+                            "artistIds": [
+                                "3290099"
+                            ],
+                            "title": "Broken Bones",
+                            "imageUrl": "avatars.yandex.net/get-music-content/49707/e44ffc4b.a.2386408-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/49707/e44ffc4b.a.2386408-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3290099"
+                                }
+                            ],
+                            "durationMs": 256100,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "24442524": {
+                            "id": "24442524",
+                            "albumId": "2849406",
+                            "artistIds": [
+                                "41134"
+                            ],
+                            "title": "Моряк",
+                            "imageUrl": "avatars.yandex.net/get-music-content/17655650/39dc32dc.a.2849406-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/17655650/39dc32dc.a.2849406-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "41134"
+                                }
+                            ],
+                            "durationMs": 215440,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "38708832": {
+                            "id": "38708832",
+                            "albumId": "4965251",
+                            "artistIds": [
+                                "30104"
+                            ],
+                            "title": "Women",
+                            "imageUrl": "avatars.yandex.net/get-music-content/139444/e82b50e6.a.4965251-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/139444/e82b50e6.a.4965251-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "30104"
+                                }
+                            ],
+                            "durationMs": 295470,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "38709940": {
+                            "id": "38709940",
+                            "albumId": "4965537",
+                            "artistIds": [
+                                "3449542"
+                            ],
+                            "title": "Forbidden Fruit",
+                            "imageUrl": "avatars.yandex.net/get-music-content/97284/7fb36c2c.a.4965537-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/97284/7fb36c2c.a.4965537-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3449542"
+                                }
+                            ],
+                            "durationMs": 235200,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "43820452": {
+                            "id": "43820452",
+                            "albumId": "5847385",
+                            "artistIds": [
+                                "3352966"
+                            ],
+                            "title": "Impulsive Behavior",
+                            "imageUrl": "avatars.yandex.net/get-music-content/108289/b5a3022f.a.5847385-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/108289/b5a3022f.a.5847385-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "3352966"
+                                }
+                            ],
+                            "durationMs": 379010,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "72818529": {
+                            "id": "72818529",
+                            "albumId": "12570454",
+                            "artistIds": [
+                                "8796692"
+                            ],
+                            "title": "Линии",
+                            "imageUrl": "avatars.yandex.net/get-music-content/3226792/0b79f066.a.12570454-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/3226792/0b79f066.a.12570454-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "8796692"
+                                }
+                            ],
+                            "durationMs": 355020,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "86230510": {
+                            "id": "86230510",
+                            "albumId": "16550083",
+                            "artistIds": [
+                                "8065432"
+                            ],
+                            "title": "Lucypher",
+                            "imageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "8065432"
+                                }
+                            ],
+                            "durationMs": 384330,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "86230511": {
+                            "id": "86230511",
+                            "albumId": "16550083",
+                            "artistIds": [
+                                "8065432",
+                                "12368042"
+                            ],
+                            "title": "Darvaza",
+                            "imageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/3927581/0e24c56c.a.16550083-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "8065432"
+                                },
+                                {
+                                    "id": "12368042"
+                                }
+                            ],
+                            "durationMs": 468570,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        },
+                        "153342742": {
+                            "id": "153342742",
+                            "albumId": "42932761",
+                            "artistIds": [
+                                "20595524"
+                            ],
+                            "title": "Dcore",
+                            "imageUrl": "avatars.yandex.net/get-music-content/18172800/e52773ba.a.42932761-1/%%",
+                            "backgroundImageUrl": "avatars.yandex.net/get-music-content/18172800/e52773ba.a.42932761-1/b%%",
+                            "artistRelations": [
+                                {
+                                    "id": "20595524"
+                                }
+                            ],
+                            "durationMs": 345230,
+                            "colors": {
+                                "MainColor": "#204898"
+                            }
+                        }
+                    }
+                }
+            },
+            "ProviderRecommendationsMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {
+                    "RecommendationsMeta": {
+                        "genre:hardrock": {
+                            "id": "genre:hardrock",
+                            "title": "Хард-рок"
+                        },
+                        "user:onyourwave": {
+                            "id": "user:onyourwave",
+                            "title": "Хард-рок"
+                        },
+                        "genre:allrock": {
+                            "id": "genre:allrock",
+                            "title": "Хард-рок"
+                        }
+                    }
+                }
+            },
+            "ProviderGenerativeMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {}
+            },
+            "ProviderFmRadioMeta": {
+                "MUSIC_PROVIDER_YANDEX_MUSIC": {}
+            }
+        },
+        "CallbacksStorage": {
+            "Callbacks": {
+                "40464": {
+                    "Like": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSFRITChEKDxINNDA0NjQ6NTgwMzE1Mg=="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Dislike": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSDRILGgkKBxIFNDA0NjQ="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnDislike": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSDRILIgkKBxIFNDA0NjQ="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnLike": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSDRILEgkKBxIFNDA0NjQ="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Next": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICQgA="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Previous": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICSgA="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "RepeatOne": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEKgIIAQ=="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "RepeatAll": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEKgIIAg=="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnRepeat": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICKgA="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Shuffle": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICMgA="
+                            }
+                        }
+                    },
+                    "UnShuffle": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICOgA="
+                            }
+                        }
+                    },
+                    "NextStopped": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEQgIIAQ=="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "PrevStopped": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIESgIIAQ=="
+                            }
+                        }
+                    },
+                    "GetLyrics": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICYgA="
+                            }
+                        }
+                    },
+                    "EnableKaraokeMode": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBRIDmgEA"
+                            }
+                        }
+                    },
+                    "DisableKaraokeMode": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBRIDogEA"
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "genre:hardrock": {
+                    "Like": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSGBIWChQKEggEEg5nZW5yZTpoYXJkcm9jaw=="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Dislike": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSKBImGiQKIggEEg5nZW5yZTpoYXJkcm9jaxoOZ2VucmU6aGFyZHJvY2s="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnDislike": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSKBImIiQKIggEEg5nZW5yZTpoYXJkcm9jaxoOZ2VucmU6aGFyZHJvY2s="
+                            }
+                        }
+                    },
+                    "UnLike": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSKBImEiQKIggEEg5nZW5yZTpoYXJkcm9jaxoOZ2VucmU6aGFyZHJvY2s="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Next": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICQgA="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Previous": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICSgA="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "RepeatOne": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEKgIIAQ=="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "RepeatAll": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEKgIIAg=="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnRepeat": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICKgA="
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Shuffle": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICMgA="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "UnShuffle": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICOgA="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "NextStopped": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIEQgIIAQ=="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "PrevStopped": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBhIESgIIAQ=="
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "GetLyrics": {
+                        "fields": {
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBBICYgA="
+                            }
+                        }
+                    },
+                    "EnableKaraokeMode": {
+                        "fields": {
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBRIDmgEA"
+                            },
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        },
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "DisableKaraokeMode": {
+                        "fields": {
+                            "request_params": {
+                                "structValue": {
+                                    "fields": {
+                                        "disable_output_speech": {
+                                            "boolValue": true
+                                        }
+                                    }
+                                }
+                            },
+                            "analytics": {
+                                "structValue": {
+                                    "fields": {
+                                        "purpose": {
+                                            "stringValue": "play_music"
+                                        },
+                                        "origin": {
+                                            "stringValue": "ThisClient"
+                                        }
+                                    }
+                                }
+                            },
+                            "typed_callback_serialized": {
+                                "stringValue": "CjN0eXBlLmdvb2dsZWFwaXMuY29tL05BbGljZS5UTXVzaWNUb3VjaFR5cGVkQ2FsbGJhY2sSBRIDogEA"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

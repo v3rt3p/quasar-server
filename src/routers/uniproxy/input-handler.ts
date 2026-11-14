@@ -88,6 +88,8 @@ export type TextInputData = {
   kind: 'musicRecoverCommit'
   recoverCommitToken: string
 } | {
+  kind: 'musicStopped'
+} | {
   kind: 'playButtonPressPlay'
 } | {
   kind: 'playNextTrackSemanticFrame'
@@ -229,6 +231,18 @@ export class InputHandler {
             internalDirective: {
               recoverCommitToken: input.data.recoverCommitToken,
               type: 'music_recover_commit'
+            }
+          }],
+          shouldListen: false,
+          text: null
+        }
+      }
+      case 'musicStopped': {
+        return {
+          dialogFinished: true,
+          directives: [{
+            internalDirective: {
+              type: 'music_stop'
             }
           }],
           shouldListen: false,

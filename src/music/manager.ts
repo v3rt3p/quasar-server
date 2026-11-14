@@ -4,10 +4,15 @@ import { randomUUID } from 'node:crypto'
 import { MusicBackend } from '../backend/backend'
 import { getLogger } from '../logger'
 
+export interface MusicSavedPosition {
+  position: number
+  trackId: string,
+}
+
 export class MusicManager {
   private readonly logger = getLogger<MusicManager>()
 
-  private readonly positionCache: Map<string, number> = new Map()
+  private readonly positionCache: Map<string, MusicSavedPosition> = new Map()
   private readonly recoverCommitTokensMap: Map<string, string> = new Map()
 
   constructor (private readonly backend: MusicBackend) {}
@@ -26,8 +31,8 @@ export class MusicManager {
     return await this.backend.getCurrentTrack(deviceId)
   }
 
-  getLastSavedPosition (deviceId: string): number {
-    return this.positionCache.get(deviceId) ?? 0
+  getLastSavedPosition (deviceId: string): MusicSavedPosition | null {
+    return this.positionCache.get(deviceId) ?? null
   }
 
   async getNextTrack (deviceId: string): Promise<null | {
@@ -55,7 +60,7 @@ export class MusicManager {
     }
   }
 
-  savePosition (deviceId: string, position: number): void {
+  savePosition (deviceId: string, position: MusicSavedPosition): void {
     this.positionCache.set(deviceId, position)
   }
 }

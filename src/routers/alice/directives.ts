@@ -134,24 +134,107 @@ export const mmSemanticFrame = (isLedSilent: boolean,
   }
 })
 
+export const setAudioPlayerSequenceStateDirective = (track: MusicTrack) => ({
+  quasarDirective: {
+    Name: 'set_audio_player_sequence_state_directive',
+    PayloadRaw: proto.NAlice.TAudioPlayerCapability.TSetSequenceStateDirective.encode({
+      SequenceState: {
+        CurrentItem: {
+          Track: {
+            Id: track.id,
+            Uuid: track.id
+          }
+        },
+        MetaStorage: {
+          ProviderAlbumMeta: {
+            MUSIC_PROVIDER_YANDEX_MUSIC: {
+              AlbumMeta: Object.fromEntries(track.albums.map(album => ([album.id, {
+                id: album.id,
+                imageUrl: album.imageUrl,
+                title: album.name,
+                year: album.year
+              }])))
+            }
+          },
+          ProviderArtistMeta: {
+            MUSIC_PROVIDER_YANDEX_MUSIC: {
+              ArtistMeta: Object.fromEntries(track.artists.map(artist => ([artist.id, {
+                id: artist.id,
+                imageUrl: artist.imageUrl,
+                name: artist.name
+              }])))
+            }
+          },
+          ProviderTrackMeta: {
+            MUSIC_PROVIDER_YANDEX_MUSIC: {
+              TrackMeta: {
+                [track.id]: {
+                  albumId: track.albums[0]?.id,
+                  artistIds: track.artists.map(artist => artist.id),
+                  artistRelations: track.artists.map(artist => ({
+                    id: artist.id
+                  })),
+                  id: track.id,
+                  imageUrl: track.imageUrl,
+                  title: track.title
+                }
+              }
+            }
+          }
+        }
+      }
+    }).finish(),
+    Type: 'client_action'
+  }
+})
+
+export const applyPlayerPlaybackQueueDirective = {
+  quasarDirective: {
+    Name: 'apply_player_playback_queue_directive',
+    PayloadRaw: proto.NAlice.TMusicPlatformQueueCapability.TApplyMusicPlatformQueueDirective.encode({
+      MusicPlatformQueue: {
+        Entities: [{
+          PlaybackEntity: {}
+        }],
+        MusicPlatformMetaStorage: {
+          ProviderMeta: {
+            MUSIC_PROVIDER_YANDEX_MUSIC: {}
+          }
+        }
+      }
+    }).finish(),
+    Type: 'client_action'
+  }
+}
+
 export const audioPlayDirective = (track: MusicTrack, offsetMs?: number, recoverCommitToken?: string) => ({
   quasarDirective: {
     Name: 'audio_play',
     Payload: encodeProtobufStruct({
       background_mode: 'Ducking',
-      callbacks: recoverCommitToken
-        ? {
-            on_started: {
-              name: 'music_thin_client_on_started',
-              payload: {
-                music: {
-                  recoverCommitToken,
-                  type: 'recoverCommit'
+      callbacks: {
+        ...(recoverCommitToken
+          ? {
+              on_started: {
+                name: 'music_thin_client_on_started',
+                payload: {
+                  music: {
+                    recoverCommitToken,
+                    type: 'recoverCommit'
+                  }
                 }
               }
             }
+          : {}),
+        on_stopped: {
+          name: 'music_thin_client_on_stopped',
+          payload: {
+            music: {
+              type: 'stopped'
+            }
           }
-        : {},
+        }
+      },
       screen_type: 'Music',
       stream: {
         format: track.format,
