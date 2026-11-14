@@ -138,8 +138,18 @@ export class UniProxyConnection {
 
   async processWrappedDirectives (directives: WrappedDirective[],
     metadata?: InputMetadata): Promise<RawDirective[]> {
+    const sortedDirectives = directives
+      .filter(item => item.priority !== undefined)
+      .toSorted((a, b) => b.priority! - a.priority!)
+
+    let index = 0
+
+    const resultDirectives = directives.map(item =>
+      item.priority == null ? item : sortedDirectives[index++]!
+    )
+
     const rawDirectives: RawDirective[] = []
-    for (const directive of directives) {
+    for (const directive of resultDirectives) {
       if (directive.quasarDirective) {
         rawDirectives.push(directive.quasarDirective)
       }
@@ -273,7 +283,7 @@ export class UniProxyConnection {
     if (message.subarray(0, 4).equals(new Uint8Array([0x41, 0x41, 0x50, 0x49]))) {
       const rawClientMessage = message.subarray(4)
       const clientMessage = TClientMessageClass.decode(rawClientMessage)
-      this.logger.debug(JSON.stringify(clientMessage.toJSON(), undefined, 4))
+      this.logger.debug('Client message:', JSON.stringify(clientMessage.toJSON(), undefined, 4))
       await this.handleClientMessage(clientMessage)
     } else {
       const streamId = new DataView(message.buffer, message.byteOffset, message.length).getUint32(0, false)
@@ -508,6 +518,20 @@ export class UniProxyConnection {
                   },
                   metadata
                 }
+              } else if (decoded?.TypedSemanticFrame?.PlayerNextTrackSemanticFrame) {
+                textInput = {
+                  data: {
+                    kind: 'playNextTrackSemanticFrame'
+                  },
+                  metadata
+                }
+              } else if (decoded?.TypedSemanticFrame?.PlayerPrevTrackSemanticFrame) {
+                textInput = {
+                  data: {
+                    kind: 'playPrevTrackSemanticFrame'
+                  },
+                  metadata
+                }
               } else {
                 this.logger.info(`Received unknown TextInput semantic frame with raw payload: ${JSON.stringify(decoded)} ${JSON.stringify(event)}`)
               }
@@ -561,6 +585,26 @@ export class UniProxyConnection {
             }
             break
           }
+          case '@@mm_stack_engine_get_next': {
+            if (event.PayloadRaw) {
+              this.logger.info(`Received unknown TextInput stack engine get next with raw payload: ${JSON.stringify(event)}`)
+            } else if (event.Payload) {
+              const payload = decodeProtobufStruct(event.Payload)
+              if (getValue(payload, 'string', 'music', 'type') === 'fetchNextTrack') {
+                textInput = {
+                  data: {
+                    kind: 'musicFetchNextTrack'
+                  },
+                  metadata
+                }
+              } else {
+                this.logger.info(`Received unknown TextInput stack engine get next with payload: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+              }
+            } else {
+              this.logger.info(`Received unknown TextInput stack engine get next: ${JSON.stringify(event)}`)
+            }
+            break
+          }
           case '@@mm_typed_callback': {
             let isPayloadRaw = false
             let rawSerialiedTypedCallback: Buffer | null = null
@@ -587,6 +631,10 @@ export class UniProxyConnection {
 
             const decodedSerialized = proto.google.protobuf.Any.decode(rawSerialiedTypedCallback)
             switch (decodedSerialized.typeUrl) {
+              case 'continueSessionStage1SemanticFrame': {
+                await this.pushDirectives(mmSemanticFrame(false, continueSessionStage2SemanticFrame(this.dialogId)))
+                break
+              }
               case 'type.googleapis.com/NAlice.TDeviceControlTimesyncTypedCallback': {
                 const data = proto.NAlice.TDeviceControlTimesyncTypedCallback.decode(decodedSerialized.value!)
                 textInput = {
@@ -603,6 +651,27 @@ export class UniProxyConnection {
               default: {
                 this.logger.info(`Received unknown serialized TextInput typed callback: ${JSON.stringify(event)}`)
               }
+            }
+            break
+          }
+          case 'music_thin_client_on_started': {
+            if (event.PayloadRaw) {
+              this.logger.info(`Received unknown TextInput music thin client on started with raw payload: ${JSON.stringify(event)}`)
+            } else if (event.Payload) {
+              const payload = decodeProtobufStruct(event.Payload)
+              if (getValue(payload, 'string', 'music', 'type') === 'recoverCommit') {
+                textInput = {
+                  data: {
+                    kind: 'musicRecoverCommit',
+                    recoverCommitToken: getValue(payload, 'string', 'music', 'recoverCommitToken')!
+                  },
+                  metadata
+                }
+              } else {
+                this.logger.info(`Received unknown TextInput music thin client on started with payload: ${JSON.stringify(payload)} ${JSON.stringify(event)}`)
+              }
+            } else {
+              this.logger.info(`Received unknown TextInput music thin client on started: ${JSON.stringify(event)}`)
             }
             break
           }
@@ -801,6 +870,10 @@ export class UniProxyConnection {
         assistantName: {
           description: 'name of assistant (YOU)',
           value: spotterToAssistantNameMapping[deviceState?.DeviceConfig?.Spotter ?? ''] ?? 'unknown'
+        },
+        deviceId: {
+          description: 'current smart speaker device ID',
+          value: this.deviceId
         },
         deviceName: {
           description: 'current smart speaker name',
@@ -1002,6 +1075,7 @@ export class UniProxyConnection {
   }
 
   private async sendServerMessage (serverMessage: TServerMessage): Promise<void> {
+    this.logger.debug('Server message:', JSON.stringify(serverMessage, undefined, 4))
     const encoded = TServerMessageClass.encode(serverMessage).finish()
     await this.sendRawData(Buffer.concat([Buffer.from('AAPI', 'ascii'), encoded]), true)
   }

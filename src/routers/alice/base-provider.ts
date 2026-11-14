@@ -22,6 +22,7 @@ const bluetoothDisableDirective = {
 }
 
 const soundSetLevelDirective = (level: number) => ({
+  priority: 10,
   quasarDirective: {
     IsLedSilent: true,
     Name: 'sound_set_level',
@@ -46,6 +47,7 @@ const playIotSoundDirective = (isPowerOn: boolean) => ({
 })
 
 const soundLouderDirective = {
+  priority: 10,
   quasarDirective: {
     IsLedSilent: true,
     Name: 'sound_louder',
@@ -55,6 +57,7 @@ const soundLouderDirective = {
 }
 
 const soundQuieterDirective = {
+  priority: 10,
   quasarDirective: {
     IsLedSilent: true,
     Name: 'sound_quiter',
@@ -78,16 +81,17 @@ export const playerStopDirective: WrappedDirective = {
 const playerStartDirectve: WrappedDirective = {
   internalDirective: {
     type: 'music_play'
-  }
+  },
+  priority: -2
 }
 
-const playerNextTrackDirective: WrappedDirective = {
+export const playerNextTrackDirective: WrappedDirective = {
   internalDirective: {
     type: 'music_next_track'
   }
 }
 
-const playerPreviousTrackDirective: WrappedDirective = {
+export const playerPreviousTrackDirective: WrappedDirective = {
   internalDirective: {
     type: 'music_previous_track'
   }
@@ -129,7 +133,7 @@ const alarmAddDirective = (properties: AlarmAddProperties,
       Alarm: {
         ActivationDays: properties.days.map(day => typeof day === 'object'
           ? {
-              Day: {
+              Date: {
                 Day: day.day,
                 Month: day.month,
                 Year: day.year
@@ -245,10 +249,15 @@ const timerSetDirective = (seconds: number): WrappedDirective => ({
 
 export const textToDirectiveMap: Record<string, WrappedDirective> = {
   громче: soundLouderDirective,
+  дальше: playerNextTrackDirective,
+  играй: playerStartDirectve,
+  назад: playerPreviousTrackDirective,
   пауза: playerStopDirective,
   продолжи: playerStartDirectve,
+  следующий: playerNextTrackDirective,
   стоп: playerStopDirective,
-  тише: soundQuieterDirective
+  тише: soundQuieterDirective,
+  хватит: playerStopDirective
 }
 
 export class BaseDirectiveFunctionProvider extends AbstractDirectiveFunctionProvider {

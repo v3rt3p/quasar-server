@@ -5,7 +5,7 @@ import { getLogger } from '../../logger'
 import { Notifier } from '../../notifier'
 import proto from '../../protos/protos'
 import { StationInfo } from '../../storage/types'
-import { textToDirectiveMap } from '../alice/base-provider'
+import { playerNextTrackDirective, playerPreviousTrackDirective, textToDirectiveMap } from '../alice/base-provider'
 import { DirectiveFunctionProvider, mmSemanticFrame, ttsPlayPlaceholderDirective, WrappedDirective } from '../alice/directives'
 import { continueSessionStage1SemanticFrame } from '../alice/typed-payloads'
 
@@ -48,6 +48,7 @@ export type InputMetadata = {
   readyToUse: Partial<{
     alarms: InputMetadataEntry
     assistantName: InputMetadataEntry
+    deviceId: InputMetadataEntry
     deviceName: InputMetadataEntry
     inputPersonAge: InputMetadataEntry
     inputPersonGender: InputMetadataEntry
@@ -88,6 +89,10 @@ export type TextInputData = {
   recoverCommitToken: string
 } | {
   kind: 'playButtonPressPlay'
+} | {
+  kind: 'playNextTrackSemanticFrame'
+} | {
+  kind: 'playPrevTrackSemanticFrame'
 } | {
   kind: 'text'
   text: string
@@ -238,6 +243,22 @@ export class InputHandler {
               type: 'music_play'
             }
           }],
+          shouldListen: false,
+          text: null
+        }
+      }
+      case 'playNextTrackSemanticFrame': {
+        return {
+          dialogFinished: true,
+          directives: [playerNextTrackDirective],
+          shouldListen: false,
+          text: null
+        }
+      }
+      case 'playPrevTrackSemanticFrame': {
+        return {
+          dialogFinished: true,
+          directives: [playerPreviousTrackDirective],
           shouldListen: false,
           text: null
         }

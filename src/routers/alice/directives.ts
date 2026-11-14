@@ -1,5 +1,4 @@
 import { MusicTrack } from '@v3rt3p/types/music'
-import { randomUUID } from 'node:crypto'
 import z from 'zod'
 
 import { getLogger } from '../../logger'
@@ -46,6 +45,7 @@ export interface SimplePayloadRawInternalDirective<T extends string> extends Sim
 
 export interface WrappedDirective {
   internalDirective?: InternalDirective
+  priority?: number
   quasarDirective?: RawDirective
 }
 
@@ -106,6 +106,7 @@ export const pushUpdateConfigDirective = {
 }
 
 export const ttsPlayPlaceholderDirective = (onFinish?: proto.NAlice.NAliceApi.TDirective.ITOnFinishEvent) => ({
+  priority: -1,
   quasarDirective: {
     AnalyticsType: 'tts_play_placeholder',
     IsLedSilent: true,
@@ -141,6 +142,7 @@ export const audioPlayDirective = (track: MusicTrack, offsetMs?: number, recover
       callbacks: recoverCommitToken
         ? {
             on_started: {
+              name: 'music_thin_client_on_started',
               payload: {
                 music: {
                   recoverCommitToken,
@@ -154,7 +156,7 @@ export const audioPlayDirective = (track: MusicTrack, offsetMs?: number, recover
       stream: {
         format: track.format,
         ...(offsetMs ? { offset_ms: offsetMs } : {}),
-        id: randomUUID(),
+        id: track.id,
         type: 'Track',
         url: track.url
       },

@@ -34,7 +34,7 @@ export class MusicManager {
     recoverCommitToken: string
     track: MusicTrack,
   }> {
-    const nextTrack = await this.backend.getCurrentTrack(deviceId)
+    const nextTrack = await this.backend.getNextTrack(deviceId)
     if (nextTrack === null) {
       return null
     }

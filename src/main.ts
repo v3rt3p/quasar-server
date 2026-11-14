@@ -29,7 +29,7 @@ import { registerRpcAliceYandexNetRouter } from './routers/rpc.alice.yandex.net'
 import { registerScbhYandexNetRouter } from './routers/scbh.yandex.net'
 import { registerStartupMobileYandexNetRouter } from './routers/startup.mobile.yandex.net'
 import { registerUniproxyAliceYandexNetRouter } from './routers/uniproxy.alice.yandex.net'
-import { InputMetadata, InputMetadataEntry } from './routers/uniproxy/input-handler'
+import { InputMetadataEntry } from './routers/uniproxy/input-handler'
 import { UniProxyConnection } from './routers/uniproxy/uniproxy-connection'
 import { quasarConfigPatch } from './storage/config-patch'
 import { TypeORMDatabaseStationInfoStorage } from './storage/database'
@@ -431,7 +431,11 @@ const functionStateServer = new Elysia({
       500: internalErrorType
     }
   })
-  .onError(async ({ error, status }) => {
+  .onError(async ({ code, error, status }) => {
+    if (code === 'UNKNOWN') {
+      logger.warn(error)
+    }
+
     status(500, {
       code: 'INTERNAL_SERVER_ERROR',
       text: String(error)
@@ -591,19 +595,24 @@ functionStateServer.post('/functions', async ({ body }) => {
     return {}
   }
 
-  const stateCache = new Map<string, InputMetadata>()
+  const processedDevices = new Set<string>()
 
   await runForConnections(calledDeviceId, async connection => {
     if (connection.getDeviceId() === fromDeviceId && calledDeviceId === 'all') {
       return
     }
 
+    if (processedDevices.has(connection.getDeviceId())) {
+      return
+    }
+    processedDevices.add(connection.getDeviceId())
+
     if (body.name === 'other_smart_speaker_tts') {
       await connection.pushTts(String(body.arguments.text))
       return
     }
 
-    const state = stateCache.getOrInsert(connection.getDeviceId(), await connection.fetchState())
+    const state = await connection.fetchState()
 
     const directive = connection.getDirectiveFunctionProvider()
       .convertToWrappedDirective({
